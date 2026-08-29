@@ -1,0 +1,1138 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARE Inscriptions — 41 PDFs</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>📜</text></svg>">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NNRYDYCMW9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NNRYDYCMW9');
+</script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1.5rem; color: #1a1a1a; }
+  h1 { font-size: 1.2rem; }
+  .stats { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
+  .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  input[type=search] { padding: 0.35rem 0.5rem; width: 20rem; }
+  select { padding: 0.35rem; }
+  .searchable-filter { padding: 0.35rem; width: 9rem; }
+  #searchBtn, #resetBtn { padding: 0.35rem 0.9rem; cursor: pointer; }
+  mark { background: #fff3a0; padding: 0 1px; border-radius: 2px; }
+  /* Mobile: the table itself keeps a sane minimum width (table-layout:
+     fixed columns squeeze to unreadable slivers otherwise) and scrolls
+     horizontally inside this wrapper instead of forcing the whole page
+     to zoom out — added 2026-08-25, per the user. */
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: collapse; width: 100%; min-width: 62rem; font-size: 0.85rem; table-layout: fixed; }
+  th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top;
+            overflow-wrap: break-word; }
+  @media (max-width: 640px) {
+    body { margin: 0.75rem; }
+    input[type=search] { width: 100%; }
+    .controls { gap: 0.5rem; }
+    /* Touch targets grow on a small screen — the desktop sizes above
+       are fine for a mouse pointer but cramped for a fingertip. */
+    button.idchip, button.page-img-btn, #searchBtn, #resetBtn,
+    .pager button { padding: 0.5rem 0.8rem; }
+  }
+  th { background: #f2f2f2; position: sticky; top: 0; }
+  tr:nth-child(even) { background: #fafafa; }
+  col.c-id { width: 8%; }
+  col.c-source { width: 4%; }
+  col.c-kind { width: 6%; }
+  col.c-type { width: 5%; }
+  col.c-location { width: 8%; }
+  col.c-sl_no { width: 3%; }
+  col.c-place { width: 10%; }
+  col.c-dynasty { width: 6%; }
+  col.c-king { width: 6%; }
+  col.c-date { width: 10%; }
+  col.c-language { width: 5%; }
+  col.c-remarks { width: 24%; }
+  col.c-page { width: 5%; }
+  /* Click-to-copy ID chip — same pattern as SII's original
+     build_review_report.py idchip, kept for visual/behavioral consistency
+     across every table that uses this shell. */
+  button.idchip {
+    font: 600 11px/1.4 ui-monospace, Consolas, monospace; cursor: pointer;
+    padding: 1px 6px; border-radius: 5px; border: 1px solid #ccc;
+    background: #fff; color: #555;
+  }
+  button.idchip:hover { color: #0a5; border-color: #0a5; }
+  button.idchip.copied { color: #fff; background: #0a5; border-color: #0a5; }
+  /* "As printed" vs "derived" two-color convention — see dual_span_cell(). */
+  .v-direct { color: inherit; }
+  .v-derived { color: #8a4b00; font-style: italic; }
+  .count { color: #555; font-size: 0.85rem; margin: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .pager button { padding: 0.2rem 0.6rem; cursor: pointer; }
+  .pager button:disabled { cursor: default; opacity: 0.4; }
+  .pager select { padding: 0.2rem; }
+  .generated { display: inline-block; background: #eef6ff; color: #1a4d8f;
+                border: 1px solid #bcd8f5; border-radius: 5px;
+                padding: 0.2rem 0.6rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+  /* Page-image popup — see page_image_button_cell() and the lightbox JS
+     below. Harmless dead markup on a page with no image buttons at all
+     (ARE today) — same "the shell doesn't know what a row means"
+     tolerance the rest of this file already has for unused pieces. */
+  button.page-img-btn {
+    font-size: 0.78rem; padding: 2px 8px; cursor: pointer;
+    border: 1px solid #ccc; border-radius: 5px; background: #fff; color: #555;
+  }
+  button.page-img-btn:hover { color: #0a5; border-color: #0a5; }
+  /* Loading overlay — shown once, at page load, while the row data
+     fetch(es) (data_url, and categories_url on Sanjay's page) are in
+     flight; see render_inscriptions_table's own data_url docstring for
+     why the data isn't embedded inline any more. Per the user,
+     2026-08-29: a wait cursor on the whole page plus every control
+     disabled, not just a spinner in a corner, so a click during this
+     window can't do anything or double-fire once the page is ready.
+     [hidden] (not display:none baked in) so JS toggling the attribute
+     is the only thing that ever shows/hides this. */
+  body.loading { cursor: wait; }
+  body.loading .controls, body.loading .count { pointer-events: none; opacity: 0.6; }
+  .load-overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .load-overlay[hidden] { display: none; }
+  .load-box {
+    background: #fff; border: 1px solid #ccc; border-radius: 8px;
+    padding: 1.5rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    text-align: center; font-size: 1rem; color: #1a1a1a;
+  }
+  #loadRetryBtn {
+    margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
+  }
+  .lightbox-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; z-index: 1000;
+  }
+  .lightbox-overlay[hidden] { display: none; }
+  /* Which row this popup was opened from — see page_image_button_cell()'s
+     row_label param. Empty and collapsed (no gap) when a caller doesn't
+     pass one. */
+  .lightbox-row-label {
+    color: #ccc; font-size: 0.8rem; max-width: 92vw; text-align: center;
+    margin-bottom: 0.3rem;
+  }
+  .lightbox-row-label:empty { display: none; }
+  .lightbox-toolbar {
+    display: flex; align-items: center; gap: 0.6rem; color: #eee;
+    font-size: 0.85rem; margin-bottom: 0.5rem;
+  }
+  .lightbox-toolbar button {
+    padding: 0.25rem 0.6rem; cursor: pointer; border: 1px solid #888;
+    border-radius: 4px; background: #333; color: #eee;
+  }
+  .lightbox-toolbar button:hover { background: #444; }
+  .lightbox-body { position: relative; display: flex; align-items: center; }
+  .lightbox-imgwrap {
+    max-width: 90vw; max-height: 80vh; overflow: auto;
+    background: #111;
+  }
+  .lightbox-imgwrap img { display: block; transform-origin: top left; }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
+    font-size: 1.4rem; padding: 0.5rem 0.8rem; cursor: pointer; z-index: 2;
+  }
+  .lightbox-nav:hover { background: rgba(0,0,0,0.8); }
+  .lightbox-prev { left: 0; }
+  .lightbox-next { right: 0; }
+  /* Resolved-citation hover — see remarks_cell_html(). A native `title`
+     tooltip on the "Ibid" word itself, not a popup or a new column, per
+     the user, 2026-08-24. `title` alone doesn't work on a touchscreen —
+     no cursor, nothing to hover — so a tap toggles this visible inline
+     reveal instead (2026-08-25); the JS below does the toggling, this is
+     just its collapsed/expanded look. */
+  .cite-hint {
+    text-decoration: underline dotted #888; text-underline-offset: 2px;
+    cursor: help;
+  }
+  .cite-hint-reveal {
+    display: block; margin-top: 0.2rem; font-size: 0.8rem;
+    color: #1a4d8f; background: #eef6ff; border: 1px solid #bcd8f5;
+    border-radius: 4px; padding: 0.3rem 0.5rem;
+  }
+  /* Remarks-column truncation — see clamp_remarks_html(). A rogue
+     record's remarks can run to dozens of lines, pushing every row
+     below it out of view even in an already-filtered list; -webkit-
+     line-clamp (Chrome/Edge/Safari/Firefox 68+ — no real holdout left)
+     is the whole visual effect, JS only decides whether "Read more" is
+     needed per row and opens the full text in #remarksModal. */
+  .remarks-clamp {
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .remarks-more-btn {
+    display: block; margin-top: 0.2rem; font-size: 0.78rem;
+    color: #1a4d8f; background: none; border: none; padding: 0;
+    cursor: pointer; text-decoration: underline;
+  }
+  .remarks-more-btn[hidden] { display: none; }
+  .remarks-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1.5rem;
+  }
+  .remarks-modal-overlay[hidden] { display: none; }
+  .remarks-modal-box {
+    background: #fff; color: #1a1a1a; border-radius: 8px;
+    max-width: 44rem; width: 100%; max-height: 80vh;
+    overflow-y: auto; padding: 1.5rem; position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .remarks-modal-close {
+    position: absolute; top: 0.5rem; right: 0.7rem;
+    font-size: 1.3rem; line-height: 1; background: none; border: none;
+    cursor: pointer; color: #888;
+  }
+  .remarks-modal-close:hover { color: #222; }
+  .remarks-modal-body { white-space: pre-wrap; line-height: 1.5; }
+</style>
+</head>
+<body class="loading">
+<h1>ARE Inscriptions — 41 PDFs</h1>
+<div class="generated">Generated 2026-08-29 18:23</div>
+<div class="stats">29846 records from 4218 table pages (338 index pages excluded). PDFs: 1967-68 (783 records), 1992-93 (613 records), 1995-96 (342 records), 1971-72 (628 records), 1972-73 (997 records), 1973-74 (804 records), 1974-75 (710 records), 1975-76 (676 records), 1976-77 (638 records), 1977-78 (568 records), 1978-79 (531 records), 1979-80 (460 records), 1980-81 (462 records), 1981-82 (828 records), 1982-83 (1068 records), 1983-84 (450 records), 1984-85 (753 records), 1985-86 (650 records), 1986-87 (659 records), 1987-88 (317 records), 1988-89 (367 records), 1993-94 (783 records), 1994-95 (463 records), 1911-14 (2182 records), 1939-44 (2856 records), 1952-53 (742 records), 1928-29 (0 records), 1922-23 (926 records), 1923-24 (873 records), 1924-25 (518 records), 1925-26 (804 records), 1926-27 (1015 records), 1964-65 (1244 records), 1965-66 (1419 records), 1966-67 (657 records), 1969-70 (772 records), 1930-31 (456 records), 1931-32 (188 records), 1932-33 (267 records), 1933-34 (175 records), 1934-35 (202 records). 25689 &quot;Do.&quot; cells resolved, 6168 flagged (unresolved or partial — not auto-filled). 17 merged Serial/Findspot cells split, 59 stray Sl.No prefixes stripped, 3389 location prefixes moved to Location, 3 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring.</div>
+<div class="controls">
+  <select id="kindFilter"><option value="">All kinds</option><option value="Arabic and Persian">Arabic and Persian (5818)</option><option value="Copper Plate">Copper Plate (640)</option><option value="Pre-1945-46 Collection">Pre-1945-46 Collection (8651)</option><option value="Stone and Other Materials">Stone and Other Materials (14737)</option></select><select id="langFilter"><option value="">All languages</option><option value="Tamil">Tamil (6726)</option><option value="Sanskrit">Sanskrit (2441)</option><option value="Arabic">Arabic (1961)</option><option value="Kannada">Kannada (1855)</option><option value="Local dialect">Local dialect (1795)</option><option value="Telugu">Telugu (1640)</option><option value="Persian">Persian (1363)</option><option value="Persian verse">Persian verse (1316)</option><option value="Prakrit">Prakrit (283)</option><option value="Sanskrit (corrupt)">Sanskrit (corrupt) (279)</option><option value="Kannaḍa">Kannaḍa (245)</option><option value="Arabic &amp; Persian">Arabic &amp; Persian (219)</option><option value="Arabic and Persian">Arabic and Persian (211)</option><option value="Kanarese">Kanarese (172)</option><option value="Prākṛit">Prākṛit (154)</option><option value="Do.">Do. (141)</option><option value="Nāgarī">Nāgarī (138)</option><option value="—">— (115)</option><option value="Local Dialect">Local Dialect (98)</option><option value="Persian verse &amp; prose">Persian verse &amp; prose (92)</option><option value="Arabic prose and Persian verse">Arabic prose and Persian verse (89)</option><option value="Persian prose &amp; verse">Persian prose &amp; verse (89)</option><option value="Arabic prose &amp; Persian verse">Arabic prose &amp; Persian verse (85)</option><option value="Urdū">Urdū (80)</option><option value="Sanskrit and Telugu">Sanskrit and Telugu (78)</option><option value="Prākrit">Prākrit (72)</option><option value="Grantha and Tamil">Grantha and Tamil (59)</option><option value="English">English (59)</option><option value="Arabic verse">Arabic verse (59)</option><option value="Sanskrit and Local dialect">Sanskrit and Local dialect (57)</option><option value="Persian prose and verse">Persian prose and verse (57)</option><option value="Brāhmī">Brāhmī (52)</option><option value="Urdū verse">Urdū verse (51)</option><option value="Urdu">Urdu (47)</option><option value="Vaṭṭeḻuttu">Vaṭṭeḻuttu (45)</option><option value="Tamil verse">Tamil verse (44)</option><option value="Persian verse and prose">Persian verse and prose (43)</option><option value="Arabic &amp; Persian verse">Arabic &amp; Persian verse (42)</option><option value="Sanskrit and Kannada">Sanskrit and Kannada (40)</option><option value="Mixed dialect">Mixed dialect (40)</option><option value="Urdu verse">Urdu verse (37)</option><option value="Arabic and Persian verse">Arabic and Persian verse (37)</option><option value="Do">Do (35)</option><option value="Tamil (verse and prose)">Tamil (verse and prose) (35)</option><option value="Grantha">Grantha (32)</option><option value="Sanskrit Nāgarī">Sanskrit Nāgarī (32)</option><option value="Marāṭhī">Marāṭhī (30)</option><option value="Do. (verse)">Do. (verse) (28)</option><option value="Persian Nasta‘līq">Persian Nasta‘līq (28)</option><option value="Local Nāgarī">Local Nāgarī (28)</option><option value="Tamil (verse)">Tamil (verse) (27)</option><option value="Portuguese">Portuguese (27)</option><option value="[Do.]">[Do.] (26)</option><option value="Do. (archaic)">Do. (archaic) (25)</option><option value="Arabic prose and verse">Arabic prose and verse (25)</option><option value="Sanskrit mixed with local dialect">Sanskrit mixed with local dialect (24)</option><option value="Arabic Naskh">Arabic Naskh (23)</option><option value="Local
+Nágari">Local
+Nágari (22)</option><option value="Telugu (archaic)">Telugu (archaic) (21)</option><option value="Sanskrit
+(corrupt)">Sanskrit
+(corrupt) (21)</option><option value="Sanskrit (corrupt) Nāgarī">Sanskrit (corrupt) Nāgarī (21)</option><option value="Do.
+Do">Do.
+Do (20)</option><option value="--">-- (20)</option><option value="Te">Te (20)</option><option value="Prākṛit and Brāhmī">Prākṛit and Brāhmī (20)</option><option value="Kannaḍa (archaic)">Kannaḍa (archaic) (19)</option><option value="Sanskrit in Telugu">Sanskrit in Telugu (19)</option><option value="Sanskrit mixed with Local dialect">Sanskrit mixed with Local dialect (19)</option><option value="Prākṛt">Prākṛt (19)</option><option value="Arabic prose &amp; verse">Arabic prose &amp; verse (18)</option><option value="Vaṭṭeluttu">Vaṭṭeluttu (17)</option><option value="Dō">Dō (17)</option><option value="Persian Nasta&#x27;līq">Persian Nasta&#x27;līq (17)</option><option value="Do. Tamil and Telugu">Do. Tamil and Telugu (17)</option><option value="Bhāshā">Bhāshā (16)</option><option value="Persian Nasta&#x27;liq">Persian Nasta&#x27;liq (16)</option><option value="Arabic &amp;
+Persian">Arabic &amp;
+Persian (16)</option><option value="No">No (15)</option><option value="Sanskrit in Grantha">Sanskrit in Grantha (15)</option><option value="Local dialect Nāgarī">Local dialect Nāgarī (15)</option><option value="Sanskrit (Telugu)">Sanskrit (Telugu) (14)</option><option value="Sanskrit influenced by local dialect">Sanskrit influenced by local dialect (14)</option><option value="Kannarese">Kannarese (13)</option><option value="Sanskrit in Nāgarī">Sanskrit in Nāgarī (13)</option><option value="Nāgari">Nāgari (13)</option><option value="Śaka Kannada">Śaka Kannada (13)</option><option value="Marathi">Marathi (13)</option><option value="Mixed Brāhmī">Mixed Brāhmī (13)</option><option value="-Do">-Do (13)</option><option value="Reads: Bālā. In characters of about the 16th century">Reads: Bālā. In characters of about the 16th century (13)</option><option value="Local
+dialect">Local
+dialect (13)</option><option value="Sanskṛit">Sanskṛit (13)</option><option value="Vatteluttu">Vatteluttu (12)</option><option value="Sanskrit (verse)">Sanskrit (verse) (12)</option><option value="Kannada and Telugu">Kannada and Telugu (12)</option><option value="Tamiḷ">Tamiḷ (12)</option><option value="Persian Naskh">Persian Naskh (12)</option><option value="Marāthī">Marāthī (12)</option><option value="Arabic prose &amp; Persian verse &amp; prose">Arabic prose &amp; Persian verse &amp; prose (12)</option><option value="Arabic prose &amp; Persian prose &amp; verse">Arabic prose &amp; Persian prose &amp; verse (12)</option><option value="Sanskrit and Tamil">Sanskrit and Tamil (11)</option><option value="Telugu (verse)">Telugu (verse) (11)</option><option value="Sanskrit Telugu">Sanskrit Telugu (11)</option><option value="Ḷēvara">Ḷēvara (11)</option><option value="Uttara-Sanskrit (in Chā-jukyan characters)">Uttara-Sanskrit (in Chā-jukyan characters) (11)</option><option value="Do. (chhaṇdasa)">Do. (chhaṇdasa) (11)</option><option value="Early Nāgarī">Early Nāgarī (11)</option><option value="Persian prose">Persian prose (11)</option><option value="Tamil (Vaṭṭeḻuttu)">Tamil (Vaṭṭeḻuttu) (10)</option><option value="Tamil (Verse)">Tamil (Verse) (10)</option><option value="Sanskrit Grantha Tamil">Sanskrit Grantha Tamil (10)</option><option value="Malayāḷam">Malayāḷam (10)</option><option value="Mixed
+Brāhmī">Mixed
+Brāhmī (10)</option><option value="Chi Tamil">Chi Tamil (10)</option><option value="Arabic &amp; Urdū">Arabic &amp; Urdū (10)</option><option value="Prakṛit">Prakṛit (10)</option><option value="Urdū prose &amp; verse">Urdū prose &amp; verse (10)</option><option value="Hebrew">Hebrew (10)</option><option value="D~">D~ (9)</option><option value="Telugu and Sanskrit">Telugu and Sanskrit (9)</option><option value="Telugu (verse and prose)">Telugu (verse and prose) (9)</option><option value="Mahraṭhi">Mahraṭhi (9)</option><option value="and Tamil">and Tamil (9)</option><option value="(west prone)">(west prone) (9)</option><option value="Malayāḷam in Vaṭṭeluttu">Malayāḷam in Vaṭṭeluttu (9)</option><option value="Tibetan">Tibetan (9)</option><option value="Sanskrit and local dialect">Sanskrit and local dialect (9)</option><option value="Local dialect mixed with Sanskrit">Local dialect mixed with Sanskrit (9)</option><option value="Tamil ...iyar">Tamil ...iyar (9)</option><option value="Arabic prose and Persian prose and verse">Arabic prose and Persian prose and verse (9)</option><option value="Hindi">Hindi (9)</option><option value="Local dialect Nāgari">Local dialect Nāgari (9)</option><option value="D">D (8)</option><option value="Tamil and Telugu">Tamil and Telugu (8)</option><option value="Sanskrit and Kanarese">Sanskrit and Kanarese (8)</option><option value="Vai-di">Vai-di (8)</option><option value="Persian Nasta‘liq">Persian Nasta‘liq (8)</option><option value="Arabic prose">Arabic prose (8)</option><option value="Sanskrit and Local
+dialect">Sanskrit and Local
+dialect (8)</option><option value="Arabic Thulth">Arabic Thulth (8)</option><option value="Persian &amp; Arabic">Persian &amp; Arabic (8)</option><option value="Arabic &amp; Urdu">Arabic &amp; Urdu (8)</option><option value="Gujarātī">Gujarātī (8)</option><option value="Tamil and Grantha">Tamil and Grantha (7)</option><option value="Kannadae">Kannadae (7)</option><option value="Tamil in Vatteluttu">Tamil in Vatteluttu (7)</option><option value="Telugu (arohaṇa)">Telugu (arohaṇa) (7)</option><option value="aṣṭami">aṣṭami (7)</option><option value="Arabic verse &amp; prose">Arabic verse &amp; prose (7)</option><option value="Arabic prose and Persian">Arabic prose and Persian (7)</option><option value="Arabic &amp; Persian verse &amp; prose">Arabic &amp; Persian verse &amp; prose (7)</option><option value="Do. and fragmentary. Records the death of probably Ratnakarpa">Do. and fragmentary. Records the death of probably Ratnakarpa (7)</option><option value="Arabic and Persian verse and prose">Arabic and Persian verse and prose (7)</option><option value="Uriya">Uriya (6)</option><option value="Tamil verse &amp; Tamil">Tamil verse &amp; Tamil (6)</option><option value="Telugu and Tamil">Telugu and Tamil (6)</option><option value="Telugu (prose and verse)">Telugu (prose and verse) (6)</option><option value="Tamil and Sanskrit in Grantha">Tamil and Sanskrit in Grantha (6)</option><option value="Prākrit in early Brāhmī">Prākrit in early Brāhmī (6)</option><option value="Sanskrit and Marāṭhī">Sanskrit and Marāṭhī (6)</option><option value="Oriya">Oriya (6)</option><option value="Tamil (corrupt)">Tamil (corrupt) (6)</option><option value="Local Nāgari">Local Nāgari (6)</option><option value="Contains the First Creed only. In characters of about the 18th century">Contains the First Creed only. In characters of about the 18th century (6)</option><option value="-">- (6)</option><option value="Sanskrit (cor-
+rupt)">Sanskrit (cor-
+rupt) (6)</option><option value="Persian verse &amp;
+prose">Persian verse &amp;
+prose (6)</option><option value="Urdu prose &amp; verse">Urdu prose &amp; verse (6)</option><option value="Kaṇṇaḍa">Kaṇṇaḍa (6)</option><option value="Nasta‘līq">Nasta‘līq (6)</option><option value="Arabic and
+Persian">Arabic and
+Persian (6)</option><option value="Tamil (verse). Tamil">Tamil (verse). Tamil (5)</option><option value="Dn">Dn (5)</option><option value="Pallava-Grantha">Pallava-Grantha (5)</option><option value="Sanskrit in Nāgari">Sanskrit in Nāgari (5)</option><option value="Kannada in Nāgarī">Kannada in Nāgarī (5)</option><option value="Kannada (verse and prose)">Kannada (verse and prose) (5)</option><option value="Sanskrit and Telugu in Telugu">Sanskrit and Telugu in Telugu (5)</option><option value="Peruril. 18th year">Peruril. 18th year (5)</option><option value="Chōla">Chōla (5)</option><option value="Oriyā">Oriyā (5)</option><option value="Persian Thulth">Persian Thulth (5)</option><option value="Arabic prose and Persian verse and prose">Arabic prose and Persian verse and prose (5)</option><option value="Kanuada">Kanuada (5)</option><option value="Arabic verse &amp; Persian">Arabic verse &amp; Persian (5)</option><option value="Sanskrit influenced by Prākrit">Sanskrit influenced by Prākrit (5)</option><option value="Sanskrit (corrupt) Nägari">Sanskrit (corrupt) Nägari (5)</option><option value="Arabic prose &amp; Urdū verse">Arabic prose &amp; Urdū verse (5)</option><option value="Sanskrit-Nāgarī">Sanskrit-Nāgarī (5)</option><option value="Persian &amp; Sanskrit">Persian &amp; Sanskrit (5)</option><option value="Kannaḍa">Kannaḍa (5)</option><option value="Do-">Do- (5)</option><option value="Arabic &amp; Urdū verse">Arabic &amp; Urdū verse (5)</option><option value="Bhuvaneśakamalla">Bhuvaneśakamalla (5)</option><option value="Purport not clear">Purport not clear (5)</option><option value="Visarādēva">Visarādēva (4)</option><option value="I&#x27;o">I&#x27;o (4)</option><option value="Granths and Tamil">Granths and Tamil (4)</option><option value="Para- Telugu">Para- Telugu (4)</option><option value="Nagari (Sane-kṛit)">Nagari (Sane-kṛit) (4)</option><option value="Pāli">Pāli (4)</option><option value="Do. (arohaio)">Do. (arohaio) (4)</option><option value="Sanskrit and Grantha">Sanskrit and Grantha (4)</option><option value="Sanskrit verse in Grantha">Sanskrit verse in Grantha (4)</option><option value="I.O">I.O (4)</option><option value="Sanskrit (verse) in Telugu">Sanskrit (verse) in Telugu (4)</option><option value="Sanskrit verse">Sanskrit verse (4)</option><option value="Sanskrit in Malayalam">Sanskrit in Malayalam (4)</option><option value="Sanskrit (Nandinagari)">Sanskrit (Nandinagari) (4)</option><option value="Sanskrit archaic Telugu">Sanskrit archaic Telugu (4)</option><option value="Vai-">Vai- (4)</option><option value="Sanskrit in Telugu and Telugu">Sanskrit in Telugu and Telugu (4)</option><option value="Sanskrit 
+and Telugu">Sanskrit 
+and Telugu (4)</option><option value="Tuḷu(?)">Tuḷu(?) (4)</option><option value="18th year">18th year (4)</option><option value="Lost">Lost (4)</option><option value="Kar">Kar (4)</option><option value="Arabic prose &amp;
+Persian verse">Arabic prose &amp;
+Persian verse (4)</option><option value="Persian prose &amp;
+verse">Persian prose &amp;
+verse (4)</option><option value="Persian verse &amp; Arabic prose">Persian verse &amp; Arabic prose (4)</option><option value="Issued from Vatsagulma (i.e">Issued from Vatsagulma (i.e (4)</option><option value="Sanskrit mixed with
+local dialect">Sanskrit mixed with
+local dialect (4)</option><option value="Monday A.D">Monday A.D (4)</option><option value="Arabic and Urdu">Arabic and Urdu (4)</option><option value="Local">Local (4)</option><option value="Do. 1349">Do. 1349 (4)</option><option value="Sanskrit (Corrupt)">Sanskrit (Corrupt) (4)</option><option value="Arabic and Persian Naskh">Arabic and Persian Naskh (4)</option><option value="Persian verso">Persian verso (4)</option><option value="Arabio">Arabio (4)</option><option value="Nagari">Nagari (4)</option><option value="French">French (4)</option><option value="Local dialect
+Nāgarī">Local dialect
+Nāgarī (4)</option><option value="Sanskrit (corrupt) and Local dialect">Sanskrit (corrupt) and Local dialect (4)</option><option value="Persian
+verse">Persian
+verse (4)</option><option value="Tamil in Arabic script">Tamil in Arabic script (4)</option><option value="Sanskrit and Kannaḍa">Sanskrit and Kannaḍa (4)</option><option value="Urdū verse &amp; prose">Urdū verse &amp; prose (4)</option><option value="Urdu verse &amp; prose">Urdu verse &amp; prose (4)</option><option value="Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D">Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D (4)</option><option value="Persian verse. Nasta‘līq">Persian verse. Nasta‘līq (4)</option><option value="Persian verse Nasta&#x27;līq">Persian verse Nasta&#x27;līq (4)</option><option value="Vaikāśi">Vaikāśi (4)</option><option value="Regnal year 10">Regnal year 10 (4)</option><option value="Dutch">Dutch (3)</option><option value="Ibid. 77">Ibid. 77 (3)</option><option value="Da">Da (3)</option><option value="Do. Telugu">Do. Telugu (3)</option><option value="Vatteļuttu">Vatteļuttu (3)</option><option value="Brahmi">Brahmi (3)</option><option value="Sanskrit and
+Kanarese">Sanskrit and
+Kanarese (3)</option><option value="Sanskrit
+and Telugu">Sanskrit
+and Telugu (3)</option><option value="Telugu (Sanskrit)">Telugu (Sanskrit) (3)</option><option value="Telugu (prose and verse) and Sanskrit (verse) in Telugu">Telugu (prose and verse) and Sanskrit (verse) in Telugu (3)</option><option value="Telugu (archaic) verse">Telugu (archaic) verse (3)</option><option value="Sanskrit (in Grantha) and Tamil verse">Sanskrit (in Grantha) and Tamil verse (3)</option><option value="Do. (Verse)">Do. (Verse) (3)</option><option value="Sanskrit and Telugu (verse)">Sanskrit and Telugu (verse) (3)</option><option value="Malayalam. Va[s]eṭṭu">Malayalam. Va[s]eṭṭu (3)</option><option value="Grantha and Sanskrit">Grantha and Sanskrit (3)</option><option value="Sanskrit Grantha">Sanskrit Grantha (3)</option><option value="Kannada (verse
+and prose)">Kannada (verse
+and prose) (3)</option><option value="Mahratta in Nāgari">Mahratta in Nāgari (3)</option><option value="Sanskrit in Grantha and Tamil">Sanskrit in Grantha and Tamil (3)</option><option value="Do. Brāhmī">Do. Brāhmī (3)</option><option value="Uriya and Nagarī">Uriya and Nagarī (3)</option><option value="Tamil vṇen">Tamil vṇen (3)</option><option value="Prakrit in Brāhmī">Prakrit in Brāhmī (3)</option><option value="Kannada and Sanskrit">Kannada and Sanskrit (3)</option><option value="Latin">Latin (3)</option><option value="Kannada (archaic)">Kannada (archaic) (3)</option><option value="Arabic and Persian script">Arabic and Persian script (3)</option><option value="Sanskrit and Tamil in Pallava-Grantha">Sanskrit and Tamil in Pallava-Grantha (3)</option><option value="Prākṛit in Brāhmī">Prākṛit in Brāhmī (3)</option><option value="Kannada in Mala-yālam">Kannada in Mala-yālam (3)</option><option value="Sanskrit in Pallava-Grantha">Sanskrit in Pallava-Grantha (3)</option><option value="Malayalam in Vatteluttu">Malayalam in Vatteluttu (3)</option><option value="Prākrit in Brāhmi">Prākrit in Brāhmi (3)</option><option value="Sanskrit Brāhmī">Sanskrit Brāhmī (3)</option><option value="Sanskrit and Bhāshā">Sanskrit and Bhāshā (3)</option><option value="Northern Alphabet">Northern Alphabet (3)</option><option value="Dialect">Dialect (3)</option><option value="Bengālī">Bengālī (3)</option><option value="Local dialect and Sanskrit">Local dialect and Sanskrit (3)</option><option value="Persian
+Nasta&#x27;līq">Persian
+Nasta&#x27;līq (3)</option><option value="Arabic prose and Urdu verse">Arabic prose and Urdu verse (3)</option><option value="…">… (3)</option><option value="Sanskrit influenced by Local dialect">Sanskrit influenced by Local dialect (3)</option><option value="Persian Nasta&#x27;liq verse">Persian Nasta&#x27;liq verse (3)</option><option value="Arabic and Persian prose and verse">Arabic and Persian prose and verse (3)</option><option value="Kōnërimēl">Kōnërimēl (3)</option><option value="Tai">Tai (3)</option><option value="Local Nāgarī. dialect">Local Nāgarī. dialect (3)</option><option value="Mixed Middle Brāhmī">Mixed Middle Brāhmī (3)</option><option value="Do. (?)">Do. (?) (3)</option><option value="Persian verse Naskh">Persian verse Naskh (3)</option><option value="Nasta&#x27;liq">Nasta&#x27;liq (3)</option><option value="Marāṭhi (?)">Marāṭhi (?) (3)</option><option value="Persian verse.
+Nashta&#x27;liq">Persian verse.
+Nashta&#x27;liq (3)</option><option value="Persian prose verse">Persian prose verse (3)</option><option value="Sanskrit and Gujarātī">Sanskrit and Gujarātī (3)</option><option value="Tamil Vaṭṭeḻuttu">Tamil Vaṭṭeḻuttu (3)</option><option value="Arabic &amp; Persian Naskh">Arabic &amp; Persian Naskh (3)</option><option value="Arabic &amp; Urdū prose &amp; verse">Arabic &amp; Urdū prose &amp; verse (3)</option><option value="Prakrit mixed with Sanskrit">Prakrit mixed with Sanskrit (3)</option><option value="Urdu verse and prose">Urdu verse and prose (3)</option><option value="Kannada verse">Kannada verse (3)</option><option value="Arabic &amp; Sanskrit">Arabic &amp; Sanskrit (3)</option><option value="Persian verse &amp; Nasta‘līq">Persian verse &amp; Nasta‘līq (3)</option><option value=". . . . .">. . . . . (3)</option><option value="Urdū and English">Urdū and English (3)</option><option value="English and Persian">English and Persian (3)</option><option value="Persian verse &amp; Arabic">Persian verse &amp; Arabic (3)</option><option value="Persian &amp; Hindi">Persian &amp; Hindi (3)</option><option value="Italian">Italian (3)</option><option value="Urdū verse &amp; Persian verse">Urdū verse &amp; Persian verse (3)</option><option value="Sanskrit mixed with
+Oriya">Sanskrit mixed with
+Oriya (3)</option><option value="Persian verse &amp; Urdu verse">Persian verse &amp; Urdu verse (3)</option><option value="Arabic &amp; Persian
+verse">Arabic &amp; Persian
+verse (3)</option><option value="Persian verse and
+prose">Persian verse and
+prose (3)</option><option value="Tamil-verse">Tamil-verse (3)</option><option value="Marāṭhi">Marāṭhi (3)</option><option value="Persian &amp; Marāṭhī">Persian &amp; Marāṭhī (3)</option><option value="verse">verse (3)</option><option value="TamilDo">TamilDo (2)</option><option value="Vaţţeluttu">Vaţţeluttu (2)</option><option value="Nagari (Marathi)">Nagari (Marathi) (2)</option><option value="Sanskrit (Nāgarī)">Sanskrit (Nāgarī) (2)</option><option value="Sanskrit and Kana- rese">Sanskrit and Kana- rese (2)</option><option value="Adi">Adi (2)</option><option value="De">De (2)</option><option value="Tam&#x27;[il]">Tam&#x27;[il] (2)</option><option value="Kanarese (Kana-
+rese)">Kanarese (Kana-
+rese) (2)</option><option value="Sanskrit (Nagari)">Sanskrit (Nagari) (2)</option><option value="Kannadian">Kannadian (2)</option><option value="Kannada (San- skrit)">Kannada (San- skrit) (2)</option><option value="Tamil verse (?).. | Do">Tamil verse (?).. | Do (2)</option><option value="Sanskrit (Nan- dinagari)">Sanskrit (Nan- dinagari) (2)</option><option value="Telugu and Kannada">Telugu and Kannada (2)</option><option value="Sanskrit (Kannada)">Sanskrit (Kannada) (2)</option><option value="Sanskrit and
+Kannada">Sanskrit and
+Kannada (2)</option><option value="Telugu and prose">Telugu and prose (2)</option><option value="Sanskrit verse and Telugu">Sanskrit verse and Telugu (2)</option><option value="Sanskrit verse in Telugu">Sanskrit verse in Telugu (2)</option><option value="Telugu (Archaic)">Telugu (Archaic) (2)</option><option value="English and Telugu">English and Telugu (2)</option><option value="Kannada Nāgarī">Kannada Nāgarī (2)</option><option value="Archaic">Archaic (2)</option><option value="Sanskrit and Telugu (prose)">Sanskrit and Telugu (prose) (2)</option><option value="Sanskrit and Nāgari">Sanskrit and Nāgari (2)</option><option value="Prakrit and Brāhmi">Prakrit and Brāhmi (2)</option><option value="Sanskrit and
+Telugu">Sanskrit and
+Telugu (2)</option><option value="Grantha &amp;
+Tamil">Grantha &amp;
+Tamil (2)</option><option value="Do. (verse and prose)">Do. (verse and prose) (2)</option><option value="Mōḍi">Mōḍi (2)</option><option value="Tamil and Sanskrit">Tamil and Sanskrit (2)</option><option value="Kannada and Tamil">Kannada and Tamil (2)</option><option value="Telugu (in Early Chālukyan characters)">Telugu (in Early Chālukyan characters) (2)</option><option value="Sanskrit in archaic characters">Sanskrit in archaic characters (2)</option><option value="Sanskrit in early characters">Sanskrit in early characters (2)</option><option value="Sanskrit and Kannada in Kannada">Sanskrit and Kannada in Kannada (2)</option><option value="Mōḍī script and Marāthī language">Mōḍī script and Marāthī language (2)</option><option value="Sanskrit in Nāgari characters">Sanskrit in Nāgari characters (2)</option><option value="(Lost)">(Lost) (2)</option><option value="Pallava">Pallava (2)</option><option value="Tamil in Vaṭṭeḻuttu Characters">Tamil in Vaṭṭeḻuttu Characters (2)</option><option value="Sanskrit and Telugu
+prose and verse">Sanskrit and Telugu
+prose and verse (2)</option><option value="Sanskrit verse and
+Telugu in Telugu
+characters">Sanskrit verse and
+Telugu in Telugu
+characters (2)</option><option value="Kannada prose and verse">Kannada prose and verse (2)</option><option value="Persian and Arabic">Persian and Arabic (2)</option><option value="Sanskrit in Pal- lava-Grantha">Sanskrit in Pal- lava-Grantha (2)</option><option value="Prākṛit in Brāhmi">Prākṛit in Brāhmi (2)</option><option value="Prākṛit and Sanskrit">Prākṛit and Sanskrit (2)</option><option value="Sanskrit (?)">Sanskrit (?) (2)</option><option value="Bālāhi">Bālāhi (2)</option><option value="Brāhmī and Northern
+Alphabet">Brāhmī and Northern
+Alphabet (2)</option><option value="Do.; Sanskrit">Do.; Sanskrit (2)</option><option value="Malayālam">Malayālam (2)</option><option value="Bilingual. Persian">Bilingual. Persian (2)</option><option value="Sanskrit and Apa-bhraṁśa">Sanskrit and Apa-bhraṁśa (2)</option><option value="Rule of Vāgādatta">Rule of Vāgādatta (2)</option><option value="Brahmadeva">Brahmadeva (2)</option><option value="Arabic and Per- sian verse">Arabic and Per- sian verse (2)</option><option value="Arabic prose and Persian Naskh">Arabic prose and Persian Naskh (2)</option><option value="Persian prose and
+verse">Persian prose and
+verse (2)</option><option value="Persian
+Nasta&#x27;liq">Persian
+Nasta&#x27;liq (2)</option><option value="Mixture of Arabic &amp; Persian">Mixture of Arabic &amp; Persian (2)</option><option value="Arabic prose &amp; Per-sian verse">Arabic prose &amp; Per-sian verse (2)</option><option value="Arabic prose &amp; Persian">Arabic prose &amp; Persian (2)</option><option value="Prakrit influenced by Sanskrit">Prakrit influenced by Sanskrit (2)</option><option value="Rāchacaya">Rāchacaya (2)</option><option value="Sanskrit mixed with Oriya">Sanskrit mixed with Oriya (2)</option><option value="Persian prose and verse; Nasta‘līq">Persian prose and verse; Nasta‘līq (2)</option><option value="Arabic prose and verse and Persian verse">Arabic prose and verse and Persian verse (2)</option><option value="Armenian">Armenian (2)</option><option value="Local Dialect Nāgari">Local Dialect Nāgari (2)</option><option value="Local dialect. Nāgari">Local dialect. Nāgari (2)</option><option value="Maga">Maga (2)</option><option value="L. o. o. a l dialect">L. o. o. a l dialect (2)</option><option value="Arabic prose and verse and Persian">Arabic prose and verse and Persian (2)</option><option value="Arabie">Arabie (2)</option><option value="Arabic prose &amp; verse and Persian verse">Arabic prose &amp; verse and Persian verse (2)</option><option value="Local dialect (?)">Local dialect (?) (2)</option><option value="and Arabic prose and Persian verse">and Arabic prose and Persian verse (2)</option><option value="and Persian">and Persian (2)</option><option value="Arabic and Urdū">Arabic and Urdū (2)</option><option value="Telugu-Kannaḍa">Telugu-Kannaḍa (2)</option><option value="Sūrya- Kannaḍa">Sūrya- Kannaḍa (2)</option><option value="Armenian; Roman">Armenian; Roman (2)</option><option value="Arabic verse &amp; Persian prose">Arabic verse &amp; Persian prose (2)</option><option value="Sanskrit and
+Prākṛit">Sanskrit and
+Prākṛit (2)</option><option value="Sanskrit
+(corrupt) and
+Local dialect">Sanskrit
+(corrupt) and
+Local dialect (2)</option><option value="Local dialect Nāgarī
+
+Bilingual. Mentions Vaurauji kōlavāla and sutradhāra Nātha. Purport not clear. For the Persian portion see below Appendix D">Local dialect Nāgarī
+
+Bilingual. Mentions Vaurauji kōlavāla and sutradhāra Nātha. Purport not clear. For the Persian portion see below Appendix D (2)</option><option value="Sanskrit mixed with Kannada">Sanskrit mixed with Kannada (2)</option><option value="Arabic and Local dialect">Arabic and Local dialect (2)</option><option value="Arabic Thulth in Tughrā">Arabic Thulth in Tughrā (2)</option><option value="Arabic Prose and Persian verse">Arabic Prose and Persian verse (2)</option><option value="Naskh">Naskh (2)</option><option value="Persian verse and Arabic prose">Persian verse and Arabic prose (2)</option><option value="Telugu mixed with Sanskrit">Telugu mixed with Sanskrit (2)</option><option value="Prakrit Nāgarī">Prakrit Nāgarī (2)</option><option value="Kannada (corrupt)">Kannada (corrupt) (2)</option><option value="Sanskrit Late Brāhmī">Sanskrit Late Brāhmī (2)</option><option value="Persian verse Nasta‘līq">Persian verse Nasta‘līq (2)</option><option value="Kannada and Sanskrit Kannada">Kannada and Sanskrit Kannada (2)</option><option value="Arabic &amp; Persian prose &amp; verse">Arabic &amp; Persian prose &amp; verse (2)</option><option value="Arabic prose &amp; Urdu verse">Arabic prose &amp; Urdu verse (2)</option><option value="[Sanskrit]">[Sanskrit] (2)</option><option value="Sanskrit influenced by Prākṛit">Sanskrit influenced by Prākṛit (2)</option><option value="Urdu prose and verse">Urdu prose and verse (2)</option><option value="Urdu and Persian verse">Urdu and Persian verse (2)</option><option value="Urdu prose and Persian verse">Urdu prose and Persian verse (2)</option><option value="English and Urdu">English and Urdu (2)</option><option value="Persian verse &amp; Urdū prose">Persian verse &amp; Urdū prose (2)</option><option value="Persian Verse">Persian Verse (2)</option><option value="Urdū &amp; Persian verse">Urdū &amp; Persian verse (2)</option><option value="Arabic &amp; Persian prose and verse">Arabic &amp; Persian prose and verse (2)</option><option value="Persian verse and prose and Arabic">Persian verse and prose and Arabic (2)</option><option value="Persian and Urdu verse">Persian and Urdu verse (2)</option><option value="Persian and Local dialect">Persian and Local dialect (2)</option><option value="Marvādī">Marvādī (2)</option><option value="Persian &amp; Urdū verse">Persian &amp; Urdū verse (2)</option><option value="verse &amp; prose">verse &amp; prose (2)</option><option value="Div">Div (2)</option><option value="-Do-">-Do- (2)</option><option value="Urdū verse Nasta&#x27;liq">Urdū verse Nasta&#x27;liq (2)</option><option value="Arabic &amp; Urdi verse">Arabic &amp; Urdi verse (2)</option><option value="Persian verse &amp; Urdu prose">Persian verse &amp; Urdu prose (2)</option><option value="Persian Nastac&#x27;līq">Persian Nastac&#x27;līq (2)</option><option value="Persian and verse">Persian and verse (2)</option><option value="Urdu prose and verse and Persian verse">Urdu prose and verse and Persian verse (2)</option><option value="Persian verse
+Nasta&#x27;līq">Persian verse
+Nasta&#x27;līq (2)</option><option value="Urdū &amp; English">Urdū &amp; English (2)</option><option value="Hindī">Hindī (2)</option><option value="Persian prose &amp; Urdū verse">Persian prose &amp; Urdū verse (2)</option><option value="Persian verse &amp; prose. Nasta‘līq">Persian verse &amp; prose. Nasta‘līq (2)</option><option value="Persian prose &amp; verse. Nasta‘līq">Persian prose &amp; verse. Nasta‘līq (2)</option><option value="Persian. Nasta‘līq">Persian. Nasta‘līq (2)</option><option value="Persian verse Nastaʿlīq">Persian verse Nastaʿlīq (2)</option><option value="Nāgari and Telugu">Nāgari and Telugu (1)</option><option value="Tamil.">Tamil. (1)</option><option value="Grantha (verse).">Grantha (verse). (1)</option><option value="Tamil (in Kana-rese)">Tamil (in Kana-rese) (1)</option><option value="Kana">Kana (1)</option><option value="Kanarese and Nagari">Kanarese and Nagari (1)</option><option value="Nagari (Kanarese)">Nagari (Kanarese) (1)</option><option value="To">To (1)</option><option value="Sanskrit (Telugu) Greek and Latin">Sanskrit (Telugu) Greek and Latin (1)</option><option value="Hindi (Nagari)">Hindi (Nagari) (1)</option><option value="Kan-rese">Kan-rese (1)</option><option value="Sanskrit (Nāgari)">Sanskrit (Nāgari) (1)</option><option value="Grantha Tamil">Grantha Tamil (1)</option><option value="Mahārāṭhi">Mahārāṭhi (1)</option><option value="Grantha
+and
+Tamil">Grantha
+and
+Tamil (1)</option><option value="Tamil and Grantha (prose and verse)">Tamil and Grantha (prose and verse) (1)</option><option value="Damaged.">Damaged. (1)</option><option value="28th">28th (1)</option><option value="23rd „">23rd „ (1)</option><option value="Ka [nna] rese">Ka [nna] rese (1)</option><option value="Sanskrit (Télugu- Kannada)">Sanskrit (Télugu- Kannada) (1)</option><option value="Kanarese
+and
+Sanskrit">Kanarese
+and
+Sanskrit (1)</option><option value="Sarva-s-skrit and Telugu">Sarva-s-skrit and Telugu (1)</option><option value="T-lugu(skrit) and Uriya">T-lugu(skrit) and Uriya (1)</option><option value="Tamil verse (?)">Tamil verse (?) (1)</option><option value="Nāgarī (Sanskrit)">Nāgarī (Sanskrit) (1)</option><option value="Pa">Pa (1)</option><option value="Kanarese (Sanskrit)">Kanarese (Sanskrit) (1)</option><option value="Sanskrit (in Telugu) and Telugu">Sanskrit (in Telugu) and Telugu (1)</option><option value="Sanskrit (Nandināgarī)">Sanskrit (Nandināgarī) (1)</option><option value="Telugu and Kannaḍa">Telugu and Kannaḍa (1)</option><option value="Tamil and poetry">Tamil and poetry (1)</option><option value="G-untha
+and
+Tamil">G-untha
+and
+Tamil (1)</option><option value="Tamil and
+Grantha">Tamil and
+Grantha (1)</option><option value="Tamil verse
+and Sanskrit">Tamil verse
+and Sanskrit (1)</option><option value="Tamil vero">Tamil vero (1)</option><option value="Marathi in Nāgari">Marathi in Nāgari (1)</option><option value="(Nag-arī)">(Nag-arī) (1)</option><option value="Telugu (Nag-arī)">Telugu (Nag-arī) (1)</option><option value="Śrī-Kannada">Śrī-Kannada (1)</option><option value="Sanskrit (prose and verse) in Telugu and Telugu">Sanskrit (prose and verse) in Telugu and Telugu (1)</option><option value="Sanskrit verse and Telugu prose">Sanskrit verse and Telugu prose (1)</option><option value="Sanskrit verse and Telugu and Telugu verse">Sanskrit verse and Telugu and Telugu verse (1)</option><option value="Telugu verse and prose">Telugu verse and prose (1)</option><option value="Pan. Tamil">Pan. Tamil (1)</option><option value="Urdw">Urdw (1)</option><option value="Arabic and Persian mixed">Arabic and Persian mixed (1)</option><option value="Sanskrit (Grantha) and Tamil">Sanskrit (Grantha) and Tamil (1)</option><option value="Tamil and | Telugu">Tamil and | Telugu (1)</option><option value="Teluga">Teluga (1)</option><option value="Persian (Verse)">Persian (Verse) (1)</option><option value="Damaged. Records gifts made to the god Sadāśivaraya (i.e. Hanuman) of Udegolam by certain officers of Rayadurgam viz">Damaged. Records gifts made to the god Sadāśivaraya (i.e. Hanuman) of Udegolam by certain officers of Rayadurgam viz (1)</option><option value="Do. (Archaic)">Do. (Archaic) (1)</option><option value="Kannada (Archaic)">Kannada (Archaic) (1)</option><option value="Sanskrit and Kannada jo. Kannada">Sanskrit and Kannada jo. Kannada (1)</option><option value="Sanskrit verses (in Kannada)">Sanskrit verses (in Kannada) (1)</option><option value="Sanskrit and Telugu (prose and verse)">Sanskrit and Telugu (prose and verse) (1)</option><option value="Sanskrit (verse) and Telugu">Sanskrit (verse) and Telugu (1)</option><option value="Do. Prakrit in Va[s]eṭṭu">Do. Prakrit in Va[s]eṭṭu (1)</option><option value="Sanskrit (Nāga-ri)">Sanskrit (Nāga-ri) (1)</option><option value="Sanskrit and Archaic Telugu">Sanskrit and Archaic Telugu (1)</option><option value="Sanskrit and Tamil (Nandina-garī)">Sanskrit and Tamil (Nandina-garī) (1)</option><option value="Grantha and
+Tamil">Grantha and
+Tamil (1)</option><option value="Kannada prose and verse)">Kannada prose and verse) (1)</option><option value="Kannada
+(verse)">Kannada
+(verse) (1)</option><option value="Kannada
+(prose) and
+Sanskrit
+(verse)">Kannada
+(prose) and
+Sanskrit
+(verse) (1)</option><option value="Sanskrit in urohaio characters">Sanskrit in urohaio characters (1)</option><option value="Kannada in Nāgari">Kannada in Nāgari (1)</option><option value="Sanskrit and Telugu in Nāgari">Sanskrit and Telugu in Nāgari (1)</option><option value="Brāhmi (of about the 4th century A.D.)">Brāhmi (of about the 4th century A.D.) (1)</option><option value="Archaiologic Telugu">Archaiologic Telugu (1)</option><option value="Sanskrit and Mahraṭhi">Sanskrit and Mahraṭhi (1)</option><option value="Kannada (archaic characters)">Kannada (archaic characters) (1)</option><option value="(Sanskrit (verse) in Telugu and Telugu (prose)">(Sanskrit (verse) in Telugu and Telugu (prose) (1)</option><option value="Telugu and Nāgarī">Telugu and Nāgarī (1)</option><option value="Sanskrit verse in Malayalam">Sanskrit verse in Malayalam (1)</option><option value="Malayalam">Malayalam (1)</option><option value="Archabic Vaṭṭe-ļuttu">Archabic Vaṭṭe-ļuttu (1)</option><option value="Vaṭeluttu and Grantha">Vaṭeluttu and Grantha (1)</option><option value="Archaic Vatte-luttu">Archaic Vatte-luttu (1)</option><option value=".">. (1)</option><option value="Sanskrit verse
+in Telugu">Sanskrit verse
+in Telugu (1)</option><option value="Do. and Tamil">Do. and Tamil (1)</option><option value="Do. (verne and prose)">Do. (verne and prose) (1)</option><option value="Prakrit in Telugu">Prakrit in Telugu (1)</option><option value="Sanskrit in Chālukyan characters (8th cent)">Sanskrit in Chālukyan characters (8th cent) (1)</option><option value="Sanskrit
+and
+Grantha &amp;
+Tamil">Sanskrit
+and
+Grantha &amp;
+Tamil (1)</option><option value="Sanskrit (in Nagari)">Sanskrit (in Nagari) (1)</option><option value="Sanskrit (Brāhmī)">Sanskrit (Brāhmī) (1)</option><option value="Do. (in Nāgarī)">Do. (in Nāgarī) (1)</option><option value="Sanskrit in Kannada">Sanskrit in Kannada (1)</option><option value="Sanskrit in Nāgarī (archaic)">Sanskrit in Nāgarī (archaic) (1)</option><option value="Sanskrit in Telugu characters">Sanskrit in Telugu characters (1)</option><option value="Sanskrit (Grantha)">Sanskrit (Grantha) (1)</option><option value="Sanskrit &amp; Nāgarī">Sanskrit &amp; Nāgarī (1)</option><option value="Sanskrit in Nandi- nāgarī">Sanskrit in Nandi- nāgarī (1)</option><option value="Sanskrit and Tamil in early Pallava characters">Sanskrit and Tamil in early Pallava characters (1)</option><option value="Kannaḍa and Sans- krit in Nāgarī">Kannaḍa and Sans- krit in Nāgarī (1)</option><option value="Kannada in Malā- yālam">Kannada in Malā- yālam (1)</option><option value="Sanskrit and Kanna- ḍa in Nāgarī">Sanskrit and Kanna- ḍa in Nāgarī (1)</option><option value="Kannada (verse)">Kannada (verse) (1)</option><option value="Sanskrit in early Telugu-Kannada characters">Sanskrit in early Telugu-Kannada characters (1)</option><option value="Sanskrit in early Telugu characters">Sanskrit in early Telugu characters (1)</option><option value="Sanskrit in Pallava characters">Sanskrit in Pallava characters (1)</option><option value="Tamil (modern)">Tamil (modern) (1)</option><option value="Persian verse in Thulth">Persian verse in Thulth (1)</option><option value="Persian verse in Nasta&#x27;līq">Persian verse in Nasta&#x27;līq (1)</option><option value="Records gift of land free of taxes">Records gift of land free of taxes (1)</option><option value="Nāgarī (peculiar)">Nāgarī (peculiar) (1)</option><option value="29th yea">29th yea (1)</option><option value="Kir. Telugu">Kir. Telugu (1)</option><option value="Pramâdôta">Pramâdôta (1)</option><option value="Pallava-Grantha and Tamil">Pallava-Grantha and Tamil (1)</option><option value="Vaiśākha">Vaiśākha (1)</option><option value="Sanskrit verse in archaic Telugu">Sanskrit verse in archaic Telugu (1)</option><option value="Telugu (?)">Telugu (?) (1)</option><option value="Telugu (modern)">Telugu (modern) (1)</option><option value="Pāṇḍya">Pāṇḍya (1)</option><option value="Tamil in Vaṭṭeḻuttu">Tamil in Vaṭṭeḻuttu (1)</option><option value="Sanskrit (in Grantha) and Tamil">Sanskrit (in Grantha) and Tamil (1)</option><option value="San">San (1)</option><option value="Sanskrit verse in
+Telugu characters">Sanskrit verse in
+Telugu characters (1)</option><option value="Sanskrit and Telugu in Telugu characters">Sanskrit and Telugu in Telugu characters (1)</option><option value="Sanskrit in Malayā-lam characters">Sanskrit in Malayā-lam characters (1)</option><option value="Kannada in Nagari">Kannada in Nagari (1)</option><option value="Kannada in Malaya-
+lam Characters">Kannada in Malaya-
+lam Characters (1)</option><option value="Kannada script and Sanskrit and Kannada language">Kannada script and Sanskrit and Kannada language (1)</option><option value="Sanskrit in Kannada script">Sanskrit in Kannada script (1)</option><option value="Nāgarī script">Nāgarī script (1)</option><option value="Sanskrit verse and Kannaḍa prose in Kannaḍa script">Sanskrit verse and Kannaḍa prose in Kannaḍa script (1)</option><option value="Nāgarī and Kannada script and Kannada language">Nāgarī and Kannada script and Kannada language (1)</option><option value="Nāgarī and Sanskrit">Nāgarī and Sanskrit (1)</option><option value="Do. in characters">Do. in characters (1)</option><option value="Marāṭhī in Nāgarī">Marāṭhī in Nāgarī (1)</option><option value="Marathi in Nāgarī">Marathi in Nāgarī (1)</option><option value="Sanskrit in box-headed characters">Sanskrit in box-headed characters (1)</option><option value="Sanskrit in early (Central Indian) box-headed characters">Sanskrit in early (Central Indian) box-headed characters (1)</option><option value="Sanskrit in Kan-
+nada characters">Sanskrit in Kan-
+nada characters (1)</option><option value="Sanskrit in Nandi-Nāgarī">Sanskrit in Nandi-Nāgarī (1)</option><option value="Sanskrit in box-headed variety of South Indian characters">Sanskrit in box-headed variety of South Indian characters (1)</option><option value="Prākritika">Prākritika (1)</option><option value="Sanskrit and
+Telugu (verse)
+in Telugu">Sanskrit and
+Telugu (verse)
+in Telugu (1)</option><option value="Sanskrit
+Telugu">Sanskrit
+Telugu (1)</option><option value="Maṇigai (?) in Nāgari characters.
+Telugu">Maṇigai (?) in Nāgari characters.
+Telugu (1)</option><option value="In late Nāgari characters">In late Nāgari characters (1)</option><option value="Marathi in Modī characters">Marathi in Modī characters (1)</option><option value="Tamil and Per-sian">Tamil and Per-sian (1)</option><option value="Tamil in Vaṭṭeluttu">Tamil in Vaṭṭeluttu (1)</option><option value="Sanskrit verse in Kannada">Sanskrit verse in Kannada (1)</option><option value="In shell characters">In shell characters (1)</option><option value="In Oriya characters">In Oriya characters (1)</option><option value="Prākṛit Brāhmi">Prākṛit Brāhmi (1)</option><option value="Präkrit in early Brähmi">Präkrit in early Brähmi (1)</option><option value="Prākṛit in early Brāhmī">Prākṛit in early Brāhmī (1)</option><option value="Prākṛit in Brāh-mī">Prākṛit in Brāh-mī (1)</option><option value="Early Nāgari">Early Nāgari (1)</option><option value="Telugu and Sanskrit in Telugu">Telugu and Sanskrit in Telugu (1)</option><option value="In late Nāgart 
+characters and 
+Kannada lan- 
+guage">In late Nāgart 
+characters and 
+Kannada lan- 
+guage (1)</option><option value="Telugu and Persian (Nasta&#x27;līq)">Telugu and Persian (Nasta&#x27;līq) (1)</option><option value="Bhāṣā">Bhāṣā (1)</option><option value="East Indian Alphabet">East Indian Alphabet (1)</option><option value="Kannada and Persian (Naskh)">Kannada and Persian (Naskh) (1)</option><option value="Rājāsthānī">Rājāsthānī (1)</option><option value="Hindusthānī">Hindusthānī (1)</option><option value="Sanskrit local dialect">Sanskrit local dialect (1)</option><option value="Maithili(?)">Maithili(?) (1)</option><option value="[Kannaḍa]">[Kannaḍa] (1)</option><option value="Sanskrit and Kaṇṇaḍa (verse)">Sanskrit and Kaṇṇaḍa (verse) (1)</option><option value="Nija-">Nija- (1)</option><option value="Greek and Prakrit">Greek and Prakrit (1)</option><option value="Nāgarī and Persian">Nāgarī and Persian (1)</option><option value="Mysore">Mysore (1)</option><option value="Mixed Dialect">Mixed Dialect (1)</option><option value="Brāhmī and Northern Alphabet">Brāhmī and Northern Alphabet (1)</option><option value="Kai/hi">Kai/hi (1)</option><option value="Nāgarī :
+Naskh">Nāgarī :
+Naskh (1)</option><option value="Kaithī">Kaithī (1)</option><option value="Persian prose and Persian verse">Persian prose and Persian verse (1)</option><option value="Persian verse; Nasta&#x27;līq. Sanskrit">Persian verse; Nasta&#x27;līq. Sanskrit (1)</option><option value="Dakhani(?) Thulth">Dakhani(?) Thulth (1)</option><option value="Bilingual. The Persian portion states that on the date mentioned">Bilingual. The Persian portion states that on the date mentioned (1)</option><option value="Arabic prose and Per- sian verse">Arabic prose and Per- sian verse (1)</option><option value="Arabic and Persian; Thulth and Nasta‘līq">Arabic and Persian; Thulth and Nasta‘līq (1)</option><option value="Bilingual. Sanskrit">Bilingual. Sanskrit (1)</option><option value="Local dialect (verse)">Local dialect (verse) (1)</option><option value="Chinese ?">Chinese ? (1)</option><option value="Siddhamātṛikā">Siddhamātṛikā (1)</option><option value="Sanskrit and Local Nāgarī">Sanskrit and Local Nāgarī (1)</option><option value="Mōḍī">Mōḍī (1)</option><option value="Kannada and Malayālam">Kannada and Malayālam (1)</option><option value="dialect">dialect (1)</option><option value="Roman">Roman (1)</option><option value="Local dialect and Nāgarī">Local dialect and Nāgarī (1)</option><option value="Contains Shiite durūd only. Part of No. 2 above">Contains Shiite durūd only. Part of No. 2 above (1)</option><option value="Fragmentary. Records the construction of a tomb (internee not specified) along with the Makki Masjid (i.e. a one-wall mosque to its west). Records the name of the builder as Hamid-i-Dhar">Fragmentary. Records the construction of a tomb (internee not specified) along with the Makki Masjid (i.e. a one-wall mosque to its west). Records the name of the builder as Hamid-i-Dhar (1)</option><option value="Persian Nasta‘liq; Sanskrit">Persian Nasta‘liq; Sanskrit (1)</option><option value="Arabic prose &amp; Persian Naskh">Arabic prose &amp; Persian Naskh (1)</option><option value="Persian Nastan&#x27;liq">Persian Nastan&#x27;liq (1)</option><option value="prose &amp; Persian verse">prose &amp; Persian verse (1)</option><option value="Arabic prose &amp;
+Persian">Arabic prose &amp;
+Persian (1)</option><option value="Arabic verse and
+Persian prose and
+verse">Arabic verse and
+Persian prose and
+verse (1)</option><option value="Persian Naskh &amp; Nasta&#x27;liq">Persian Naskh &amp; Nasta&#x27;liq (1)</option><option value="Persian verses">Persian verses (1)</option><option value="Persian verse &amp; Ara-bio prose">Persian verse &amp; Ara-bio prose (1)</option><option value="Persian prose &amp; prose">Persian prose &amp; prose (1)</option><option value="Arabic &amp; Persian prose">Arabic &amp; Persian prose (1)</option><option value="Arabic prose &amp; Per- sian verse">Arabic prose &amp; Per- sian verse (1)</option><option value="(corrupt)">(corrupt) (1)</option><option value="Sanskrit (verse) and Marāthī">Sanskrit (verse) and Marāthī (1)</option><option value="Kannaḍa (corrupt)">Kannaḍa (corrupt) (1)</option><option value="Sanskrit mixed with
+Local dialect">Sanskrit mixed with
+Local dialect (1)</option><option value="Gaṇḍamahārāja">Gaṇḍamahārāja (1)</option><option value="Sanskrit influenced
+by Local dialect">Sanskrit influenced
+by Local dialect (1)</option><option value="Sanskrit mixed with dialect">Sanskrit mixed with dialect (1)</option><option value="Sanskrit influenced by Prakrit">Sanskrit influenced by Prakrit (1)</option><option value="Greek">Greek (1)</option><option value="Late Brāhmī">Late Brāhmī (1)</option><option value="Arabic prose and Persian Thulth">Arabic prose and Persian Thulth (1)</option><option value="Do. (only chronogram)">Do. (only chronogram) (1)</option><option value="Persian and Urdu">Persian and Urdu (1)</option><option value="Armenian; Persian prose and verse">Armenian; Persian prose and verse (1)</option><option value="Persian verse; Nasta‘līq">Persian verse; Nasta‘līq (1)</option><option value="Arabic prose and Persian prose and verse; Nasta‘līq">Arabic prose and Persian prose and verse; Nasta‘līq (1)</option><option value="Urdu verse and Arabic">Urdu verse and Arabic (1)</option><option value="Mixture of Arabic Persian">Mixture of Arabic Persian (1)</option><option value="Persian Naskh and Nasta&#x27;liq">Persian Naskh and Nasta&#x27;liq (1)</option><option value="Arabic (Tughrā). Naskh">Arabic (Tughrā). Naskh (1)</option><option value="Mixture of Arabic and Persian">Mixture of Arabic and Persian (1)</option><option value="Arabic and Persian. Nāskh and Nasta&#x27;līq">Arabic and Persian. Nāskh and Nasta&#x27;līq (1)</option><option value="Arabi">Arabi (1)</option><option value="Persio verse">Persio verse (1)</option><option value="Telugu mixed with Kannada; Telugu">Telugu mixed with Kannada; Telugu (1)</option><option value="Damaged. Purport not clear">Damaged. Purport not clear (1)</option><option value="Prãkrit">Prãkrit (1)</option><option value="Arabic prose and Persian prose">Arabic prose and Persian prose (1)</option><option value="Arabio prose and Persian prose and Naskh and Nasta‘līq">Arabio prose and Persian prose and Naskh and Nasta‘līq (1)</option><option value="Arabic prose and Persian Nasta‘līq">Arabic prose and Persian Nasta‘līq (1)</option><option value="Persian verse and prose; Nāgarī">Persian verse and prose; Nāgarī (1)</option><option value="Arabic prose and Urdū verse">Arabic prose and Urdū verse (1)</option><option value="prose">prose (1)</option><option value="Do.; Persian">Do.; Persian (1)</option><option value="Persian Verse and prose">Persian Verse and prose (1)</option><option value="Arabic prose and Persian Nasta&#x27;līq">Arabic prose and Persian Nasta&#x27;līq (1)</option><option value="Ahom">Ahom (1)</option><option value="Sanskrit and Kannada (corrupt)">Sanskrit and Kannada (corrupt) (1)</option><option value="Sanskrit mixed with Local Nāgarī dialect">Sanskrit mixed with Local Nāgarī dialect (1)</option><option value="Do. Sanskrit">Do. Sanskrit (1)</option><option value="Tamil Vatteluttu">Tamil Vatteluttu (1)</option><option value="[Sanskrit ?]">[Sanskrit ?] (1)</option><option value="Local dialect; Nāgarī">Local dialect; Nāgarī (1)</option><option value="Bhadra- Do">Bhadra- Do (1)</option><option value="Arabic prose and Persian verse Thulth">Arabic prose and Persian verse Thulth (1)</option><option value="Arabic prose &amp; Persian verse Naskh and Nasta&#x27;liq">Arabic prose &amp; Persian verse Naskh and Nasta&#x27;liq (1)</option><option value="Arabic and Persian Naskh and Nasta&#x27;liq">Arabic and Persian Naskh and Nasta&#x27;liq (1)</option><option value="Persian verse and Sanskrit">Persian verse and Sanskrit (1)</option><option value="Persian Prose &amp; verse">Persian Prose &amp; verse (1)</option><option value="Persian &amp; Local dialect">Persian &amp; Local dialect (1)</option><option value="Sanskrit mixed with Kannada and Kannada">Sanskrit mixed with Kannada and Kannada (1)</option><option value="Saka 1211">Saka 1211 (1)</option><option value="Sanskrit (corrupt) and Prākrit">Sanskrit (corrupt) and Prākrit (1)</option><option value="Gri. Mixed. Middle Brāhmī">Gri. Mixed. Middle Brāhmī (1)</option><option value="and Persian Nasta&#x27;līq">and Persian Nasta&#x27;līq (1)</option><option value="and Persian Naskh and Nasta&#x27;līq">and Persian Naskh and Nasta&#x27;līq (1)</option><option value="and Arabic and Persian">and Arabic and Persian (1)</option><option value="Arabic and Urdu verse">Arabic and Urdu verse (1)</option><option value="Contains Qur&#x27;an">Contains Qur&#x27;an (1)</option><option value="Damaged. States that a well was constructed by two officers">Damaged. States that a well was constructed by two officers (1)</option><option value="Early Brāhmī">Early Brāhmī (1)</option><option value="(words)">(words) (1)</option><option value="Arabic religious text (Nal.;-dih). Published">Arabic religious text (Nal.;-dih). Published (1)</option><option value="Arabic prose and Persian verse and Persian Naskh and Nasta&#x27;līq">Arabic prose and Persian verse and Persian Naskh and Nasta&#x27;līq (1)</option><option value="Arabic prose and Persian verse and Persian Nasta&#x27;līq">Arabic prose and Persian verse and Persian Nasta&#x27;līq (1)</option><option value="Arabic prose and Persian Nasta&#x27;liq">Arabic prose and Persian Nasta&#x27;liq (1)</option><option value="Persian and Arabic verse">Persian and Arabic verse (1)</option><option value="Persian &amp; Arabic prose &amp; verse">Persian &amp; Arabic prose &amp; verse (1)</option><option value="Marathi and Sanskrit">Marathi and Sanskrit (1)</option><option value="Records the death of Gādha Harideśā">Records the death of Gādha Harideśā (1)</option><option value="Records the death of Guhilaputra Paṁchhurā">Records the death of Guhilaputra Paṁchhurā (1)</option><option value="Badly worn out. Seems to record the death of some one (name not clear) and (the performance of sati by) his wife (name not clear)">Badly worn out. Seems to record the death of some one (name not clear) and (the performance of sati by) his wife (name not clear) (1)</option><option value="Records the death of Mahimādarā">Records the death of Mahimādarā (1)</option><option value="Records the death of Sīdhurā">Records the death of Sīdhurā (1)</option><option value="Records the death of Mahali and the making of the memorial slab by some one (name not clear)">Records the death of Mahali and the making of the memorial slab by some one (name not clear) (1)</option><option value="Records the death of Raṇasiṁha">Records the death of Raṇasiṁha (1)</option><option value="Badly worn out. Records the death of some one (name not clear) belonging to the Guhilaputra-jāti and (the performance of sati by) his wife Āmaladevī">Badly worn out. Records the death of some one (name not clear) belonging to the Guhilaputra-jāti and (the performance of sati by) his wife Āmaladevī (1)</option><option value="Records the death of Tilōtilvā (Tilōtamā)">Records the death of Tilōtilvā (Tilōtamā) (1)</option><option value="Damaged. Records the death of some person (name not clear)">Damaged. Records the death of some person (name not clear) (1)</option><option value="Śāhaji">Śāhaji (1)</option><option value="Persian Thuluth">Persian Thuluth (1)</option><option value="Arabic prose &amp; Thulth">Arabic prose &amp; Thulth (1)</option><option value="Persian verse &amp; Arabic Prose">Persian verse &amp; Arabic Prose (1)</option><option value="Spanish">Spanish (1)</option><option value="Armenian; Persian verse">Armenian; Persian verse (1)</option><option value="Urdu; verse">Urdu; verse (1)</option><option value="Arabic prose &amp; Per-
+sian verse">Arabic prose &amp; Per-
+sian verse (1)</option><option value="Persian verse &amp;
+Arabic prose">Persian verse &amp;
+Arabic prose (1)</option><option value="Arabic(?)">Arabic(?) (1)</option><option value="Arabic Kūfi &amp; Naskh">Arabic Kūfi &amp; Naskh (1)</option><option value="Sanskrit (corrupt) and Kannada">Sanskrit (corrupt) and Kannada (1)</option><option value="Puduvaippu 84">Puduvaippu 84 (1)</option><option value="Iravi-Kōdai">Iravi-Kōdai (1)</option><option value="English and Tamil ; Roman and Tamil">English and Tamil ; Roman and Tamil (1)</option><option value="Sanskrit (corr-upt) Nāgarī">Sanskrit (corr-upt) Nāgarī (1)</option><option value="Arabic (?)">Arabic (?) (1)</option><option value="Arabic prose &amp; Urdū verse &amp; prose">Arabic prose &amp; Urdū verse &amp; prose (1)</option><option value="Arabic Prose &amp; Persian verse">Arabic Prose &amp; Persian verse (1)</option><option value="Arabic prose &amp; Persian verse Naskh &amp; Nasta’līq">Arabic prose &amp; Persian verse Naskh &amp; Nasta’līq (1)</option><option value="Arabic &amp; Per-
+sian">Arabic &amp; Per-
+sian (1)</option><option value="Arabic verse &amp; Malayāḷam">Arabic verse &amp; Malayāḷam (1)</option><option value="Urdū ? verse">Urdū ? verse (1)</option><option value="Tamil and Sanskrit (verse)">Tamil and Sanskrit (verse) (1)</option><option value="Gujarāti">Gujarāti (1)</option><option value="Prāna. Do. Published ibid">Prāna. Do. Published ibid (1)</option><option value="Reads : Śrī Pratāparar [d]īna. Do. Published ibid">Reads : Śrī Pratāparar [d]īna. Do. Published ibid (1)</option><option value="Verse in local dialect">Verse in local dialect (1)</option><option value="Arabic prose and Persian verse (?)">Arabic prose and Persian verse (?) (1)</option><option value="Contains religious text (Nād-i-&#x27;Ali). In characters of about the 15th century">Contains religious text (Nād-i-&#x27;Ali). In characters of about the 15th century (1)</option><option value="Persian Prose and verse">Persian Prose and verse (1)</option><option value="Persian Ṭhulth">Persian Ṭhulth (1)</option><option value="Persian Prose &amp; Naskh &amp; Nasta‘līq">Persian Prose &amp; Naskh &amp; Nasta‘līq (1)</option><option value="Khara">Khara (1)</option><option value="Bengali; Arabic">Bengali; Arabic (1)</option><option value="Sanskrit mixed with Marāṭhi">Sanskrit mixed with Marāṭhi (1)</option><option value="Tamil; Vaṭṭe-luṭṭu">Tamil; Vaṭṭe-luṭṭu (1)</option><option value="Tamil Vaṭṭe-ḷuttu">Tamil Vaṭṭe-ḷuttu (1)</option><option value="Sanskrit and Tamil; -Grantha and Tamil">Sanskrit and Tamil; -Grantha and Tamil (1)</option><option value="Sanskrit Siddhamātrikā">Sanskrit Siddhamātrikā (1)</option><option value="Prākṛit Brāhmī">Prākṛit Brāhmī (1)</option><option value="Local dialect &amp; Persian (in verse)">Local dialect &amp; Persian (in verse) (1)</option><option value="Arabic Prose &amp; Persian verse &amp; prose">Arabic Prose &amp; Persian verse &amp; prose (1)</option><option value="Persian verse &amp; prose. Nasta&#x27;liq">Persian verse &amp; prose. Nasta&#x27;liq (1)</option><option value="Persian verse. Nasta&#x27;liq">Persian verse. Nasta&#x27;liq (1)</option><option value="Arabic prose &amp;
+Persian verse.
+Naskh &amp;
+Nasta&#x27;liq">Arabic prose &amp;
+Persian verse.
+Naskh &amp;
+Nasta&#x27;liq (1)</option><option value="Arabic &amp;
+Bengali">Arabic &amp;
+Bengali (1)</option><option value="Year 2">Year 2 (1)</option><option value="Telugu and
+Kannada">Telugu and
+Kannada (1)</option><option value="Telugu-Kannada">Telugu-Kannada (1)</option><option value="Sanskrit Brahmi">Sanskrit Brahmi (1)</option><option value="Sanskrit and
+Local dialect">Sanskrit and
+Local dialect (1)</option><option value="Arabic Thuith">Arabic Thuith (1)</option><option value="Persian &amp;
+Urdu verse">Persian &amp;
+Urdu verse (1)</option><option value="Arabic prose &amp;
+Persian
+verse">Arabic prose &amp;
+Persian
+verse (1)</option><option value="Thulth &amp; Nasta&#x27;liq">Thulth &amp; Nasta&#x27;liq (1)</option><option value="Arabic Thuḷth">Arabic Thuḷth (1)</option><option value="Persian &amp; Arabic verse">Persian &amp; Arabic verse (1)</option><option value="Urdū verse Nasta&#x27;līq">Urdū verse Nasta&#x27;līq (1)</option><option value="Arabic verse &amp; prose &amp; Persian prose">Arabic verse &amp; prose &amp; Persian prose (1)</option><option value="Sanskrit Kannada Kannada">Sanskrit Kannada Kannada (1)</option><option value="Sanskrit and Kannaḍa Kannaḍa">Sanskrit and Kannaḍa Kannaḍa (1)</option><option value="Telugu and Kannada Kannada">Telugu and Kannada Kannada (1)</option><option value="Śaka 15[78]">Śaka 15[78] (1)</option><option value="Śaka 1627">Śaka 1627 (1)</option><option value="Sanskrit Kannaḍa">Sanskrit Kannaḍa (1)</option><option value="Endows the ruler with epithets such as Mahārāja">Endows the ruler with epithets such as Mahārāja (1)</option><option value="Arabice &amp; Persian">Arabice &amp; Persian (1)</option><option value="Persian prose &amp; Nasta&#x27;liq">Persian prose &amp; Nasta&#x27;liq (1)</option><option value="Persain">Persain (1)</option><option value="Arabic &amp; Urdū prose &amp; Persian verse">Arabic &amp; Urdū prose &amp; Persian verse (1)</option><option value="Arabic and verse &amp; Persian prose Nasta&#x27;liq">Arabic and verse &amp; Persian prose Nasta&#x27;liq (1)</option><option value="Arabic prose &amp; verse &amp; Persian prose Naskh">Arabic prose &amp; verse &amp; Persian prose Naskh (1)</option><option value="Records the gift of some land by Rājaputra Pūrṇarāja who is described as belonging to the Paramāra-jāti and as the son of Rājaputra Sīyanapāla">Records the gift of some land by Rājaputra Pūrṇarāja who is described as belonging to the Paramāra-jāti and as the son of Rājaputra Sīyanapāla (1)</option><option value="Kannada and Tamil (?)">Kannada and Tamil (?) (1)</option><option value="Brāhmi">Brāhmi (1)</option><option value="Sanskrit and Gujarātī Nāgarī">Sanskrit and Gujarātī Nāgarī (1)</option><option value="Sānskṛt">Sānskṛt (1)</option><option value="Irregular">Irregular (1)</option><option value="Sanskrit and
+Kannaḍa
+Kannaḍa">Sanskrit and
+Kannaḍa
+Kannaḍa (1)</option><option value="Tamil vetse">Tamil vetse (1)</option><option value="Southern (?)">Southern (?) (1)</option><option value="Badly damaged Seem to record the death of someone (name illegible)">Badly damaged Seem to record the death of someone (name illegible) (1)</option><option value="Arabic prose &amp; Urdū prose &amp; verse">Arabic prose &amp; Urdū prose &amp; verse (1)</option><option value="Persian Nasta’liq">Persian Nasta’liq (1)</option><option value="Arabic prose &amp; verse &amp; Persian">Arabic prose &amp; verse &amp; Persian (1)</option><option value="Arabic prose &amp; verse and Urdū prose">Arabic prose &amp; verse and Urdū prose (1)</option><option value="Arabic prose &amp; Urdū">Arabic prose &amp; Urdū (1)</option><option value="Prakrit and Sanskrit">Prakrit and Sanskrit (1)</option><option value="Marāṭhī (?)">Marāṭhī (?) (1)</option><option value="Sanskrit mixed with Prakrit">Sanskrit mixed with Prakrit (1)</option><option value="Hindi (corrupt)">Hindi (corrupt) (1)</option><option value="Arabic verse and Persian prose">Arabic verse and Persian prose (1)</option><option value="Arabic prose and verse and Persian verse and prose">Arabic prose and verse and Persian verse and prose (1)</option><option value="Arabic verse and prose">Arabic verse and prose (1)</option><option value="Arabic and Persian Naskh; Local dialect">Arabic and Persian Naskh; Local dialect (1)</option><option value="Persian verse and Urdū prose">Persian verse and Urdū prose (1)</option><option value="Urdu-Nasta&#x27;līq">Urdu-Nasta&#x27;līq (1)</option><option value="Urdu verse and Persian prose">Urdu verse and Persian prose (1)</option><option value="Urdu Nasta&#x27;liq">Urdu Nasta&#x27;liq (1)</option><option value="Arabic prose and Urdu verse and prose">Arabic prose and Urdu verse and prose (1)</option><option value="Urdū and Arabic">Urdū and Arabic (1)</option><option value="Arabic prose and Persian verse; Naskh and Nasta&#x27;liq">Arabic prose and Persian verse; Naskh and Nasta&#x27;liq (1)</option><option value="Arabic prose and Urdu and Persian verse">Arabic prose and Urdu and Persian verse (1)</option><option value="Arabic prose &amp; Persian verse &amp; prose Naskh &amp; Nasta&#x27;liq">Arabic prose &amp; Persian verse &amp; prose Naskh &amp; Nasta&#x27;liq (1)</option><option value="Urdū Nasta&#x27;līq">Urdū Nasta&#x27;līq (1)</option><option value="Persian &amp; local dialect Naskh &amp; Nāgarī">Persian &amp; local dialect Naskh &amp; Nāgarī (1)</option><option value="Persian &amp; Gujarātī">Persian &amp; Gujarātī (1)</option><option value="Arabic Prose &amp; Persian prose &amp; verse">Arabic Prose &amp; Persian prose &amp; verse (1)</option><option value="Urdū prose &amp; Persian verse">Urdū prose &amp; Persian verse (1)</option><option value="Persian prose &amp; Urdū verse Nasta‘liq">Persian prose &amp; Urdū verse Nasta‘liq (1)</option><option value="Persian prose &amp; verse Nasta‘liq">Persian prose &amp; verse Nasta‘liq (1)</option><option value="Perian">Perian (1)</option><option value="Arauc">Arauc (1)</option><option value="Urdū &amp;
+Arabic">Urdū &amp;
+Arabic (1)</option><option value="Arabic &amp; mixture of Persian and Urdū">Arabic &amp; mixture of Persian and Urdū (1)</option><option value="Arabic &amp; Persian verse &amp; prose &amp; Persian verse &amp; prose">Arabic &amp; Persian verse &amp; prose &amp; Persian verse &amp; prose (1)</option><option value="Arabic prose
+&amp; Persian
+verse">Arabic prose
+&amp; Persian
+verse (1)</option><option value="Arabic Persian">Arabic Persian (1)</option><option value="Persian &amp; Local Dialect">Persian &amp; Local Dialect (1)</option><option value="Persian prose &amp; Naskh">Persian prose &amp; Naskh (1)</option><option value="States that this mosque was constructed at a cost of Rupees nine thousand by Bībī Ihabū. Cf. Proc.As.Soc. Beng">States that this mosque was constructed at a cost of Rupees nine thousand by Bībī Ihabū. Cf. Proc.As.Soc. Beng (1)</option><option value="Tamil &amp; Sanskrit">Tamil &amp; Sanskrit (1)</option><option value="Khwāja Farmān who is mentioned as the polestar of the age. Composed by Prasād Kaul (?)">Khwāja Farmān who is mentioned as the polestar of the age. Composed by Prasād Kaul (?) (1)</option><option value="Arabic prose &amp; Persian Naskh &amp; Nasta‘līq">Arabic prose &amp; Persian Naskh &amp; Nasta‘līq (1)</option><option value="Arabic prose &amp; Persian verse and prose">Arabic prose &amp; Persian verse and prose (1)</option><option value="Arabic prose
+&amp; Urdu prose
+&amp; verse">Arabic prose
+&amp; Urdu prose
+&amp; verse (1)</option><option value="Kannaḍa mixed with Tamil">Kannaḍa mixed with Tamil (1)</option><option value="Arabic verse and prose and Persian verse">Arabic verse and prose and Persian verse (1)</option><option value="Persian verse and Arabic verse">Persian verse and Arabic verse (1)</option><option value="Arabic verse and Persian">Arabic verse and Persian (1)</option><option value="Arabic and Gujarātī verse in Arabic script">Arabic and Gujarātī verse in Arabic script (1)</option><option value="Arabic and Gujarātī">Arabic and Gujarātī (1)</option><option value="Arabic and
+Persian
+verse">Arabic and
+Persian
+verse (1)</option><option value="Arabic and
+Persian verse
+and prose">Arabic and
+Persian verse
+and prose (1)</option><option value="Persian verse and prose and Marathī">Persian verse and prose and Marathī (1)</option><option value="Urdū and Hindi">Urdū and Hindi (1)</option><option value="Urdū and Kaithalī">Urdū and Kaithalī (1)</option><option value="Persian and Kaththali">Persian and Kaththali (1)</option><option value="Persian verse
+and Urdu
+prose">Persian verse
+and Urdu
+prose (1)</option><option value="Persian prose and verse Thulth">Persian prose and verse Thulth (1)</option><option value="Prākrit Brāhmi">Prākrit Brāhmi (1)</option><option value="Sanskrit Nagari">Sanskrit Nagari (1)</option><option value="Mixture of Arabic &amp; Gujarātī">Mixture of Arabic &amp; Gujarātī (1)</option><option value="Arabic &amp;
+Persian
+verse">Arabic &amp;
+Persian
+verse (1)</option><option value="Arabic &amp;
+Persian
+prose &amp;
+verse">Arabic &amp;
+Persian
+prose &amp;
+verse (1)</option><option value="Persian &amp;
+Urdū
+verse">Persian &amp;
+Urdū
+verse (1)</option><option value="Urdū Nasta&#x27;līq
+Arabic &amp; Persian">Urdū Nasta&#x27;līq
+Arabic &amp; Persian (1)</option><option value="Arabic &amp; Local dialect">Arabic &amp; Local dialect (1)</option><option value="Do.
+Arabic &amp; Persian verse">Do.
+Arabic &amp; Persian verse (1)</option><option value="Persian &amp; Rājasthānī">Persian &amp; Rājasthānī (1)</option><option value="Arabic &amp; Tamil">Arabic &amp; Tamil (1)</option><option value="Arabic &amp; Persian Naskh &amp; Nasta&#x27;līq">Arabic &amp; Persian Naskh &amp; Nasta&#x27;līq (1)</option><option value="Urdū prose &amp; verse &amp; Persian verse">Urdū prose &amp; verse &amp; Persian verse (1)</option><option value="Arabic &amp; Persian verse Naskh &amp; Nasta‘līq">Arabic &amp; Persian verse Naskh &amp; Nasta‘līq (1)</option><option value="Sanskrit and Telu- gu">Sanskrit and Telu- gu (1)</option><option value="Urdū and Kannada">Urdū and Kannada (1)</option><option value="Sanskrit and Tēlu- gu">Sanskrit and Tēlu- gu (1)</option><option value="Telugu and Sams- krit">Telugu and Sams- krit (1)</option><option value="Sanskṛit (corrupt)">Sanskṛit (corrupt) (1)</option><option value="I o">I o (1)</option><option value="Arabic &amp; Urdu verse &amp; prose">Arabic &amp; Urdu verse &amp; prose (1)</option><option value="Persian &amp; Urdu Nasta&#x27;līq">Persian &amp; Urdu Nasta&#x27;līq (1)</option><option value="Persian verse &amp; Sanskrit">Persian verse &amp; Sanskrit (1)</option><option value="Persian verse and Urdu verse">Persian verse and Urdu verse (1)</option><option value="Sanskrit
+influenced by
+local dialect">Sanskrit
+influenced by
+local dialect (1)</option><option value="Sanskrit (corrupt)
+Nāgarī">Sanskrit (corrupt)
+Nāgarī (1)</option><option value="Sanskrit
+(corrupt)
+Nāgarī">Sanskrit
+(corrupt)
+Nāgarī (1)</option><option value="Sanskrit (corrupt) Nāgarī">Sanskrit (corrupt) Nāgarī (1)</option><option value="Persian prose and
+Urdū verse">Persian prose and
+Urdū verse (1)</option><option value="Arabic verse &amp; Urdu verse">Arabic verse &amp; Urdu verse (1)</option><option value="Urdū &amp; Hindī">Urdū &amp; Hindī (1)</option><option value="Arabic prose &amp;
+Urdū prose &amp;
+verse">Arabic prose &amp;
+Urdū prose &amp;
+verse (1)</option><option value="Persian &amp;
+Sanskrit">Persian &amp;
+Sanskrit (1)</option><option value="Arabic &amp; Persian Nasta‘līq">Arabic &amp; Persian Nasta‘līq (1)</option><option value="Portuguese &amp;
+Persian">Portuguese &amp;
+Persian (1)</option><option value="Portuguese &amp; Persian">Portuguese &amp; Persian (1)</option><option value="Persian &amp; Mori">Persian &amp; Mori (1)</option><option value="Persian prose &amp;
+Urdu verse &amp;
+Nasta&#x27;lîq">Persian prose &amp;
+Urdu verse &amp;
+Nasta&#x27;lîq (1)</option><option value="Urdû">Urdû (1)</option><option value="Urdû &amp; Persian
+verse">Urdû &amp; Persian
+verse (1)</option><option value="Arabic Thulth &amp;
+Naskh">Arabic Thulth &amp;
+Naskh (1)</option><option value="Persian &amp; Arabic (Mixed)">Persian &amp; Arabic (Mixed) (1)</option><option value="Mixture of Arabic &amp;
+Persian">Mixture of Arabic &amp;
+Persian (1)</option><option value="Persian &amp; Kannada">Persian &amp; Kannada (1)</option><option value="Gujarātī &amp; Persian">Gujarātī &amp; Persian (1)</option><option value="Persian verse &amp; Marathi Bilingual. Nasta‘līq &amp; Nāgarī">Persian verse &amp; Marathi Bilingual. Nasta‘līq &amp; Nāgarī (1)</option><option value="Urdu &amp; Marāthī">Urdu &amp; Marāthī (1)</option><option value="Persian Naskh &amp;
+Nasta&#x27;līq">Persian Naskh &amp;
+Nasta&#x27;līq (1)</option><option value="Persian &amp; local Dialect">Persian &amp; local Dialect (1)</option><option value="Arabic &amp; Persian
+Naskh
+&amp; Nasta&#x27;līq">Arabic &amp; Persian
+Naskh
+&amp; Nasta&#x27;līq (1)</option><option value="Sanskrit and Prākṛit">Sanskrit and Prākṛit (1)</option><option value="Sanskrit and Prākṛt">Sanskrit and Prākṛt (1)</option><option value="Seems to record an official order. Details not clear. Also contains an imprecarion for both Hindus and Muslims. In late characters">Seems to record an official order. Details not clear. Also contains an imprecarion for both Hindus and Muslims. In late characters (1)</option><option value="Seems to record an order of a certain Mahārāja Jasavantasinghia. Details not clear">Seems to record an order of a certain Mahārāja Jasavantasinghia. Details not clear (1)</option><option value="Persian and Sanskrit">Persian and Sanskrit (1)</option><option value="Hindi &amp; Urdū">Hindi &amp; Urdū (1)</option><option value="Records the date (probably that of completion) of the
+gate by Rustam Khān">Records the date (probably that of completion) of the
+gate by Rustam Khān (1)</option><option value="English &amp; Persian">English &amp; Persian (1)</option><option value="Urdū verse &amp; prose &amp; English">Urdū verse &amp; prose &amp; English (1)</option><option value="Arabic &amp; Urdū verse &amp; prose">Arabic &amp; Urdū verse &amp; prose (1)</option><option value="Arabic &amp; Persian verse &amp; English">Arabic &amp; Persian verse &amp; English (1)</option><option value="Persian prose &amp; verse
+&amp; Urdu prose">Persian prose &amp; verse
+&amp; Urdu prose (1)</option><option value="Persian verse &amp; Urdu">Persian verse &amp; Urdu (1)</option><option value="Persian prose
+&amp; Urdu verse">Persian prose
+&amp; Urdu verse (1)</option><option value="Persian verse &amp; prose
+&amp; Tamil">Persian verse &amp; prose
+&amp; Tamil (1)</option><option value="Prākrit mixed with Sanskrit">Prākrit mixed with Sanskrit (1)</option><option value="Arabic &amp; Persian verse &amp; Urdū verse">Arabic &amp; Persian verse &amp; Urdū verse (1)</option><option value="Arabic prose &amp;
+verse">Arabic prose &amp;
+verse (1)</option><option value="English prose &amp;
+verse">English prose &amp;
+verse (1)</option><option value="Urdu prose &amp;
+verse">Urdu prose &amp;
+verse (1)</option><option value="Arabic &amp;
+Persian verse">Arabic &amp;
+Persian verse (1)</option><option value="Arabic &amp; Urdū
+prose">Arabic &amp; Urdū
+prose (1)</option><option value="Urdū verse &amp;
+prose">Urdū verse &amp;
+prose (1)</option><option value="... Tākarī">... Tākarī (1)</option><option value="Local dialect
+mixed with
+Sanskrit">Local dialect
+mixed with
+Sanskrit (1)</option><option value="Tribhuvana- chakravartti">Tribhuvana- chakravartti (1)</option><option value="Year 8">Year 8 (1)</option><option value="Arabic prose and verse and Urdu verse">Arabic prose and verse and Urdu verse (1)</option><option value="Persian and Marāthī">Persian and Marāthī (1)</option><option value="Urdu verse and
+prose and
+Persian verse">Urdu verse and
+prose and
+Persian verse (1)</option><option value="Urdu prose and
+verse">Urdu prose and
+verse (1)</option><option value="Persian prose
+and Urdu
+verse">Persian prose
+and Urdu
+verse (1)</option><option value="Persian prose and Urdu verse">Persian prose and Urdu verse (1)</option><option value="Urdu verse Nasta&#x27;līq">Urdu verse Nasta&#x27;līq (1)</option><option value="Arabic verse and Persian verse">Arabic verse and Persian verse (1)</option><option value="Persian verse
+and prose">Persian verse
+and prose (1)</option><option value="Arabic and
+Persian verse">Arabic and
+Persian verse (1)</option><option value="Arabic and Persian and Bangla">Arabic and Persian and Bangla (1)</option><option value="Sanskrit
+influenced
+by Prākṛit">Sanskrit
+influenced
+by Prākṛit (1)</option><option value="Persian &amp; Urdu verse &amp; prose">Persian &amp; Urdu verse &amp; prose (1)</option><option value="Urdū verse &amp; Persian prose">Urdū verse &amp; Persian prose (1)</option><option value="Arabic &amp;
+Urdū verse">Arabic &amp;
+Urdū verse (1)</option><option value="Persian verse &amp; Urdū verse">Persian verse &amp; Urdū verse (1)</option><option value="English &amp; Persian verse">English &amp; Persian verse (1)</option><option value="Hindī &amp; Persian">Hindī &amp; Persian (1)</option><option value="Arabic Urdu verse &amp; Persian verse">Arabic Urdu verse &amp; Persian verse (1)</option><option value="Persian verse &amp; prose &amp; Urdū verse">Persian verse &amp; prose &amp; Urdū verse (1)</option><option value="Arabic prose &amp; Persian verse &amp; prose Urdu verse">Arabic prose &amp; Persian verse &amp; prose Urdu verse (1)</option><option value="Arabic &amp; Persian verse &amp; prose. Ṭughrā. Naskh &amp; Nasta&#x27;līq">Arabic &amp; Persian verse &amp; prose. Ṭughrā. Naskh &amp; Nasta&#x27;līq (1)</option><option value="Persian verse and Hindi. Nasta&#x27;līq &amp; Nāgarī">Persian verse and Hindi. Nasta&#x27;līq &amp; Nāgarī (1)</option><option value="Persian prose &amp; verse &amp; Hindi. Naskh">Persian prose &amp; verse &amp; Hindi. Naskh (1)</option><option value="Persian prose &amp; verse &amp; Hindi. Nasta&#x27;līq &amp; Nāgarī">Persian prose &amp; verse &amp; Hindi. Nasta&#x27;līq &amp; Nāgarī (1)</option><option value="Persian prose &amp; verse &amp; Arabic verse">Persian prose &amp; verse &amp; Arabic verse (1)</option><option value="English. Roman">English. Roman (1)</option><option value="Persian verse &amp; Arabic prose and verse. Nasta‘līq &amp; Thulth">Persian verse &amp; Arabic prose and verse. Nasta‘līq &amp; Thulth (1)</option><option value="Arabic prose
+&amp; verse &amp;
+Persian verse">Arabic prose
+&amp; verse &amp;
+Persian verse (1)</option><option value="Urdū verse. Nasta‘līq">Urdū verse. Nasta‘līq (1)</option></select><input list="yearOptions" id="yearFilter" placeholder="All years" autocomplete="off" class="searchable-filter"><datalist id="yearOptions"><option value="1911-14">1911-14 (2182)</option><option value="1922-23">1922-23 (926)</option><option value="1923-24">1923-24 (873)</option><option value="1924-25">1924-25 (518)</option><option value="1925-26">1925-26 (804)</option><option value="1926-27">1926-27 (1015)</option><option value="1930-31">1930-31 (456)</option><option value="1931-32">1931-32 (188)</option><option value="1932-33">1932-33 (267)</option><option value="1933-34">1933-34 (175)</option><option value="1934-35">1934-35 (202)</option><option value="1939-44">1939-44 (2856)</option><option value="1952-53">1952-53 (742)</option><option value="1964-65">1964-65 (1244)</option><option value="1965-66">1965-66 (1419)</option><option value="1966-67">1966-67 (657)</option><option value="1967-68">1967-68 (783)</option><option value="1969-70">1969-70 (772)</option><option value="1971-72">1971-72 (628)</option><option value="1972-73">1972-73 (997)</option><option value="1973-74">1973-74 (804)</option><option value="1974-75">1974-75 (710)</option><option value="1975-76">1975-76 (676)</option><option value="1976-77">1976-77 (638)</option><option value="1977-78">1977-78 (568)</option><option value="1978-79">1978-79 (531)</option><option value="1979-80">1979-80 (460)</option><option value="1980-81">1980-81 (462)</option><option value="1981-82">1981-82 (828)</option><option value="1982-83">1982-83 (1068)</option><option value="1983-84">1983-84 (450)</option><option value="1984-85">1984-85 (753)</option><option value="1985-86">1985-86 (650)</option><option value="1986-87">1986-87 (659)</option><option value="1987-88">1987-88 (317)</option><option value="1988-89">1988-89 (367)</option><option value="1992-93">1992-93 (613)</option><option value="1993-94">1993-94 (783)</option><option value="1994-95">1994-95 (463)</option><option value="1995-96">1995-96 (342)</option></datalist>
+  <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (488)</option><option value="woman_death_composite">woman_death_composite (317)</option><option value="incidental_sati_mention">incidental_sati_mention (236)</option><option value="sati_stone_direct">sati_stone_direct (123)</option><option value="memorial_samadhi">memorial_samadhi (51)</option><option value="memorial_nisidhi">memorial_nisidhi (16)</option><option value="incidental_hero_death_mention">incidental_hero_death_mention (14)</option><option value="memorial_shrine">memorial_shrine (1)</option></select>
+  <select id="searchScope">
+    <option value="all">Search: all columns</option>
+    <option value="col-place">Search: Place/Source only</option><option value="col-remarks">Search: Remarks only</option>
+  </select>
+  <select id="matchMode" title="Whole word: 'sati' won't match inside 'utilisation'">
+    <option value="contains">Contains</option>
+    <option value="word">Whole word</option>
+  </select>
+  <input type="search" id="q" placeholder="type to search…">
+  <button type="button" id="searchBtn">Search</button>
+  <button type="button" id="resetBtn">Reset</button>
+</div>
+<div class="count">
+  <span id="count"></span>
+  <span class="pager">
+    <button type="button" id="prevPage">&larr; Prev</button>
+    <span id="pageIndicator"></span>
+    <button type="button" id="nextPage">Next &rarr;</button>
+    <select id="pageSize" title="Rows per page — a smaller page paints faster on a big filtered/searched result">
+      <option value="50">50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="250">250 / page</option>
+      <option value="0">All (slow on a large result)</option>
+    </select>
+  </span>
+</div>
+<div class="table-scroll">
+<table id="t">
+<colgroup><col class="c-id"><col class="c-source"><col class="c-kind"><col class="c-type"><col class="c-location"><col class="c-sl_no"><col class="c-place"><col class="c-dynasty"><col class="c-king"><col class="c-date"><col class="c-language"><col class="c-remarks"><col class="c-page"></colgroup>
+<thead><tr><th>ID</th><th>Year</th><th>Kind</th><th>Type</th><th>Location</th><th>Sl.No</th><th>Place/Source</th><th>Dynasty</th><th>King</th><th>Date</th><th>Language</th><th>Remarks</th><th>Page</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<div id="loadOverlay" class="load-overlay">
+  <div class="load-box">
+    <div id="loadMessage">Loading data&hellip;</div>
+    <button type="button" id="loadRetryBtn" hidden>Retry</button>
+  </div>
+</div>
+<div id="lightbox" class="lightbox-overlay" hidden>
+  <div id="lbRowLabel" class="lightbox-row-label"></div>
+  <div class="lightbox-toolbar">
+    <button type="button" id="lbZoomOut" title="Zoom out">&minus;</button>
+    <span id="lbZoomLevel">100%</span>
+    <button type="button" id="lbZoomIn" title="Zoom in">+</button>
+    <button type="button" id="lbZoomReset" title="Reset zoom">Reset</button>
+    <span id="lbPageIndicator"></span>
+    <button type="button" id="lbClose" title="Close">Close &times;</button>
+  </div>
+  <div class="lightbox-body">
+    <button type="button" id="lbPrev" class="lightbox-nav lightbox-prev" title="Previous page">&larr;</button>
+    <div class="lightbox-imgwrap" id="lbImgWrap"><img id="lbImg" alt="scanned page"></div>
+    <button type="button" id="lbNext" class="lightbox-nav lightbox-next" title="Next page">&rarr;</button>
+  </div>
+</div>
+<div id="remarksModal" class="remarks-modal-overlay" hidden>
+  <div class="remarks-modal-box">
+    <button type="button" id="remarksModalClose" class="remarks-modal-close" title="Close">&times;</button>
+    <div id="remarksModalBody" class="remarks-modal-body"></div>
+  </div>
+</div>
+<script>
+const FILTER_KEYS = ['kind', 'lang', 'year'];
+const SEARCHABLE_KEYS = new Set(['year']);
+const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page'];
+const HIGHLIGHT_COLS = [6, 7, 8, 9, 10, 11];
+const REMARKS_COL_IDX = 11;
+const q = document.getElementById('q');
+const searchScope = document.getElementById('searchScope');
+const matchMode = document.getElementById('matchMode');
+const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
+const categoryFilterEl = document.getElementById('categoryFilter'); // null if no row has any category
+const tbody = document.getElementById('tbody');
+const DATA_URL = "../data/ARE-Inscriptions.json";
+const CATEGORIES_URL = "ARE-Inscriptions-categories.json";
+// Row DATA, not DOM — see render_inscriptions_table's own comment on
+// data_url/categories_url for why this is fetched, not embedded inline.
+// Starts empty; loadData() (bottom of this script) populates it before
+// the first real render() call. Every control is disabled and the load
+// overlay shown (see body.loading in the CSS) until that happens, so
+// nothing can act on an empty ROWS in between.
+let ROWS = [];
+const countEl = document.getElementById('count');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevPage = document.getElementById('prevPage');
+const nextPage = document.getElementById('nextPage');
+const pageSizeEl = document.getElementById('pageSize');
+const filterEls = {};
+FILTER_KEYS.forEach((k) => { filterEls[k] = document.getElementById(k + 'Filter'); });
+
+// The text search only runs on an explicit action (the Search button, or
+// Enter in the field) — per the user 2026-08-22, not live as-you-type like
+// the filter dropdowns still are. `activeTerm` is what was last actually
+// searched for; `q.value` can differ from it while the user is still
+// typing, which is the whole point.
+let activeTerm = '';
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
+// non-word character to JS regex without unicode-property-escape
+// machinery, same as a space), which is fine for the plain-ASCII search
+// terms this is meant for ("sati", "hero") — a diacritic-bearing term's
+// word boundaries would be less reliable, not broken outright.
+function makeMatcher(term, whole) {
+  const body = escapeRegex(term);
+  return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
+}
+
+// Every [start, end) span of `re` within `text`, in order — the
+// free-text-search equivalent of a Row.spans entry, computed on demand
+// against the row's own precomputed plain text rather than DOM.
+function textRanges(text, re) {
+  const out = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    out.push([m.index, m.index + m[0].length]);
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out;
+}
+
+// Sets `cell.innerHTML = cellHtml`, then wraps the character ranges in
+// `ranges` (offsets into the cell's own plain text, same ordering as
+// `.textContent` — see strip_tags()'s docstring for why those agree) in
+// <mark>, walking the tree so markup the cell already carries
+// (dual_span_cell's v-direct/v-derived spans, the citation-tooltip span)
+// survives untouched. One shared primitive for both free-text search
+// (ranges from textRanges() above) and exact term-category highlighting
+// (ranges from Row.spans) — same walk either way, only where the ranges
+// came from differs. Rebuilt from `cellHtml` fresh on every call (never
+// "restored" from a prior paint) because a fresh <td> is what paintPage
+// builds every time now — no stale highlight state to undo.
+function markRanges(cell, cellHtml, ranges) {
+  cell.innerHTML = cellHtml;
+  if (!ranges || !ranges.length) return;
+  const sorted = ranges.slice().sort((a, b) => a[0] - b[0]);
+  let ri = 0;
+  let pos = 0;
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      let i = 0;
+      while (i < text.length) {
+        while (ri < sorted.length && sorted[ri][1] <= pos + i) ri++;
+        if (ri >= sorted.length) {
+          frag.appendChild(document.createTextNode(text.slice(i)));
+          break;
+        }
+        const rs = sorted[ri][0], re_ = sorted[ri][1];
+        const g = pos + i;
+        if (g < rs) {
+          const take = Math.min(rs - g, text.length - i);
+          frag.appendChild(document.createTextNode(text.slice(i, i + take)));
+          i += take;
+        } else {
+          const take = Math.min(re_ - g, text.length - i);
+          const m = document.createElement('mark');
+          m.textContent = text.slice(i, i + take);
+          frag.appendChild(m);
+          i += take;
+        }
+      }
+      pos += text.length;
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  Array.from(cell.childNodes).forEach(walk);
+}
+
+// Pagination exists because painting is what's actually slow, not
+// matching — per the user, 2026-08-24: on a full-corpus table (10,000+
+// rows), the expensive part of every filter/search keystroke was never
+// the plain regex test (a few ms over that many short strings), it was
+// rebuilding cell markup for every *matching* row, all at once, even
+// the thousands scrolled off-screen. Splitting matching from painting
+// and only building DOM for the current page's slice turns an O(all
+// matches) DOM-rewrite into an O(page size) one on every keystroke —
+// matching itself still runs over every row (it has to, to know the
+// true total and which rows belong on which page), but that half was
+// never the slow part. Extended 2026-08-28, per the user: row DOM
+// itself is now built lazily too (paintPage below), not just hidden —
+// see rows_data's own comment for the original page-load cost this
+// closes.
+let currentPage = 1;
+
+function pageSizeValue() {
+  const n = parseInt(pageSizeEl.value, 10);
+  return n > 0 ? n : Infinity; // "All" option is 0 -> unlimited
+}
+
+// Builds one <tr> from a ROWS entry, fresh every time — never reused
+// across paints, so there is no stale-DOM state (a previous search's
+// marks, a previous page's row) to undo before applying this paint's
+// own highlighting.
+function buildRow(row, term, whole, scope, catVal) {
+  const tr = document.createElement('tr');
+  COLUMN_KEYS.forEach((key, i) => {
+    const td = document.createElement('td');
+    const cellHtml = row.cells[key] || '';
+    let ranges = null;
+    if (catVal) {
+      const spans = row.spans[key];
+      if (spans) {
+        ranges = spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]);
+      }
+    } else if (term && HIGHLIGHT_COLS.includes(i)) {
+      const inScope = scope === 'all' || ('col-' + key) === scope;
+      if (inScope) ranges = textRanges(row.text[key] || '', makeMatcher(term, whole));
+    }
+    markRanges(td, cellHtml, ranges);
+    tr.appendChild(td);
+  });
+  return tr;
+}
+
+function render() {
+  const term = activeTerm;
+  const whole = matchMode.value === 'word';
+  const scope = searchScope.value;
+  const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+  const filterVals = {};
+  FILTER_KEYS.forEach((k) => { filterVals[k] = filterEls[k].value; });
+
+  // Matching only — plain-object/string work, no DOM, so this stays
+  // cheap regardless of table size.
+  const re = term ? makeMatcher(term, whole) : null;
+  const matches = [];
+  for (const row of ROWS) {
+    let textMatch = true;
+    if (re) {
+      if (scope === 'all') {
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        textMatch = re.test(all);
+      } else {
+        const key = scope.slice('col-'.length);
+        textMatch = re.test(row.text[key] || '');
+      }
+    }
+    let match = textMatch;
+    if (match && catVal) {
+      match = row.categories.includes(catVal);
+    }
+    if (match) {
+      for (const k of FILTER_KEYS) {
+        if (!filterVals[k]) continue;
+        const cellVal = row.filters[k] || '';
+        const ok = SEARCHABLE_KEYS.has(k)
+          ? cellVal.toLowerCase().includes(filterVals[k].toLowerCase())
+          : cellVal === filterVals[k];
+        if (!ok) { match = false; break; }
+      }
+    }
+    if (match) matches.push(row);
+  }
+
+  const pageSize = pageSizeValue();
+  const totalPages = Math.max(1, Math.ceil(matches.length / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pageRows = matches.slice(start, start + pageSize);
+
+  // Paint: build <tr> DOM only for this page's slice and swap the whole
+  // tbody in one go — replaceChildren is a single reflow, not one per
+  // row, and there is nothing from a previous paint worth keeping
+  // (buildRow always starts fresh from row data).
+  const frag = document.createDocumentFragment();
+  const builtRows = [];
+  for (const row of pageRows) {
+    const tr = buildRow(row, term, whole, scope, catVal);
+    builtRows.push(tr);
+    frag.appendChild(tr);
+  }
+  tbody.replaceChildren(frag);
+  // Remarks-clamp overflow can only be measured once each <tr> is
+  // actually attached to the document (scrollHeight/clientHeight are
+  // both 0 on a detached node, e.g. still inside `frag` above) — bug
+  // found 2026-08-28, per the user: every "Read more" button was
+  // silently staying hidden because buildRow() used to measure before
+  // attach, so every clamped remarks cell showed the CSS ellipsis with
+  // no way to open the full text. Measuring here, one reflow-free pass
+  // over the just-attached rows, fixes it for both corpora sharing this
+  // shell.
+  if (REMARKS_COL_IDX >= 0) {
+    for (const tr of builtRows) updateRemarksClamp(tr.children[REMARKS_COL_IDX]);
+  }
+
+  countEl.textContent = matches.length + ' of ' + ROWS.length + ' records match'
+    + (matches.length > pageRows.length || start > 0
+        ? ' — showing ' + (matches.length ? start + 1 : 0) + '-'
+          + Math.min(start + pageSize, matches.length)
+        : '');
+  pageIndicator.textContent = 'page ' + currentPage + ' of ' + totalPages;
+  prevPage.disabled = currentPage <= 1;
+  nextPage.disabled = currentPage >= totalPages;
+}
+
+function runSearch() {
+  activeTerm = q.value.trim();
+  currentPage = 1;
+  render();
+}
+
+// Any change that could change *which* rows match (not just how a page
+// of them is painted) resets to page 1 — staying on page 6 of a result
+// set that's now 2 rows long would just show an empty page.
+function renderFromTop() { currentPage = 1; render(); }
+
+searchBtn.addEventListener('click', runSearch);
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+// 'input' fires as the user types (a searchable filter's whole point);
+// 'change' still fires for a plain <select>'s click-to-pick, and is
+// harmless to also attach to the text inputs (fires again on blur,
+// render() is idempotent).
+FILTER_KEYS.forEach((k) => {
+  filterEls[k].addEventListener('input', renderFromTop);
+  filterEls[k].addEventListener('change', renderFromTop);
+});
+searchScope.addEventListener('change', renderFromTop);
+matchMode.addEventListener('change', renderFromTop);
+pageSizeEl.addEventListener('change', renderFromTop);
+if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop);
+prevPage.addEventListener('click', () => { currentPage--; render(); });
+nextPage.addEventListener('click', () => { currentPage++; render(); });
+resetBtn.addEventListener('click', () => {
+  q.value = '';
+  activeTerm = '';
+  FILTER_KEYS.forEach((k) => { filterEls[k].value = ''; });
+  if (categoryFilterEl) categoryFilterEl.value = '';
+  searchScope.value = 'all';
+  matchMode.value = 'contains';
+  pageSizeEl.value = '50';
+  currentPage = 1;
+  render();
+});
+
+// Loading overlay + control-disabling — see body.loading in the CSS and
+// this function's own call at the bottom of this script. Per the user,
+// 2026-08-29: not just a spinner, every interactive control actually
+// disabled (not only visually dimmed via pointer-events) so a click or
+// a keyboard Enter during the fetch window can't fire at all, and
+// nothing can double-fire once the page becomes interactive.
+const CONTROL_ELS = [q, searchBtn, resetBtn, searchScope, matchMode,
+                      pageSizeEl, prevPage, nextPage,
+                      ...FILTER_KEYS.map((k) => filterEls[k])];
+if (categoryFilterEl) CONTROL_ELS.push(categoryFilterEl);
+const loadOverlay = document.getElementById('loadOverlay');
+const loadMessage = document.getElementById('loadMessage');
+const loadRetryBtn = document.getElementById('loadRetryBtn');
+
+function setControlsDisabled(disabled) {
+  CONTROL_ELS.forEach((el) => { el.disabled = disabled; });
+}
+
+async function loadData() {
+  document.body.classList.add('loading');
+  loadOverlay.hidden = false;
+  loadMessage.textContent = 'Loading data\u2026';
+  loadRetryBtn.hidden = true;
+  setControlsDisabled(true);
+  try {
+    const dataResp = await fetch(DATA_URL);
+    if (!dataResp.ok) throw new Error('HTTP ' + dataResp.status + ' fetching ' + DATA_URL);
+    const data = await dataResp.json();
+    if (CATEGORIES_URL) {
+      const suppResp = await fetch(CATEGORIES_URL);
+      if (!suppResp.ok) throw new Error('HTTP ' + suppResp.status + ' fetching ' + CATEGORIES_URL);
+      const supp = await suppResp.json();
+      // Keyed by array index (a string, since JSON object keys always
+      // are) — safe because both files are written from the same rows
+      // list, in the same order, in one build run (see
+      // write_supplement_json's own docstring). cells/text/filters are
+      // Object.assign'd in (not overwritten wholesale) since the shared
+      // blob already has its own non-excluded keys for this row that
+      // must survive the merge.
+      Object.keys(supp).forEach((idx) => {
+        const s = supp[idx];
+        if (s.spans) data[idx].spans = s.spans;
+        if (s.categories) data[idx].categories = s.categories;
+        if (s.cells) Object.assign(data[idx].cells, s.cells);
+        if (s.text) Object.assign(data[idx].text, s.text);
+        if (s.filters) Object.assign(data[idx].filters, s.filters);
+      });
+    }
+    data.forEach((r) => {
+      if (!r.spans) r.spans = {};
+      if (!r.categories) r.categories = [];
+    });
+    ROWS = data;
+    loadOverlay.hidden = true;
+    document.body.classList.remove('loading');
+    setControlsDisabled(false);
+    render();
+  } catch (err) {
+    loadMessage.textContent = 'Could not load data: ' + err.message;
+    loadRetryBtn.hidden = false;
+  }
+}
+loadRetryBtn.addEventListener('click', loadData);
+loadData();
+
+// Click-to-copy the ID chip — execCommand is tried first, deliberately:
+// these pages are opened from file://, where navigator.clipboard exists
+// but writeText can throw synchronously rather than rejecting, so a
+// .then(ok, fail) chain never reaches its failure handler and nothing is
+// copied, silently. The deprecated path is the one that actually works
+// locally; the async API is the fallback, not the default. If both fail
+// the id is left selected, so Ctrl+C still works.
+//
+// Delegated on `document` (2026-08-28, was a per-button querySelectorAll
+// binding) — idchip buttons are now built fresh by buildRow() on every
+// paint (only the current page's rows exist in the DOM at all), so a
+// one-time binding at load would find nothing yet and a rebinding after
+// every render() would be wasted duplicate work. Same reasoning already
+// applied to the citation tap-to-reveal and "Read more" button below.
+(function () {
+  function flash(b, msg) {
+    const was = b.dataset.label || b.textContent;
+    b.dataset.label = was;
+    b.classList.add('copied');
+    b.textContent = msg;
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1000);
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectOnly(b) {
+    const r = document.createRange();
+    r.selectNodeContents(b);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.idchip');
+    if (!b) return;
+    e.preventDefault();
+    const id = b.dataset.id;
+    if (legacyCopy(id)) { flash(b, 'copied'); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(
+          () => flash(b, 'copied'),
+          () => { selectOnly(b); flash(b, 'press Ctrl+C'); }
+        );
+        return;
+      }
+    } catch (err) { /* fall through to selection */ }
+    selectOnly(b);
+    flash(b, 'press Ctrl+C');
+  });
+})();
+
+// Page-image popup — one lightbox shared by every "View page" button on
+// the page, per page_image_button_cell()'s data-images attribute (a
+// comma-separated list of image paths, in page order). Runs even when
+// no such button exists on this particular page (ARE today) — the
+// querySelectorAll below just finds nothing and nothing happens.
+(function() {
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbImgWrap = document.getElementById('lbImgWrap');
+  const lbZoomLevel = document.getElementById('lbZoomLevel');
+  const lbPageIndicator = document.getElementById('lbPageIndicator');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
+  const lbRowLabel = document.getElementById('lbRowLabel');
+
+  let images = [];
+  let idx = 0;
+  let zoom = 1;
+  const ZOOM_MIN = 0.25, ZOOM_MAX = 5, ZOOM_STEP = 0.25;
+
+  function applyZoom() {
+    lbImg.style.transform = 'scale(' + zoom + ')';
+    lbZoomLevel.textContent = Math.round(zoom * 100) + '%';
+  }
+  function setZoom(z) {
+    zoom = Math.min(Math.max(z, ZOOM_MIN), ZOOM_MAX);
+    applyZoom();
+  }
+  function show() {
+    lbImg.src = images[idx];
+    lbPageIndicator.textContent = images.length > 1 ? (idx + 1) + ' / ' + images.length : '';
+    lbPrev.style.display = images.length > 1 ? '' : 'none';
+    lbNext.style.display = images.length > 1 ? '' : 'none';
+    zoom = 1;
+    applyZoom();
+    lbImgWrap.scrollTop = 0;
+    lbImgWrap.scrollLeft = 0;
+  }
+  function openLightbox(imgList, rowLabel) {
+    images = imgList;
+    idx = 0;
+    lbRowLabel.textContent = rowLabel || '';
+    show();
+    lightbox.hidden = false;
+  }
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lbImg.src = '';
+  }
+  function step(delta) {
+    idx = (idx + delta + images.length) % images.length;
+    show();
+  }
+
+  // Delegated (2026-08-28, was a per-button querySelectorAll binding) —
+  // same reason as the idchip binding above: these buttons are only
+  // ever in the DOM for the current page's rows.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.page-img-btn');
+    if (!b) return;
+    openLightbox(b.dataset.images.split(','), b.dataset.rowLabel);
+  });
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', () => step(-1));
+  lbNext.addEventListener('click', () => step(1));
+  document.getElementById('lbZoomIn').addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
+  document.getElementById('lbZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
+  document.getElementById('lbZoomReset').addEventListener('click', () => setZoom(1));
+
+  // Click anywhere outside the toolbar/image (i.e. directly on the dark
+  // overlay backdrop) closes the popup — per the user.
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.hidden) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft' && images.length > 1) step(-1);
+    else if (e.key === 'ArrowRight' && images.length > 1) step(1);
+    else if (e.key === '+' || e.key === '=') setZoom(zoom + ZOOM_STEP);
+    else if (e.key === '-') setZoom(zoom - ZOOM_STEP);
+  });
+
+  // Ctrl/Cmd + wheel to zoom — a reader studying a diacritic closely will
+  // likely reach for the wheel before the toolbar buttons.
+  lbImgWrap.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+  }, { passive: false });
+})();
+
+// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
+// .cite-hint span, and CSS above. `title` gives a real tooltip on a
+// mouse hover already; a touchscreen has no hover at all, so a tap
+// toggles a visible inline line under the word instead — added
+// 2026-08-25, per the user. Delegated on `document` rather than bound
+// per-span, since highlightCell() can rebuild a cell's markup (from its
+// own saved original) on every search, which would otherwise leave a
+// freshly-restored .cite-hint with no listener attached.
+document.addEventListener('click', (e) => {
+  const hint = e.target.closest('.cite-hint');
+  if (!hint) return;
+  const next = hint.nextElementSibling;
+  if (next && next.classList.contains('cite-hint-reveal')) {
+    next.remove();
+    return;
+  }
+  const reveal = document.createElement('span');
+  reveal.className = 'cite-hint-reveal';
+  reveal.textContent = hint.getAttribute('title') || '';
+  hint.insertAdjacentElement('afterend', reveal);
+});
+
+// Remarks-column truncation — see clamp_remarks_html(). Only the
+// "Read more" button's visibility is decided in JS; the clamp itself is
+// pure CSS. Run per-row, only for rows actually on the current page
+// (render()'s paint loop) — scrollHeight is meaningless on a
+// display:none row, and re-checking every row in the table on every
+// keystroke would be wasted work at full table size.
+function updateRemarksClamp(cell) {
+  const clampEl = cell.querySelector('.remarks-clamp');
+  const btn = cell.querySelector('.remarks-more-btn');
+  if (!clampEl || !btn) return;
+  // +1px fudge for sub-pixel rounding between scrollHeight/clientHeight
+  // on some browsers' zoom levels — without it a handful of borderline
+  // rows flip the button on and off depending on font rendering.
+  btn.hidden = clampEl.scrollHeight <= clampEl.clientHeight + 1;
+}
+
+(function() {
+  const modal = document.getElementById('remarksModal');
+  const modalBody = document.getElementById('remarksModalBody');
+  const modalClose = document.getElementById('remarksModalClose');
+
+  function openRemarksModal(html) {
+    modalBody.innerHTML = html;
+    modal.hidden = false;
+  }
+  function closeRemarksModal() {
+    modal.hidden = true;
+    modalBody.innerHTML = '';
+  }
+  modalClose.addEventListener('click', closeRemarksModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRemarksModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeRemarksModal();
+  });
+  // Delegated for the same reason the citation tap-to-reveal is: a
+  // .remarks-more-btn can be (re)painted by render() at any time, so a
+  // per-button listener would go stale.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remarks-more-btn');
+    if (!btn) return;
+    const clampEl = btn.previousElementSibling;
+    if (!clampEl) return;
+    openRemarksModal(clampEl.innerHTML);
+  });
+})();
+</script>
+</body>
+</html>

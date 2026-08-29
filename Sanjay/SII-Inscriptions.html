@@ -1,0 +1,841 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SII Inscriptions (Gen-2 complete volumes)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>📜</text></svg>">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NNRYDYCMW9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NNRYDYCMW9');
+</script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1.5rem; color: #1a1a1a; }
+  h1 { font-size: 1.2rem; }
+  .stats { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
+  .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  input[type=search] { padding: 0.35rem 0.5rem; width: 20rem; }
+  select { padding: 0.35rem; }
+  .searchable-filter { padding: 0.35rem; width: 9rem; }
+  #searchBtn, #resetBtn { padding: 0.35rem 0.9rem; cursor: pointer; }
+  mark { background: #fff3a0; padding: 0 1px; border-radius: 2px; }
+  /* Mobile: the table itself keeps a sane minimum width (table-layout:
+     fixed columns squeeze to unreadable slivers otherwise) and scrolls
+     horizontally inside this wrapper instead of forcing the whole page
+     to zoom out — added 2026-08-25, per the user. */
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: collapse; width: 100%; min-width: 62rem; font-size: 0.85rem; table-layout: fixed; }
+  th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top;
+            overflow-wrap: break-word; }
+  @media (max-width: 640px) {
+    body { margin: 0.75rem; }
+    input[type=search] { width: 100%; }
+    .controls { gap: 0.5rem; }
+    /* Touch targets grow on a small screen — the desktop sizes above
+       are fine for a mouse pointer but cramped for a fingertip. */
+    button.idchip, button.page-img-btn, #searchBtn, #resetBtn,
+    .pager button { padding: 0.5rem 0.8rem; }
+  }
+  th { background: #f2f2f2; position: sticky; top: 0; }
+  tr:nth-child(even) { background: #fafafa; }
+  col.c-id { width: 8%; }
+  col.c-source { width: 6%; }
+  col.c-kind { width: 6%; }
+  col.c-type { width: 6%; }
+  col.c-location { width: 9%; }
+  col.c-sl_no { width: 3%; }
+  col.c-place { width: 10%; }
+  col.c-dynasty { width: 8%; }
+  col.c-king { width: 4%; }
+  col.c-date { width: 9%; }
+  col.c-language { width: 4%; }
+  col.c-remarks { width: 19%; }
+  col.c-page { width: 5%; }
+  col.c-image { width: 3%; }
+  /* Click-to-copy ID chip — same pattern as SII's original
+     build_review_report.py idchip, kept for visual/behavioral consistency
+     across every table that uses this shell. */
+  button.idchip {
+    font: 600 11px/1.4 ui-monospace, Consolas, monospace; cursor: pointer;
+    padding: 1px 6px; border-radius: 5px; border: 1px solid #ccc;
+    background: #fff; color: #555;
+  }
+  button.idchip:hover { color: #0a5; border-color: #0a5; }
+  button.idchip.copied { color: #fff; background: #0a5; border-color: #0a5; }
+  /* "As printed" vs "derived" two-color convention — see dual_span_cell(). */
+  .v-direct { color: inherit; }
+  .v-derived { color: #8a4b00; font-style: italic; }
+  .count { color: #555; font-size: 0.85rem; margin: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .pager button { padding: 0.2rem 0.6rem; cursor: pointer; }
+  .pager button:disabled { cursor: default; opacity: 0.4; }
+  .pager select { padding: 0.2rem; }
+  .generated { display: inline-block; background: #eef6ff; color: #1a4d8f;
+                border: 1px solid #bcd8f5; border-radius: 5px;
+                padding: 0.2rem 0.6rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+  /* Page-image popup — see page_image_button_cell() and the lightbox JS
+     below. Harmless dead markup on a page with no image buttons at all
+     (ARE today) — same "the shell doesn't know what a row means"
+     tolerance the rest of this file already has for unused pieces. */
+  button.page-img-btn {
+    font-size: 0.78rem; padding: 2px 8px; cursor: pointer;
+    border: 1px solid #ccc; border-radius: 5px; background: #fff; color: #555;
+  }
+  button.page-img-btn:hover { color: #0a5; border-color: #0a5; }
+  /* Loading overlay — shown once, at page load, while the row data
+     fetch(es) (data_url, and categories_url on Sanjay's page) are in
+     flight; see render_inscriptions_table's own data_url docstring for
+     why the data isn't embedded inline any more. Per the user,
+     2026-08-29: a wait cursor on the whole page plus every control
+     disabled, not just a spinner in a corner, so a click during this
+     window can't do anything or double-fire once the page is ready.
+     [hidden] (not display:none baked in) so JS toggling the attribute
+     is the only thing that ever shows/hides this. */
+  body.loading { cursor: wait; }
+  body.loading .controls, body.loading .count { pointer-events: none; opacity: 0.6; }
+  .load-overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .load-overlay[hidden] { display: none; }
+  .load-box {
+    background: #fff; border: 1px solid #ccc; border-radius: 8px;
+    padding: 1.5rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    text-align: center; font-size: 1rem; color: #1a1a1a;
+  }
+  #loadRetryBtn {
+    margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
+  }
+  .lightbox-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; z-index: 1000;
+  }
+  .lightbox-overlay[hidden] { display: none; }
+  /* Which row this popup was opened from — see page_image_button_cell()'s
+     row_label param. Empty and collapsed (no gap) when a caller doesn't
+     pass one. */
+  .lightbox-row-label {
+    color: #ccc; font-size: 0.8rem; max-width: 92vw; text-align: center;
+    margin-bottom: 0.3rem;
+  }
+  .lightbox-row-label:empty { display: none; }
+  .lightbox-toolbar {
+    display: flex; align-items: center; gap: 0.6rem; color: #eee;
+    font-size: 0.85rem; margin-bottom: 0.5rem;
+  }
+  .lightbox-toolbar button {
+    padding: 0.25rem 0.6rem; cursor: pointer; border: 1px solid #888;
+    border-radius: 4px; background: #333; color: #eee;
+  }
+  .lightbox-toolbar button:hover { background: #444; }
+  .lightbox-body { position: relative; display: flex; align-items: center; }
+  .lightbox-imgwrap {
+    max-width: 90vw; max-height: 80vh; overflow: auto;
+    background: #111;
+  }
+  .lightbox-imgwrap img { display: block; transform-origin: top left; }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
+    font-size: 1.4rem; padding: 0.5rem 0.8rem; cursor: pointer; z-index: 2;
+  }
+  .lightbox-nav:hover { background: rgba(0,0,0,0.8); }
+  .lightbox-prev { left: 0; }
+  .lightbox-next { right: 0; }
+  /* Resolved-citation hover — see remarks_cell_html(). A native `title`
+     tooltip on the "Ibid" word itself, not a popup or a new column, per
+     the user, 2026-08-24. `title` alone doesn't work on a touchscreen —
+     no cursor, nothing to hover — so a tap toggles this visible inline
+     reveal instead (2026-08-25); the JS below does the toggling, this is
+     just its collapsed/expanded look. */
+  .cite-hint {
+    text-decoration: underline dotted #888; text-underline-offset: 2px;
+    cursor: help;
+  }
+  .cite-hint-reveal {
+    display: block; margin-top: 0.2rem; font-size: 0.8rem;
+    color: #1a4d8f; background: #eef6ff; border: 1px solid #bcd8f5;
+    border-radius: 4px; padding: 0.3rem 0.5rem;
+  }
+  /* Remarks-column truncation — see clamp_remarks_html(). A rogue
+     record's remarks can run to dozens of lines, pushing every row
+     below it out of view even in an already-filtered list; -webkit-
+     line-clamp (Chrome/Edge/Safari/Firefox 68+ — no real holdout left)
+     is the whole visual effect, JS only decides whether "Read more" is
+     needed per row and opens the full text in #remarksModal. */
+  .remarks-clamp {
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .remarks-more-btn {
+    display: block; margin-top: 0.2rem; font-size: 0.78rem;
+    color: #1a4d8f; background: none; border: none; padding: 0;
+    cursor: pointer; text-decoration: underline;
+  }
+  .remarks-more-btn[hidden] { display: none; }
+  .remarks-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1.5rem;
+  }
+  .remarks-modal-overlay[hidden] { display: none; }
+  .remarks-modal-box {
+    background: #fff; color: #1a1a1a; border-radius: 8px;
+    max-width: 44rem; width: 100%; max-height: 80vh;
+    overflow-y: auto; padding: 1.5rem; position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .remarks-modal-close {
+    position: absolute; top: 0.5rem; right: 0.7rem;
+    font-size: 1.3rem; line-height: 1; background: none; border: none;
+    cursor: pointer; color: #888;
+  }
+  .remarks-modal-close:hover { color: #222; }
+  .remarks-modal-body { white-space: pre-wrap; line-height: 1.5; }
+</style>
+</head>
+<body class="loading">
+<h1>SII Inscriptions (Gen-2 complete volumes)</h1>
+<div class="generated">Generated 2026-08-29 18:25</div>
+<div class="stats">15127 records from 44 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). Volumes: Vol I, Vol II Pt I, Vol II Pt II, Vol III Pt I, Vol III Pt II, Vol III Pt III, Vol III Pt IV, Vol IV, Vol IX Pt I, Vol IX Pt II, Vol V, Vol VI, Vol VII, Vol VIII, Vol X, Vol XI Pt I, Vol XII Pt I, Vol XIII, Vol XIV, Vol XIX, Vol XL, Vol XLI, Vol XV Pt II, Vol XVI, Vol XVII, Vol XVIII, Vol XX, Vol XXII Pt I, Vol XXII Pt II, Vol XXIII, Vol XXIV, Vol XXVI, Vol XXVII, Vol XXVIII, Vol XXX, Vol XXXI, Vol XXXII Pt I, Vol XXXII Pt II, Vol XXXIII, Vol XXXIV, Vol XXXV, Vol XXXVI, Vol XXXVII, Vol XXXVIII. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
+<div class="controls">
+  <select id="kindFilter"><option value="">All kinds</option><option value="Stone and Other Materials">Stone and Other Materials (15127)</option></select><select id="typeFilter"><option value="">All types</option><option value="Unclassified">Unclassified (14720)</option><option value="Hero-stone">Hero-stone (352)</option><option value="Incidental mention">Incidental mention (48)</option><option value="Sati-stone">Sati-stone (7)</option></select><input list="volumeOptions" id="volumeFilter" placeholder="All volumes" autocomplete="off" class="searchable-filter"><datalist id="volumeOptions"><option value="Vol I (1)">Vol I (1) — 130 record(s)</option><option value="Vol II Pt I (2)">Vol II Pt I (2) — 19 record(s)</option><option value="Vol II Pt II (2)">Vol II Pt II (2) — 31 record(s)</option><option value="Vol III Pt I (3)">Vol III Pt I (3) — 46 record(s)</option><option value="Vol III Pt II (3)">Vol III Pt II (3) — 24 record(s)</option><option value="Vol III Pt III (3)">Vol III Pt III (3) — 105 record(s)</option><option value="Vol III Pt IV (3)">Vol III Pt IV (3) — 7 record(s)</option><option value="Vol IV (4)">Vol IV (4) — 901 record(s)</option><option value="Vol V (5)">Vol V (5) — 1089 record(s)</option><option value="Vol VI (6)">Vol VI (6) — 648 record(s)</option><option value="Vol VII (7)">Vol VII (7) — 817 record(s)</option><option value="Vol VIII (8)">Vol VIII (8) — 382 record(s)</option><option value="Vol IX Pt I (9)">Vol IX Pt I (9) — 339 record(s)</option><option value="Vol IX Pt II (9)">Vol IX Pt II (9) — 237 record(s)</option><option value="Vol X (10)">Vol X (10) — 692 record(s)</option><option value="Vol XI Pt I (11)">Vol XI Pt I (11) — 106 record(s)</option><option value="Vol XII Pt I (12)">Vol XII Pt I (12) — 256 record(s)</option><option value="Vol XIII (13)">Vol XIII (13) — 337 record(s)</option><option value="Vol XIV (14)">Vol XIV (14) — 238 record(s)</option><option value="Vol XV Pt II (15)">Vol XV Pt II (15) — 475 record(s)</option><option value="Vol XVI (16)">Vol XVI (16) — 269 record(s)</option><option value="Vol XVII (17)">Vol XVII (17) — 588 record(s)</option><option value="Vol XVIII (18)">Vol XVIII (18) — 410 record(s)</option><option value="Vol XIX (19)">Vol XIX (19) — 455 record(s)</option><option value="Vol XX (20)">Vol XX (20) — 375 record(s)</option><option value="Vol XXII Pt I (22)">Vol XXII Pt I (22) — 295 record(s)</option><option value="Vol XXII Pt II (22)">Vol XXII Pt II (22) — 139 record(s)</option><option value="Vol XXIII (23)">Vol XXIII (23) — 528 record(s)</option><option value="Vol XXIV (24)">Vol XXIV (24) — 545 record(s)</option><option value="Vol XXVI (26)">Vol XXVI (26) — 683 record(s)</option><option value="Vol XXVII (27)">Vol XXVII (27) — 417 record(s)</option><option value="Vol XXVIII (28)">Vol XXVIII (28) — 307 record(s)</option><option value="Vol XXX (30)">Vol XXX (30) — 259 record(s)</option><option value="Vol XXXI (31)">Vol XXXI (31) — 358 record(s)</option><option value="Vol XXXII Pt I (32)">Vol XXXII Pt I (32) — 74 record(s)</option><option value="Vol XXXII Pt II (32)">Vol XXXII Pt II (32) — 11 record(s)</option><option value="Vol XXXIII (33)">Vol XXXIII (33) — 218 record(s)</option><option value="Vol XXXIV (34)">Vol XXXIV (34) — 361 record(s)</option><option value="Vol XXXV (35)">Vol XXXV (35) — 194 record(s)</option><option value="Vol XXXVI (36)">Vol XXXVI (36) — 218 record(s)</option><option value="Vol XXXVII (37)">Vol XXXVII (37) — 405 record(s)</option><option value="Vol XXXVIII (38)">Vol XXXVIII (38) — 503 record(s)</option><option value="Vol XL (40)">Vol XL (40) — 232 record(s)</option><option value="Vol XLI (41)">Vol XLI (41) — 404 record(s)</option></datalist>
+  <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (322)</option><option value="woman_death_composite">woman_death_composite (19)</option><option value="memorial_samadhi">memorial_samadhi (9)</option><option value="memorial_nisidhi">memorial_nisidhi (9)</option><option value="sati_stone_direct">sati_stone_direct (7)</option><option value="memorial_shrine">memorial_shrine (4)</option><option value="incidental_sati_mention">incidental_sati_mention (4)</option></select>
+  <select id="searchScope">
+    <option value="all">Search: all columns</option>
+    <option value="col-place">Search: Place/Source only</option><option value="col-remarks">Search: Remarks only</option>
+  </select>
+  <select id="matchMode" title="Whole word: 'sati' won't match inside 'utilisation'">
+    <option value="contains">Contains</option>
+    <option value="word">Whole word</option>
+  </select>
+  <input type="search" id="q" placeholder="type to search…">
+  <button type="button" id="searchBtn">Search</button>
+  <button type="button" id="resetBtn">Reset</button>
+</div>
+<div class="count">
+  <span id="count"></span>
+  <span class="pager">
+    <button type="button" id="prevPage">&larr; Prev</button>
+    <span id="pageIndicator"></span>
+    <button type="button" id="nextPage">Next &rarr;</button>
+    <select id="pageSize" title="Rows per page — a smaller page paints faster on a big filtered/searched result">
+      <option value="50">50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="250">250 / page</option>
+      <option value="0">All (slow on a large result)</option>
+    </select>
+  </span>
+</div>
+<div class="table-scroll">
+<table id="t">
+<colgroup><col class="c-id"><col class="c-source"><col class="c-kind"><col class="c-type"><col class="c-location"><col class="c-sl_no"><col class="c-place"><col class="c-dynasty"><col class="c-king"><col class="c-date"><col class="c-language"><col class="c-remarks"><col class="c-page"><col class="c-image"></colgroup>
+<thead><tr><th>ID</th><th>Volume</th><th>Kind</th><th>Type</th><th>Location</th><th>Sl.No</th><th>Place/Source</th><th>Dynasty</th><th>King</th><th>Date</th><th>Language</th><th>Remarks</th><th>Page</th><th>Image</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<div id="loadOverlay" class="load-overlay">
+  <div class="load-box">
+    <div id="loadMessage">Loading data&hellip;</div>
+    <button type="button" id="loadRetryBtn" hidden>Retry</button>
+  </div>
+</div>
+<div id="lightbox" class="lightbox-overlay" hidden>
+  <div id="lbRowLabel" class="lightbox-row-label"></div>
+  <div class="lightbox-toolbar">
+    <button type="button" id="lbZoomOut" title="Zoom out">&minus;</button>
+    <span id="lbZoomLevel">100%</span>
+    <button type="button" id="lbZoomIn" title="Zoom in">+</button>
+    <button type="button" id="lbZoomReset" title="Reset zoom">Reset</button>
+    <span id="lbPageIndicator"></span>
+    <button type="button" id="lbClose" title="Close">Close &times;</button>
+  </div>
+  <div class="lightbox-body">
+    <button type="button" id="lbPrev" class="lightbox-nav lightbox-prev" title="Previous page">&larr;</button>
+    <div class="lightbox-imgwrap" id="lbImgWrap"><img id="lbImg" alt="scanned page"></div>
+    <button type="button" id="lbNext" class="lightbox-nav lightbox-next" title="Next page">&rarr;</button>
+  </div>
+</div>
+<div id="remarksModal" class="remarks-modal-overlay" hidden>
+  <div class="remarks-modal-box">
+    <button type="button" id="remarksModalClose" class="remarks-modal-close" title="Close">&times;</button>
+    <div id="remarksModalBody" class="remarks-modal-body"></div>
+  </div>
+</div>
+<script>
+const FILTER_KEYS = ['kind', 'type', 'volume'];
+const SEARCHABLE_KEYS = new Set(['volume']);
+const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page', 'image'];
+const HIGHLIGHT_COLS = [6, 7, 9, 11];
+const REMARKS_COL_IDX = 11;
+const q = document.getElementById('q');
+const searchScope = document.getElementById('searchScope');
+const matchMode = document.getElementById('matchMode');
+const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
+const categoryFilterEl = document.getElementById('categoryFilter'); // null if no row has any category
+const tbody = document.getElementById('tbody');
+const DATA_URL = "../data/SII-Inscriptions.json";
+const CATEGORIES_URL = "SII-Inscriptions-supplement.json";
+// Row DATA, not DOM — see render_inscriptions_table's own comment on
+// data_url/categories_url for why this is fetched, not embedded inline.
+// Starts empty; loadData() (bottom of this script) populates it before
+// the first real render() call. Every control is disabled and the load
+// overlay shown (see body.loading in the CSS) until that happens, so
+// nothing can act on an empty ROWS in between.
+let ROWS = [];
+const countEl = document.getElementById('count');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevPage = document.getElementById('prevPage');
+const nextPage = document.getElementById('nextPage');
+const pageSizeEl = document.getElementById('pageSize');
+const filterEls = {};
+FILTER_KEYS.forEach((k) => { filterEls[k] = document.getElementById(k + 'Filter'); });
+
+// The text search only runs on an explicit action (the Search button, or
+// Enter in the field) — per the user 2026-08-22, not live as-you-type like
+// the filter dropdowns still are. `activeTerm` is what was last actually
+// searched for; `q.value` can differ from it while the user is still
+// typing, which is the whole point.
+let activeTerm = '';
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
+// non-word character to JS regex without unicode-property-escape
+// machinery, same as a space), which is fine for the plain-ASCII search
+// terms this is meant for ("sati", "hero") — a diacritic-bearing term's
+// word boundaries would be less reliable, not broken outright.
+function makeMatcher(term, whole) {
+  const body = escapeRegex(term);
+  return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
+}
+
+// Every [start, end) span of `re` within `text`, in order — the
+// free-text-search equivalent of a Row.spans entry, computed on demand
+// against the row's own precomputed plain text rather than DOM.
+function textRanges(text, re) {
+  const out = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    out.push([m.index, m.index + m[0].length]);
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out;
+}
+
+// Sets `cell.innerHTML = cellHtml`, then wraps the character ranges in
+// `ranges` (offsets into the cell's own plain text, same ordering as
+// `.textContent` — see strip_tags()'s docstring for why those agree) in
+// <mark>, walking the tree so markup the cell already carries
+// (dual_span_cell's v-direct/v-derived spans, the citation-tooltip span)
+// survives untouched. One shared primitive for both free-text search
+// (ranges from textRanges() above) and exact term-category highlighting
+// (ranges from Row.spans) — same walk either way, only where the ranges
+// came from differs. Rebuilt from `cellHtml` fresh on every call (never
+// "restored" from a prior paint) because a fresh <td> is what paintPage
+// builds every time now — no stale highlight state to undo.
+function markRanges(cell, cellHtml, ranges) {
+  cell.innerHTML = cellHtml;
+  if (!ranges || !ranges.length) return;
+  const sorted = ranges.slice().sort((a, b) => a[0] - b[0]);
+  let ri = 0;
+  let pos = 0;
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      let i = 0;
+      while (i < text.length) {
+        while (ri < sorted.length && sorted[ri][1] <= pos + i) ri++;
+        if (ri >= sorted.length) {
+          frag.appendChild(document.createTextNode(text.slice(i)));
+          break;
+        }
+        const rs = sorted[ri][0], re_ = sorted[ri][1];
+        const g = pos + i;
+        if (g < rs) {
+          const take = Math.min(rs - g, text.length - i);
+          frag.appendChild(document.createTextNode(text.slice(i, i + take)));
+          i += take;
+        } else {
+          const take = Math.min(re_ - g, text.length - i);
+          const m = document.createElement('mark');
+          m.textContent = text.slice(i, i + take);
+          frag.appendChild(m);
+          i += take;
+        }
+      }
+      pos += text.length;
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  Array.from(cell.childNodes).forEach(walk);
+}
+
+// Pagination exists because painting is what's actually slow, not
+// matching — per the user, 2026-08-24: on a full-corpus table (10,000+
+// rows), the expensive part of every filter/search keystroke was never
+// the plain regex test (a few ms over that many short strings), it was
+// rebuilding cell markup for every *matching* row, all at once, even
+// the thousands scrolled off-screen. Splitting matching from painting
+// and only building DOM for the current page's slice turns an O(all
+// matches) DOM-rewrite into an O(page size) one on every keystroke —
+// matching itself still runs over every row (it has to, to know the
+// true total and which rows belong on which page), but that half was
+// never the slow part. Extended 2026-08-28, per the user: row DOM
+// itself is now built lazily too (paintPage below), not just hidden —
+// see rows_data's own comment for the original page-load cost this
+// closes.
+let currentPage = 1;
+
+function pageSizeValue() {
+  const n = parseInt(pageSizeEl.value, 10);
+  return n > 0 ? n : Infinity; // "All" option is 0 -> unlimited
+}
+
+// Builds one <tr> from a ROWS entry, fresh every time — never reused
+// across paints, so there is no stale-DOM state (a previous search's
+// marks, a previous page's row) to undo before applying this paint's
+// own highlighting.
+function buildRow(row, term, whole, scope, catVal) {
+  const tr = document.createElement('tr');
+  COLUMN_KEYS.forEach((key, i) => {
+    const td = document.createElement('td');
+    const cellHtml = row.cells[key] || '';
+    let ranges = null;
+    if (catVal) {
+      const spans = row.spans[key];
+      if (spans) {
+        ranges = spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]);
+      }
+    } else if (term && HIGHLIGHT_COLS.includes(i)) {
+      const inScope = scope === 'all' || ('col-' + key) === scope;
+      if (inScope) ranges = textRanges(row.text[key] || '', makeMatcher(term, whole));
+    }
+    markRanges(td, cellHtml, ranges);
+    tr.appendChild(td);
+  });
+  return tr;
+}
+
+function render() {
+  const term = activeTerm;
+  const whole = matchMode.value === 'word';
+  const scope = searchScope.value;
+  const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+  const filterVals = {};
+  FILTER_KEYS.forEach((k) => { filterVals[k] = filterEls[k].value; });
+
+  // Matching only — plain-object/string work, no DOM, so this stays
+  // cheap regardless of table size.
+  const re = term ? makeMatcher(term, whole) : null;
+  const matches = [];
+  for (const row of ROWS) {
+    let textMatch = true;
+    if (re) {
+      if (scope === 'all') {
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        textMatch = re.test(all);
+      } else {
+        const key = scope.slice('col-'.length);
+        textMatch = re.test(row.text[key] || '');
+      }
+    }
+    let match = textMatch;
+    if (match && catVal) {
+      match = row.categories.includes(catVal);
+    }
+    if (match) {
+      for (const k of FILTER_KEYS) {
+        if (!filterVals[k]) continue;
+        const cellVal = row.filters[k] || '';
+        const ok = SEARCHABLE_KEYS.has(k)
+          ? cellVal.toLowerCase().includes(filterVals[k].toLowerCase())
+          : cellVal === filterVals[k];
+        if (!ok) { match = false; break; }
+      }
+    }
+    if (match) matches.push(row);
+  }
+
+  const pageSize = pageSizeValue();
+  const totalPages = Math.max(1, Math.ceil(matches.length / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pageRows = matches.slice(start, start + pageSize);
+
+  // Paint: build <tr> DOM only for this page's slice and swap the whole
+  // tbody in one go — replaceChildren is a single reflow, not one per
+  // row, and there is nothing from a previous paint worth keeping
+  // (buildRow always starts fresh from row data).
+  const frag = document.createDocumentFragment();
+  const builtRows = [];
+  for (const row of pageRows) {
+    const tr = buildRow(row, term, whole, scope, catVal);
+    builtRows.push(tr);
+    frag.appendChild(tr);
+  }
+  tbody.replaceChildren(frag);
+  // Remarks-clamp overflow can only be measured once each <tr> is
+  // actually attached to the document (scrollHeight/clientHeight are
+  // both 0 on a detached node, e.g. still inside `frag` above) — bug
+  // found 2026-08-28, per the user: every "Read more" button was
+  // silently staying hidden because buildRow() used to measure before
+  // attach, so every clamped remarks cell showed the CSS ellipsis with
+  // no way to open the full text. Measuring here, one reflow-free pass
+  // over the just-attached rows, fixes it for both corpora sharing this
+  // shell.
+  if (REMARKS_COL_IDX >= 0) {
+    for (const tr of builtRows) updateRemarksClamp(tr.children[REMARKS_COL_IDX]);
+  }
+
+  countEl.textContent = matches.length + ' of ' + ROWS.length + ' records match'
+    + (matches.length > pageRows.length || start > 0
+        ? ' — showing ' + (matches.length ? start + 1 : 0) + '-'
+          + Math.min(start + pageSize, matches.length)
+        : '');
+  pageIndicator.textContent = 'page ' + currentPage + ' of ' + totalPages;
+  prevPage.disabled = currentPage <= 1;
+  nextPage.disabled = currentPage >= totalPages;
+}
+
+function runSearch() {
+  activeTerm = q.value.trim();
+  currentPage = 1;
+  render();
+}
+
+// Any change that could change *which* rows match (not just how a page
+// of them is painted) resets to page 1 — staying on page 6 of a result
+// set that's now 2 rows long would just show an empty page.
+function renderFromTop() { currentPage = 1; render(); }
+
+searchBtn.addEventListener('click', runSearch);
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+// 'input' fires as the user types (a searchable filter's whole point);
+// 'change' still fires for a plain <select>'s click-to-pick, and is
+// harmless to also attach to the text inputs (fires again on blur,
+// render() is idempotent).
+FILTER_KEYS.forEach((k) => {
+  filterEls[k].addEventListener('input', renderFromTop);
+  filterEls[k].addEventListener('change', renderFromTop);
+});
+searchScope.addEventListener('change', renderFromTop);
+matchMode.addEventListener('change', renderFromTop);
+pageSizeEl.addEventListener('change', renderFromTop);
+if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop);
+prevPage.addEventListener('click', () => { currentPage--; render(); });
+nextPage.addEventListener('click', () => { currentPage++; render(); });
+resetBtn.addEventListener('click', () => {
+  q.value = '';
+  activeTerm = '';
+  FILTER_KEYS.forEach((k) => { filterEls[k].value = ''; });
+  if (categoryFilterEl) categoryFilterEl.value = '';
+  searchScope.value = 'all';
+  matchMode.value = 'contains';
+  pageSizeEl.value = '50';
+  currentPage = 1;
+  render();
+});
+
+// Loading overlay + control-disabling — see body.loading in the CSS and
+// this function's own call at the bottom of this script. Per the user,
+// 2026-08-29: not just a spinner, every interactive control actually
+// disabled (not only visually dimmed via pointer-events) so a click or
+// a keyboard Enter during the fetch window can't fire at all, and
+// nothing can double-fire once the page becomes interactive.
+const CONTROL_ELS = [q, searchBtn, resetBtn, searchScope, matchMode,
+                      pageSizeEl, prevPage, nextPage,
+                      ...FILTER_KEYS.map((k) => filterEls[k])];
+if (categoryFilterEl) CONTROL_ELS.push(categoryFilterEl);
+const loadOverlay = document.getElementById('loadOverlay');
+const loadMessage = document.getElementById('loadMessage');
+const loadRetryBtn = document.getElementById('loadRetryBtn');
+
+function setControlsDisabled(disabled) {
+  CONTROL_ELS.forEach((el) => { el.disabled = disabled; });
+}
+
+async function loadData() {
+  document.body.classList.add('loading');
+  loadOverlay.hidden = false;
+  loadMessage.textContent = 'Loading data\u2026';
+  loadRetryBtn.hidden = true;
+  setControlsDisabled(true);
+  try {
+    const dataResp = await fetch(DATA_URL);
+    if (!dataResp.ok) throw new Error('HTTP ' + dataResp.status + ' fetching ' + DATA_URL);
+    const data = await dataResp.json();
+    if (CATEGORIES_URL) {
+      const suppResp = await fetch(CATEGORIES_URL);
+      if (!suppResp.ok) throw new Error('HTTP ' + suppResp.status + ' fetching ' + CATEGORIES_URL);
+      const supp = await suppResp.json();
+      // Keyed by array index (a string, since JSON object keys always
+      // are) — safe because both files are written from the same rows
+      // list, in the same order, in one build run (see
+      // write_supplement_json's own docstring). cells/text/filters are
+      // Object.assign'd in (not overwritten wholesale) since the shared
+      // blob already has its own non-excluded keys for this row that
+      // must survive the merge.
+      Object.keys(supp).forEach((idx) => {
+        const s = supp[idx];
+        if (s.spans) data[idx].spans = s.spans;
+        if (s.categories) data[idx].categories = s.categories;
+        if (s.cells) Object.assign(data[idx].cells, s.cells);
+        if (s.text) Object.assign(data[idx].text, s.text);
+        if (s.filters) Object.assign(data[idx].filters, s.filters);
+      });
+    }
+    data.forEach((r) => {
+      if (!r.spans) r.spans = {};
+      if (!r.categories) r.categories = [];
+    });
+    ROWS = data;
+    loadOverlay.hidden = true;
+    document.body.classList.remove('loading');
+    setControlsDisabled(false);
+    render();
+  } catch (err) {
+    loadMessage.textContent = 'Could not load data: ' + err.message;
+    loadRetryBtn.hidden = false;
+  }
+}
+loadRetryBtn.addEventListener('click', loadData);
+loadData();
+
+// Click-to-copy the ID chip — execCommand is tried first, deliberately:
+// these pages are opened from file://, where navigator.clipboard exists
+// but writeText can throw synchronously rather than rejecting, so a
+// .then(ok, fail) chain never reaches its failure handler and nothing is
+// copied, silently. The deprecated path is the one that actually works
+// locally; the async API is the fallback, not the default. If both fail
+// the id is left selected, so Ctrl+C still works.
+//
+// Delegated on `document` (2026-08-28, was a per-button querySelectorAll
+// binding) — idchip buttons are now built fresh by buildRow() on every
+// paint (only the current page's rows exist in the DOM at all), so a
+// one-time binding at load would find nothing yet and a rebinding after
+// every render() would be wasted duplicate work. Same reasoning already
+// applied to the citation tap-to-reveal and "Read more" button below.
+(function () {
+  function flash(b, msg) {
+    const was = b.dataset.label || b.textContent;
+    b.dataset.label = was;
+    b.classList.add('copied');
+    b.textContent = msg;
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1000);
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectOnly(b) {
+    const r = document.createRange();
+    r.selectNodeContents(b);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.idchip');
+    if (!b) return;
+    e.preventDefault();
+    const id = b.dataset.id;
+    if (legacyCopy(id)) { flash(b, 'copied'); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(
+          () => flash(b, 'copied'),
+          () => { selectOnly(b); flash(b, 'press Ctrl+C'); }
+        );
+        return;
+      }
+    } catch (err) { /* fall through to selection */ }
+    selectOnly(b);
+    flash(b, 'press Ctrl+C');
+  });
+})();
+
+// Page-image popup — one lightbox shared by every "View page" button on
+// the page, per page_image_button_cell()'s data-images attribute (a
+// comma-separated list of image paths, in page order). Runs even when
+// no such button exists on this particular page (ARE today) — the
+// querySelectorAll below just finds nothing and nothing happens.
+(function() {
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbImgWrap = document.getElementById('lbImgWrap');
+  const lbZoomLevel = document.getElementById('lbZoomLevel');
+  const lbPageIndicator = document.getElementById('lbPageIndicator');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
+  const lbRowLabel = document.getElementById('lbRowLabel');
+
+  let images = [];
+  let idx = 0;
+  let zoom = 1;
+  const ZOOM_MIN = 0.25, ZOOM_MAX = 5, ZOOM_STEP = 0.25;
+
+  function applyZoom() {
+    lbImg.style.transform = 'scale(' + zoom + ')';
+    lbZoomLevel.textContent = Math.round(zoom * 100) + '%';
+  }
+  function setZoom(z) {
+    zoom = Math.min(Math.max(z, ZOOM_MIN), ZOOM_MAX);
+    applyZoom();
+  }
+  function show() {
+    lbImg.src = images[idx];
+    lbPageIndicator.textContent = images.length > 1 ? (idx + 1) + ' / ' + images.length : '';
+    lbPrev.style.display = images.length > 1 ? '' : 'none';
+    lbNext.style.display = images.length > 1 ? '' : 'none';
+    zoom = 1;
+    applyZoom();
+    lbImgWrap.scrollTop = 0;
+    lbImgWrap.scrollLeft = 0;
+  }
+  function openLightbox(imgList, rowLabel) {
+    images = imgList;
+    idx = 0;
+    lbRowLabel.textContent = rowLabel || '';
+    show();
+    lightbox.hidden = false;
+  }
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lbImg.src = '';
+  }
+  function step(delta) {
+    idx = (idx + delta + images.length) % images.length;
+    show();
+  }
+
+  // Delegated (2026-08-28, was a per-button querySelectorAll binding) —
+  // same reason as the idchip binding above: these buttons are only
+  // ever in the DOM for the current page's rows.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.page-img-btn');
+    if (!b) return;
+    openLightbox(b.dataset.images.split(','), b.dataset.rowLabel);
+  });
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', () => step(-1));
+  lbNext.addEventListener('click', () => step(1));
+  document.getElementById('lbZoomIn').addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
+  document.getElementById('lbZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
+  document.getElementById('lbZoomReset').addEventListener('click', () => setZoom(1));
+
+  // Click anywhere outside the toolbar/image (i.e. directly on the dark
+  // overlay backdrop) closes the popup — per the user.
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.hidden) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft' && images.length > 1) step(-1);
+    else if (e.key === 'ArrowRight' && images.length > 1) step(1);
+    else if (e.key === '+' || e.key === '=') setZoom(zoom + ZOOM_STEP);
+    else if (e.key === '-') setZoom(zoom - ZOOM_STEP);
+  });
+
+  // Ctrl/Cmd + wheel to zoom — a reader studying a diacritic closely will
+  // likely reach for the wheel before the toolbar buttons.
+  lbImgWrap.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+  }, { passive: false });
+})();
+
+// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
+// .cite-hint span, and CSS above. `title` gives a real tooltip on a
+// mouse hover already; a touchscreen has no hover at all, so a tap
+// toggles a visible inline line under the word instead — added
+// 2026-08-25, per the user. Delegated on `document` rather than bound
+// per-span, since highlightCell() can rebuild a cell's markup (from its
+// own saved original) on every search, which would otherwise leave a
+// freshly-restored .cite-hint with no listener attached.
+document.addEventListener('click', (e) => {
+  const hint = e.target.closest('.cite-hint');
+  if (!hint) return;
+  const next = hint.nextElementSibling;
+  if (next && next.classList.contains('cite-hint-reveal')) {
+    next.remove();
+    return;
+  }
+  const reveal = document.createElement('span');
+  reveal.className = 'cite-hint-reveal';
+  reveal.textContent = hint.getAttribute('title') || '';
+  hint.insertAdjacentElement('afterend', reveal);
+});
+
+// Remarks-column truncation — see clamp_remarks_html(). Only the
+// "Read more" button's visibility is decided in JS; the clamp itself is
+// pure CSS. Run per-row, only for rows actually on the current page
+// (render()'s paint loop) — scrollHeight is meaningless on a
+// display:none row, and re-checking every row in the table on every
+// keystroke would be wasted work at full table size.
+function updateRemarksClamp(cell) {
+  const clampEl = cell.querySelector('.remarks-clamp');
+  const btn = cell.querySelector('.remarks-more-btn');
+  if (!clampEl || !btn) return;
+  // +1px fudge for sub-pixel rounding between scrollHeight/clientHeight
+  // on some browsers' zoom levels — without it a handful of borderline
+  // rows flip the button on and off depending on font rendering.
+  btn.hidden = clampEl.scrollHeight <= clampEl.clientHeight + 1;
+}
+
+(function() {
+  const modal = document.getElementById('remarksModal');
+  const modalBody = document.getElementById('remarksModalBody');
+  const modalClose = document.getElementById('remarksModalClose');
+
+  function openRemarksModal(html) {
+    modalBody.innerHTML = html;
+    modal.hidden = false;
+  }
+  function closeRemarksModal() {
+    modal.hidden = true;
+    modalBody.innerHTML = '';
+  }
+  modalClose.addEventListener('click', closeRemarksModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRemarksModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeRemarksModal();
+  });
+  // Delegated for the same reason the citation tap-to-reveal is: a
+  // .remarks-more-btn can be (re)painted by render() at any time, so a
+  // per-button listener would go stale.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remarks-more-btn');
+    if (!btn) return;
+    const clampEl = btn.previousElementSibling;
+    if (!clampEl) return;
+    openRemarksModal(clampEl.innerHTML);
+  });
+})();
+</script>
+</body>
+</html>
