@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How It Works</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>&#128301;</text></svg>">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NNRYDYCMW9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NNRYDYCMW9');
+</script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; color: #1a1a1a; line-height: 1.65; }
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.1rem; margin-top: 2.2rem; }
+  p { margin: 0.85rem 0; }
+  a { color: #1a4d8f; }
+  .home-link { text-decoration: none; color: #1a4d8f; margin-right: 0.4rem; }
+  .home-link:hover { color: #0a5; }
+  .example {
+    background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 6px;
+    padding: 0.8rem 1rem; margin: 0.9rem 0; font-size: 0.92rem;
+  }
+  .example .row { margin: 0.3rem 0; }
+  .example .label { color: #666; font-size: 0.8rem; }
+  .v-direct { color: inherit; }
+  .v-derived { color: #8a4b00; font-style: italic; }
+  code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+  .note { color: #555; font-size: 0.88rem; }
+</style>
+</head>
+<body>
+<a href="index.html" class="home-link" title="Home">&#8962;</a>
+<h1>How were the volumes processed?</h1>
+
+<h2>Reading the original scans</h2>
+<p>Both sources are scanned books, decades old, in a mix of English
+apparatus and vernacular (Tamil, Kannada, Telugu, Sanskrit) script, often
+with diacritical marks (ā, ṛ, ḻ, ñ, ...) that plain OCR software reads
+unreliably or drops outright. Every page was read using an AI vision
+model instructed to transcribe exactly what's printed, diacritics
+included, rather than a traditional OCR engine — the difference matters
+most on exactly the marks that carry real linguistic information.</p>
+<p>Some ARE (Annual Report on Indian Epigraphy) appendix tables are
+printed sideways on the page (rotated 90&deg;) to fit a wide table onto a
+portrait page. These needed the same careful reading, with the model
+told about the rotation so it reads the table in the right order rather
+than transcribing it as if it were upright.</p>
+
+<h2>Turning a page of text into structured records</h2>
+<p>Once a page is transcribed, each individual inscription record on it
+is identified and its own attributes pulled out separately: a survey/
+serial number, the find-spot as printed, the dynasty and ruler named (if
+any), a date, the language and script, and the descriptive remarks.
+These become the columns of the searchable table — one row per
+inscription record, not one row per page.</p>
+
+<h2>Location: what's printed vs. what's resolved</h2>
+<p>A find-spot is often only stated in full the first time it's needed —
+the next several inscriptions from the same place just say <em>"same
+taluk"</em> or similar, trusting the reader to remember. The site follows
+that same reasoning: each record's <strong>Location</strong> column shows
+either what was <span class="v-direct">directly printed</span> on that
+page, or a value <span class="v-derived">derived</span> some other way —
+resolved by tracing back to whichever earlier record last stated a real
+place, matched against the volume's own contents/topographical table, or
+geocoded from the printed text. Hover either kind of value on the table
+itself to see exactly where it came from.</p>
+
+<div class="example">
+  <div class="label">A real example (South Indian Inscriptions, Vol. IV)</div>
+  <div class="row"><strong>No. 24</strong> — Place/Source: <em>(not printed
+  on the page directly)</em> &rarr; Location: <span class="v-derived">Gengauur,
+  Vellore, ANANTAPUR</span> <span class="label">(matched against the
+  volume's own contents table)</span></div>
+  <div class="row"><strong>No. 25</strong> — Place/Source: <em>"SAME TALUK"</em>
+  &rarr; Location: <span class="v-derived">Vellore, ANANTAPUR</span>
+  <span class="label">(inherited from No. 24 — taluk and district only,
+  since "same taluk" doesn't claim the same village)</span></div>
+</div>
+
+<p class="note">"Ibid."-style cross-references in the Remarks column
+(pointing back at an earlier citation, e.g. "Ibid., Vol. VIII, pp. 138
+ff.") are being resolved to their full citation the same way — volume by
+volume, or report-year by report-year for ARE. This is a work in
+progress: most records don't have a resolved citation yet. Where one has
+been resolved, the underlined word in Remarks carries the full citation
+as a hover tooltip.</p>
+
+<h2>Reading a long record</h2>
+<p>A record's remarks can run to many lines for a heavily-discussed
+inscription. Long remarks are visually clipped in the table with a
+<strong>"Read more"</strong> link that opens the full text in a popup —
+this only affects how it's displayed, the full text is always there.</p>
+
+<h2>Viewing the original page</h2>
+<p>Some records have a button to view the actual scanned page image
+alongside the transcription. This isn't available for every record —
+each page image adds real file size to what's published, and hosting a
+scan for every page of every volume of both sources would grow well
+beyond what's practical for this site's own repository. Page images are
+included selectively, not for the whole corpus.</p>
+
+<a href="index.html" style="display:inline-block; margin-top:2rem;">&larr; Back</a>
+</body>
+</html>
