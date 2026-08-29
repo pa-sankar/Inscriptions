@@ -16,7 +16,18 @@
 </script>
 <style>
   body { font-family: system-ui, sans-serif; margin: 1.5rem; color: #1a1a1a; }
-  h1 { font-size: 1.2rem; }
+  h1 { font-size: 1.2rem; margin: 0; }
+  /* Titlebar: h1 (with an optional Home icon prefix) on the left,
+     an optional same-corpus-size cross-link (Sanjay pages only, to
+     the sibling corpus's page) on the right — per the user,
+     2026-08-29. */
+  .titlebar {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.5rem;
+  }
+  .home-link { text-decoration: none; color: #1a4d8f; margin-right: 0.3rem; }
+  .home-link:hover { color: #0a5; }
+  .cross-link { font-size: 1.2rem; color: #1a4d8f; }
   .stats { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
   /* Legend block — explains the v-direct/v-derived color convention
      and the Location-vs-Place/Source distinction, per the user,
@@ -211,8 +222,11 @@
 </style>
 </head>
 <body class="loading">
-<h1>SII Inscriptions (Gen-2 complete volumes)</h1>
-<div class="generated">Generated 2026-08-29 20:38</div>
+<div class="titlebar">
+  <h1><a href="../index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
+  <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
+</div>
+<div class="generated">Generated 2026-08-29 20:45</div>
 <div class="stats">15127 records from 44 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). Volumes: Vol I, Vol II Pt I, Vol II Pt II, Vol III Pt I, Vol III Pt II, Vol III Pt III, Vol III Pt IV, Vol IV, Vol IX Pt I, Vol IX Pt II, Vol V, Vol VI, Vol VII, Vol VIII, Vol X, Vol XI Pt I, Vol XII Pt I, Vol XIII, Vol XIV, Vol XIX, Vol XL, Vol XLI, Vol XV Pt II, Vol XVI, Vol XVII, Vol XVIII, Vol XX, Vol XXII Pt I, Vol XXII Pt II, Vol XXIII, Vol XXIV, Vol XXVI, Vol XXVII, Vol XXVIII, Vol XXX, Vol XXXI, Vol XXXII Pt I, Vol XXXII Pt II, Vol XXXIII, Vol XXXIV, Vol XXXV, Vol XXXVI, Vol XXXVII, Vol XXXVIII. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, volume by volume — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
