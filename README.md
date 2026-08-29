@@ -1,29 +1,32 @@
 # Inscriptions
 
 Static, searchable HTML tables of South Indian epigraphic records — a
-public snapshot published from [The Hero Search](https://github.com/pa-sankar/HeroSearch),
-a private project building a queryable database of hero-stone and
-sati-stone inscriptions from the *South Indian Inscriptions* (SII) series
-and the *Annual Report on [South] Indian Epigraphy* (ARE).
+public snapshot published from a private project building queryable
+databases of the *South Indian Inscriptions* (SII) series and the
+*Annual Report on [South] Indian Epigraphy* (ARE).
 
 **Live pages** (once GitHub Pages is enabled on this repo — see below):
 
-- `index.html` — landing page, links to both tables
-- `SII-Inscriptions.html` — every South Indian Inscriptions record from
-  volumes at 100% high-quality OCR
-- `ARE-Inscriptions.html` — every Annual Report on Indian Epigraphy
-  appendix record read so far
+- `index.html` — landing page, links to both public tables
+- `SII-Inscriptions.html` / `ARE-Inscriptions.html` — public, simple
+  search tables (basic details only — place, dynasty, king, date,
+  language, remarks, citation ID)
+- `Sources.html` — every volume/report used, linked to its original
+  scan on the Internet Archive
 
-Both are self-contained single HTML files (no build step, no server) —
-open them directly, or serve the whole folder as-is.
+`Sanjay/` holds the original full-featured pages (every filter and
+tag) — a public URL, but not linked from the pages above.
 
 ## What's here
 
-Each page is a flat table with search (whole-corpus or one column),
-filter dropdowns (including type-to-search volume/year filters), and
-click-to-copy stable IDs for citing a specific record. Regenerated from
-the source project's database — not hand-edited, and not a live query:
-treat the timestamp of the last commit as this snapshot's "as of" date.
+Each table is a flat, searchable list with a search box (whole-page or
+one column), a few filter dropdowns, and click-to-copy stable IDs for
+citing a specific record. The actual row data lives in `data/*.json`
+(fetched by the page at load, not embedded — both the public and
+`Sanjay/` pages share the same data file, so the real record text is
+never duplicated between them). Regenerated from the source project's
+database — not hand-edited, and not a live query: treat the timestamp
+of the last commit as this snapshot's "as of" date.
 
 ## Enabling the live URL
 

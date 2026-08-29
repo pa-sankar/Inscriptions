@@ -2,32 +2,80 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inscriptions</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>📜</text></svg>">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NNRYDYCMW9"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-NNRYDYCMW9');
 </script>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 40rem; color: #1a1a1a; }
-  h1 { font-size: 1.4rem; }
-  ul { line-height: 2.2; font-size: 1.05rem; }
-  p.note { color: #555; font-size: 0.9rem; }
+  body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 42rem; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }
+  h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+  h2 { font-size: 1.1rem; margin-top: 2.5rem; }
+  p { margin: 0.9rem 0; }
+  .byline { color: #555; font-size: 0.95rem; margin-bottom: 1.5rem; }
+  ul.links { line-height: 2.3; font-size: 1.05rem; padding-left: 1.3rem; }
+  a { color: #1a4d8f; }
+  .note { color: #555; font-size: 0.88rem; }
+  .card {
+    border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.3rem;
+    margin: 0.75rem 0; background: #fafafa;
+  }
+  .card h3 { margin: 0 0 0.3rem 0; font-size: 1rem; }
+  .card p { margin: 0.4rem 0; font-size: 0.95rem; }
+  hr { border: none; border-top: 1px solid #e5e5e5; margin: 2rem 0; }
 </style>
 </head>
 <body>
-<h1>The Hero Search — Inscriptions</h1>
-<p>Two searchable, filterable tables of South Indian epigraphic records, generated
-from the underlying project's database.</p>
-<ul>
-  <li><a href="SII-Inscriptions.html">South Indian Inscriptions (SII)</a></li>
-  <li><a href="ARE-Inscriptions.html">Annual Report on Indian Epigraphy (ARE)</a></li>
+<h1>Inscriptions</h1>
+<p class="byline">A project by Sankar &mdash; Senior Project Consultant, Cystar, IIT&nbsp;Madras</p>
+
+<p>Over the past several months, this project has built two easily
+keyword-searchable databases from two major published sources on South
+Indian epigraphy:</p>
+
+<div class="card">
+  <h3>South Indian Inscriptions (SII)</h3>
+  <p>The Archaeological Survey of India's long-running series publishing
+  the full text of stone and copper-plate inscriptions across South
+  India, volume by volume since 1890.</p>
+</div>
+<div class="card">
+  <h3>Annual Report on [South] Indian Epigraphy (ARE)</h3>
+  <p>The Archaeological Survey of India's yearly reports listing every
+  inscription copied and examined that year &mdash; copper plates, stone
+  inscriptions, and pre-1945-46 collections.</p>
+</div>
+
+<p>What started as a personal research effort has grown into something
+that may be useful to other researchers and enthusiasts working with
+these same sources &mdash; hence this page.</p>
+
+<h2>Search the tables</h2>
+<p>A simple, searchable view of both databases &mdash; basic details only
+(place, dynasty, king, date, language, remarks, and a citation ID for
+each record), with full-text search and a few filters to narrow results.</p>
+<ul class="links">
+  <li><a href="SII-Inscriptions.html">South Indian Inscriptions</a></li>
+  <li><a href="ARE-Inscriptions.html">Annual Report on Indian Epigraphy</a></li>
+  <li><a href="Sources.html">Sources</a> &mdash; every volume/report used, linked to its original scan</li>
 </ul>
-<p class="note">Static snapshots — regenerated and re-published periodically as the
-underlying corpus grows. Not a live database query.</p>
+<p class="note">A note on page images: some records have the original
+scanned page available to view alongside their transcription.</p>
+
+<hr>
+
+<h2>Feedback</h2>
+<p>Found something useful, or think a different source should be added?
+<!-- TODO: Google Form link, pending from the user -->
+Feedback and requests are welcome via <a href="#">this form</a>.</p>
+
+<p class="note">Static snapshots &mdash; regenerated and re-published
+periodically as the underlying databases grow. Not a live database query.</p>
 </body>
 </html>
