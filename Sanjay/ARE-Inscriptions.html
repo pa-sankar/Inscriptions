@@ -183,6 +183,32 @@
     color: #1a4d8f; background: #eef6ff; border: 1px solid #bcd8f5;
     border-radius: 4px; padding: 0.3rem 0.5rem;
   }
+  /* A "Published in ..." citation this project can actually resolve to
+     another record — see remarks_cell_html()'s xref-link spans and
+     jumpToKey()/OTHER_CORPUS_URL in the JS. A real <button>, not a
+     hover-only affordance, per the user 2026-08-30: needs to work by
+     tap on mobile, where hover does nothing at all. Styled like an
+     inline link (not a boxed button) so it reads as part of the
+     sentence, with enough padding for a real touch target. */
+  button.xref-link {
+    font: inherit; color: #1a4d8f; background: none; border: none;
+    padding: 0.1rem 0.15rem; margin: -0.1rem -0.15rem; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+    border-radius: 3px;
+  }
+  button.xref-link:hover, button.xref-link:focus-visible {
+    background: #eef6ff; outline: 2px solid #bcd8f5; outline-offset: 1px;
+  }
+  /* Landed-on-after-a-jump highlight — jumpToKey() adds this class to
+     the target <tr>, then removes it after the animation finishes.
+     Needed because the row is just one of many identical-looking rows
+     on the page it scrolls to; without this, "where did it take me"
+     is a real question on a long table. */
+  tr.xref-target { animation: xref-flash 2.6s ease-out; }
+  @keyframes xref-flash {
+    0%, 15% { background: #fff3a0; }
+    100% { background: transparent; }
+  }
   /* Remarks-column truncation — see clamp_remarks_html(). A rogue
      record's remarks can run to dozens of lines, pushing every row
      below it out of view even in an already-filtered list; -webkit-
@@ -225,7 +251,7 @@
   <h1><a href="../index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 41 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-08-29 21:05</div>
+<div class="generated">Generated 2026-08-30 10:54</div>
 <div class="stats">31292 records from 4358 table pages (339 index pages excluded). PDFs: 1967-68 (783 records), 1992-93 (613 records), 1995-96 (342 records), 1971-72 (628 records), 1972-73 (997 records), 1973-74 (804 records), 1974-75 (710 records), 1975-76 (676 records), 1976-77 (638 records), 1977-78 (568 records), 1978-79 (531 records), 1979-80 (460 records), 1980-81 (462 records), 1981-82 (828 records), 1982-83 (1068 records), 1983-84 (450 records), 1984-85 (753 records), 1985-86 (650 records), 1986-87 (659 records), 1987-88 (317 records), 1988-89 (367 records), 1993-94 (783 records), 1994-95 (463 records), 1911-14 (2182 records), 1939-44 (2856 records), 1952-53 (742 records), 1928-29 (0 records), 1922-23 (926 records), 1923-24 (873 records), 1924-25 (518 records), 1925-26 (804 records), 1926-27 (1015 records), 1964-65 (1244 records), 1965-66 (1419 records), 1966-67 (657 records), 1969-70 (772 records), 1930-31 (490 records), 1931-32 (456 records), 1932-33 (689 records), 1933-34 (507 records), 1934-35 (592 records). 27242 &quot;Do.&quot; cells resolved, 6198 flagged (unresolved or partial — not auto-filled). 17 merged Serial/Findspot cells split, 59 stray Sl.No prefixes stripped, 3680 location prefixes moved to Location, 3 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
@@ -605,6 +631,14 @@ const categoryFilterEl = document.getElementById('categoryFilter'); // null if n
 const tbody = document.getElementById('tbody');
 const DATA_URL = "../data/ARE-Inscriptions.json";
 const CATEGORIES_URL = "ARE-Inscriptions-categories.json";
+// Cross-reference jump target (see remarks_cell_html's xref-link spans
+// and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
+// which corpus THIS page's own rows belong to ('sii'/'are'), so a click
+// on a same-corpus xref-link jumps in place while a different-corpus
+// one navigates to OTHER_CORPUS_URL. Both null on a page that doesn't
+// pass sibling_corpus_url (nothing to link to yet).
+const CURRENT_CORPUS = "are";
+const OTHER_CORPUS_URL = "SII-Inscriptions.html";
 // Row DATA, not DOM — see render_inscriptions_table's own comment on
 // data_url/categories_url for why this is fetched, not embedded inline.
 // Starts empty; loadData() (bottom of this script) populates it before
@@ -733,6 +767,12 @@ function pageSizeValue() {
 // own highlighting.
 function buildRow(row, term, whole, scope, catVal) {
   const tr = document.createElement('tr');
+  // The row's own stable_key (the ID column's plain text, same value
+  // its idchip button already carries as data-id) — used by jumpToKey()
+  // below to find and scroll to this <tr> after a cross-reference click
+  // repaints the table. Set unconditionally, not just when an "id"
+  // column exists, so a future caller without one just gets ''.
+  tr.dataset.key = (row.text && row.text.id) || '';
   COLUMN_KEYS.forEach((key, i) => {
     const td = document.createElement('td');
     const cellHtml = row.cells[key] || '';
@@ -925,10 +965,25 @@ async function loadData() {
       if (!r.categories) r.categories = [];
     });
     ROWS = data;
+    // stable_key -> ROWS index, for jumpToKey() below. Built once here,
+    // not per-jump, since ROWS never changes after load — the ID
+    // column's plain text (row.text.id) already equals its own
+    // stable_key (build_sii_inscriptions.py / build_are_inscriptions.py
+    // both render it verbatim into the idchip button), so no separate
+    // data field was needed to support this.
+    STABLE_KEY_INDEX = new Map(ROWS.map((r, i) => [(r.text && r.text.id) || '', i]));
     loadOverlay.hidden = true;
     document.body.classList.remove('loading');
     setControlsDisabled(false);
     render();
+    // A cross-reference click on the OTHER corpus's page (jumpToKey()
+    // below) navigates here with ?jump=<stable_key> rather than trying
+    // to fetch/merge this page's data itself — simplest thing that
+    // works, and keeps the public/Sanjay data-fetch boundary exactly as
+    // it already is. Handled only after the real render() above, so the
+    // jump lands on a fully-painted, unfiltered table.
+    const jumpKey = new URLSearchParams(location.search).get('jump');
+    if (jumpKey) jumpToKey(jumpKey);
   } catch (err) {
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
@@ -936,6 +991,53 @@ async function loadData() {
 }
 loadRetryBtn.addEventListener('click', loadData);
 loadData();
+
+// stable_key -> ROWS index (see loadData() above for when this is
+// built) and jumpToKey()/the xref-link click handler that uses it —
+// per the user, 2026-08-30: a "Published in ..." citation that
+// resolves to another record this project holds should be a real,
+// tappable link (works on mobile, where hover does nothing), same-page
+// or cross-page depending on which corpus it names.
+let STABLE_KEY_INDEX = new Map();
+
+function jumpToKey(key) {
+  const idx = STABLE_KEY_INDEX.get(key);
+  if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  // Clear every filter so the target can't be hidden by whatever view
+  // state the reader was in — a citation jump is "take me to this
+  // record", not "take me to this record if it happens to still match
+  // your search". Same fields resetBtn's own handler clears.
+  activeTerm = '';
+  q.value = '';
+  matchMode.value = 'contains';
+  searchScope.value = 'all';
+  if (categoryFilterEl) categoryFilterEl.value = '';
+  FILTER_KEYS.forEach((k) => { filterEls[k].value = ''; });
+  // With every filter cleared, `matches` in render() is ROWS in its
+  // original order, so the target's page follows directly from its
+  // index — no need to re-derive position from the DOM.
+  currentPage = Math.floor(idx / pageSizeValue()) + 1;
+  render();
+  requestAnimationFrame(() => {
+    const tr = tbody.querySelector('tr[data-key="' + CSS.escape(key) + '"]');
+    if (!tr) return;
+    tr.scrollIntoView({behavior: 'smooth', block: 'center'});
+    tr.classList.add('xref-target');
+    setTimeout(() => tr.classList.remove('xref-target'), 2600);
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button.xref-link');
+  if (!b) return;
+  e.preventDefault();
+  const key = b.dataset.key;
+  if (b.dataset.corpus === CURRENT_CORPUS) {
+    jumpToKey(key);
+  } else if (OTHER_CORPUS_URL) {
+    location.href = OTHER_CORPUS_URL + '?jump=' + encodeURIComponent(key);
+  }
+});
 
 // Click-to-copy the ID chip — execCommand is tried first, deliberately:
 // these pages are opened from file://, where navigator.clipboard exists
