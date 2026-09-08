@@ -32,55 +32,88 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.5;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14.5px; line-height: 1.5;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 22px 60px; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 22px 60px; }
   h1 { font-size: 22px; margin: 0 0 6px; font-weight: 700; }
-  .sub { color: var(--text-dim); font-size: 13.5px; margin-bottom: 28px; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-  .card {
-    display: block; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 18px 18px 16px; text-decoration: none; color: var(--text);
-    box-shadow: var(--shadow); transition: border-color 0.15s;
+  .sub-head { color: var(--text-dim); font-size: 13.5px; margin-bottom: 22px; }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; }
+  thead th {
+    text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-dim); background: var(--surface-2); padding: 9px 14px; border-bottom: 1px solid var(--border);
   }
-  a.card:hover { border-color: var(--accent); }
-  .card.missing { opacity: 0.55; }
-  .card .name { font-weight: 700; font-size: 16px; color: var(--accent-strong); margin-bottom: 4px; }
-  .card .desc { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
-  .card .generated {
-    font-size: 11.5px; color: var(--accent-teal-strong); font-family: 'Consolas', monospace;
-  }
-  .card .generated.stale { color: var(--accent-strong); font-style: italic; }
-  footer { margin-top: 32px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr.row-link { cursor: pointer; }
+  tr.row-link:hover { background: var(--surface-2); }
+  tr.row-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  tr.missing { opacity: 0.55; }
+  .name { font-weight: 700; font-size: 15px; color: var(--accent-strong); }
+  .desc { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .sub { font-size: 12px; color: var(--text-dim); }
+  td.generated { font-family: 'Consolas', monospace; font-size: 12px; color: var(--accent-teal-strong); white-space: nowrap; }
+  td.generated.stale { color: var(--accent-strong); font-style: italic; }
+  footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Inscriptions — Review Index</h1>
-  <div class="sub">First-cut, in-progress corpora, for review before wider publish.</div>
-  <div class="grid">
-    <a class="card" href="SII-Inscriptions.html">
-      <div class="name">SII Inscriptions</div>
-      <div class="desc">South Indian Inscriptions</div>
-      <div class="generated">Generated 2026-09-05 09:56</div>
-    </a>
-    <a class="card" href="ARE-Inscriptions.html">
-      <div class="name">ARE Inscriptions</div>
-      <div class="desc">Annual Reports on [South] Indian Epigraphy</div>
-      <div class="generated">Generated 2026-09-05 07:16</div>
-    </a>
-    <a class="card" href="EpCa-Inscriptions.html">
-      <div class="name">EpCa Inscriptions</div>
-      <div class="desc">Epigraphia Carnatica</div>
-      <div class="generated">Generated 2026-09-08 06:57</div>
-    </a>
-    <a class="card" href="TaKa-Inscriptions.html">
-      <div class="name">TaKa Inscriptions</div>
-      <div class="desc">Tamil Nadu Inscriptions (தமிழ்நாட்டுக் கல்வெட்டுகள்)</div>
-      <div class="generated">Generated 2026-09-08 06:57</div>
-    </a>
+  <div class="sub-head">First-cut, in-progress corpora, for review before wider publish. Click a row to open that source's own page.</div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Volumes / sources in DB</th>
+          <th>Place inheritance</th>
+          <th>Ibid / citation resolution</th>
+          <th>Generated</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr class="row-link" data-href="SII-Inscriptions.html" tabindex="0">
+        <td><div class="name">SII Inscriptions</div><div class="desc">South Indian Inscriptions</div></td>
+        <td>48 volumes/parts<br><span class="sub">15,716 records</span></td>
+        <td>14,158 records have a resolved location</td>
+        <td>264 citations resolved</td>
+        <td class="generated">2026-09-05 09:56</td>
+      </tr>
+      <tr class="row-link" data-href="ARE-Inscriptions.html" tabindex="0">
+        <td><div class="name">ARE Inscriptions</div><div class="desc">Annual Reports on [South] Indian Epigraphy</div></td>
+        <td>43 reports<br><span class="sub">33,050 records</span></td>
+        <td>Applied every build (are_resolve_ditto.py, via build_are_inscriptions.py)</td>
+        <td>782 citations resolved</td>
+        <td class="generated">2026-09-05 07:16</td>
+      </tr>
+      <tr class="row-link" data-href="EpCa-Inscriptions.html" tabindex="0">
+        <td><div class="name">EpCa Inscriptions</div><div class="desc">Epigraphia Carnatica</div></td>
+        <td>Vol I, II<br><span class="sub">613 records</span></td>
+        <td>Applied every build (resolve_epca_findspot.py)<br><span class="sub">36 records with a terminology match</span></td>
+        <td>N/A (old-edition cross-reference captured, not an Ibid-style citation)</td>
+        <td class="generated">2026-09-08 06:57</td>
+      </tr>
+      <tr class="row-link" data-href="TaKa-Inscriptions.html" tabindex="0">
+        <td><div class="name">TaKa Inscriptions</div><div class="desc">Tamil Nadu Inscriptions (தமிழ்நாட்டுக் கல்வெட்டுகள்)</div></td>
+        <td>Vol I, II, III, IV<br><span class="sub">581 records</span></td>
+        <td>Applied every build (resolve_taka_ditto.py)<br><span class="sub">1 record with a terminology match</span></td>
+        <td>N/A (Prior Publication field captured verbatim, no citation-resolution pass)</td>
+        <td class="generated">2026-09-08 06:57</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
-  <footer>Sanjay review area — not linked from the public site. This index itself generated 2026-09-08 07:01, via <code>scripts/build_sanjay_index.py</code> — re-run any time a linked page changes.</footer>
+
+  <footer>Sanjay review area — not linked from the public site. This index itself generated 2026-09-08 07:36, via <code>scripts/build_sanjay_index.py</code> — re-run any time a linked page changes (scripts/refresh_web_outputs.py already does this automatically).</footer>
 </div>
+<script>
+document.querySelectorAll('tr.row-link').forEach(function (tr) {
+  var go = function () { window.location.href = tr.dataset.href; };
+  tr.addEventListener('click', go);
+  tr.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+});
+</script>
 </body>
 </html>
