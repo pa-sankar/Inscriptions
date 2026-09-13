@@ -134,11 +134,26 @@
     max-height: 6.6em; overflow: hidden; white-space: pre-wrap;
   }
   .remarks-clamp.expanded { max-height: none; }
+  /* Expanding a remarks cell used to grow it to its full content height,
+     pushing every row below it out of view and forcing a scroll all the
+     way down the PAGE just to find "Read less" again -- per the user,
+     2026-09-13. Capping the cell itself to a viewport-relative height
+     with its own scrollbar turns that into a local text-scroll window
+     instead: the row's height stays bounded, and "Read less" -- sticky
+     to the bottom of that same scroll area -- rides along and is always
+     one click away, no matter how far into the text you've scrolled. */
+  td.remarks-td.cell-expanded {
+    max-height: 60vh; overflow-y: auto;
+  }
   .remarks-more-btn {
     background: none; border: none; color: var(--accent-copper-strong); font-size: 12.5px;
     cursor: pointer; padding: 3px 0 0; font-weight: 600;
   }
   .remarks-more-btn:hover { text-decoration: underline; }
+  td.remarks-td.cell-expanded .remarks-more-btn {
+    position: sticky; bottom: 0; display: block; width: 100%; text-align: left;
+    background: var(--surface); padding: 4px 0 3px; box-shadow: 0 -6px 6px -4px rgba(0, 0, 0, 0.18);
+  }
 
   .view-text-btn {
     font-size: 12.5px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
@@ -221,7 +236,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/epca.sqlite</code> via <code>scripts/build_epca_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 18:48</span></footer>
+  <footer>Built from <code>db/epca.sqlite</code> via <code>scripts/build_epca_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 20:33</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
@@ -367,7 +382,7 @@
       <td>${esc(r.page != null ? String(r.page) : '')}</td>
       <td>${r.find_spot_html || ''}</td>
       <td>${highlight(r.date, q)}</td>
-      <td>
+      <td class="remarks-td">
         <div class="remarks-clamp">${applyRanges(r.translation, fieldRanges(r, 'translation', q, catVal)) || '<em style="color:var(--text-dim)">no translation</em>'}</div>
         <button type="button" class="remarks-more-btn" hidden>Read more</button>
       </td>
@@ -458,6 +473,7 @@
       const clamp = moreBtn.previousElementSibling;
       const expanding = !clamp.classList.contains('expanded');
       clamp.classList.toggle('expanded');
+      moreBtn.closest('td.remarks-td').classList.toggle('cell-expanded', expanding);
       moreBtn.textContent = expanding ? 'Read less' : 'Read more';
       return;
     }
