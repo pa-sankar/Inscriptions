@@ -48,7 +48,14 @@
      fixed columns squeeze to unreadable slivers otherwise) and scrolls
      horizontally inside this wrapper instead of forcing the whole page
      to zoom out — added 2026-08-25, per the user. */
-  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* max-height + overflow-y makes this div its own vertical scroll
+     container, not just a horizontal one -- position:sticky on `th`
+     below only sticks within its *nearest scrolling ancestor*, and
+     without a bounded height here that ancestor was the whole page
+     (which never actually scrolls this div, so the header just
+     scrolled away with everything else) -- found live 2026-09-13,
+     per the user. */
+  .table-scroll { overflow-x: auto; overflow-y: auto; max-height: 75vh; -webkit-overflow-scrolling: touch; }
   table { border-collapse: collapse; width: 100%; min-width: 62rem; font-size: 0.85rem; table-layout: fixed; }
   th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top;
             overflow-wrap: break-word; }
@@ -251,7 +258,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-12 18:26</div>
+<div class="generated">Generated 2026-09-13 16:14</div>
 <div class="stats">15783 records from 44 volume(s)/part(s) at 100% Gen-2 OCR. Volumes: Vol I, Vol II Pt I, Vol II Pt II, Vol III Pt I, Vol III Pt II, Vol III Pt III, Vol III Pt IV, Vol IV, Vol IX Pt I, Vol IX Pt II, Vol V, Vol VI, Vol VII, Vol VIII, Vol X, Vol XI Pt I, Vol XII Pt I, Vol XIII, Vol XIV, Vol XIX, Vol XL, Vol XLI, Vol XV Pt II, Vol XVI, Vol XVII, Vol XVIII, Vol XX, Vol XXII Pt I, Vol XXII Pt II, Vol XXIII, Vol XXIV, Vol XXVI, Vol XXVII, Vol XXVIII, Vol XXX, Vol XXXI, Vol XXXII Pt I, Vol XXXII Pt II, Vol XXXIII, Vol XXXIV, Vol XXXV, Vol XXXVI, Vol XXXVII, Vol XXXVIII. See <a href="Sources.html">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, volume by volume — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">

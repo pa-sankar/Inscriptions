@@ -90,7 +90,10 @@
   .v-direct { color: inherit; }
   .v-derived { color: var(--accent-strong); font-style: italic; }
 
-  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
+  /* max-height + overflow-y makes this its own vertical scroll
+     container so the sticky thead below actually has something to
+     stick within -- found live 2026-09-13, per the user. */
+  .table-scroll { overflow-x: auto; overflow-y: auto; max-height: 75vh; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
   table { border-collapse: collapse; width: 100%; min-width: 980px; }
   col.c-id { width: 11%; } col.c-vol { width: 6%; } col.c-loc { width: 16%; }
   col.c-dyn { width: 14%; } col.c-date { width: 9%; }
@@ -201,7 +204,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 15:44</span></footer>
+  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 16:14</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
