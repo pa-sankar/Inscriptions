@@ -68,6 +68,21 @@
     padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 14px;
   }
   .toolbar .hint { font-size: 12px; color: var(--text-dim); }
+  /* Pager row -- same prev/next/page-size shape as SII/ARE's shared
+     shell, per the user 2026-09-13. */
+  .pagerbar {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    margin-bottom: 10px; font-size: 13px; color: var(--text-dim);
+  }
+  .pagerbar button {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 12px; color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  .pagerbar button:disabled { cursor: default; opacity: 0.4; }
+  .pagerbar select {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 8px; color: var(--text); font-family: inherit; font-size: 13px;
+  }
   h1 { display: flex; align-items: baseline; gap: 8px; }
   .home-link { text-decoration: none; color: var(--accent-strong); }
   .home-link:hover { color: var(--accent-teal-strong); }
@@ -162,6 +177,18 @@
     <span class="hint" id="matchHint"></span>
   </div>
 
+  <div class="pagerbar">
+    <button type="button" id="prevPage">&larr; Prev</button>
+    <span id="pageIndicator"></span>
+    <button type="button" id="nextPage">Next &rarr;</button>
+    <select id="pageSize" title="Rows per page — a smaller page paints faster on a big filtered/searched result">
+      <option value="50">50 / page</option>
+      <option value="100" selected>100 / page</option>
+      <option value="250">250 / page</option>
+      <option value="0">All (slow on a large result)</option>
+    </select>
+  </div>
+
   <div class="table-scroll">
     <table>
       <colgroup>
@@ -174,7 +201,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 15:30</span></footer>
+  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 15:44</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
@@ -203,6 +230,16 @@
   const categoryFilter = document.getElementById('categoryFilter');
   const matchHint = document.getElementById('matchHint');
   const countBadge = document.getElementById('countBadge');
+  const prevPage = document.getElementById('prevPage');
+  const nextPage = document.getElementById('nextPage');
+  const pageIndicator = document.getElementById('pageIndicator');
+  const pageSizeEl = document.getElementById('pageSize');
+  let currentPage = 1;
+  function pageSizeValue() {
+    const n = parseInt(pageSizeEl.value, 10);
+    return n > 0 ? n : Infinity; // "All" option is 0 -> unlimited
+  }
+  function renderFromTop() { currentPage = 1; render(); }
 
   Array.from(new Set(records.map(r => r.volume_short))).sort().forEach(v => {
     const opt = document.createElement('option');
@@ -316,8 +353,7 @@
     const q = searchBox.value.trim();
     const vol = volumeFilter.value;
     const catVal = categoryFilter.value;
-    tbody.innerHTML = '';
-    let shown = 0;
+    const matches = [];
     records.forEach(r => {
       if (vol && r.volume_short !== vol) return;
       if (catVal && !(r.categories || []).includes(catVal)) return;
@@ -325,12 +361,28 @@
                    tamilFieldsText(r.tamil_fields), r.inscription_text].join(' \n ').toLowerCase();
       const match = !q || hay.includes(q.toLowerCase());
       if (!match) return;
-      tbody.appendChild(buildRow(r, q, catVal));
-      shown++;
+      matches.push(r);
     });
+
+    const pageSize = pageSizeValue();
+    const totalPages = Math.max(1, Math.ceil(matches.length / pageSize));
+    currentPage = Math.min(Math.max(1, currentPage), totalPages);
+    const start = (currentPage - 1) * pageSize;
+    const pageRows = matches.slice(start, start + pageSize);
+
+    const frag = document.createDocumentFragment();
+    pageRows.forEach(r => frag.appendChild(buildRow(r, q, catVal)));
+    tbody.replaceChildren(frag);
+
     const scoped = vol ? records.filter(r => r.volume_short === vol).length : records.length;
     countBadge.textContent = `${scoped} record${scoped === 1 ? '' : 's'}` + (vol ? ` in Vol ${vol}` : '');
-    matchHint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : '';
+    matchHint.textContent = (q ? `${matches.length} match${matches.length === 1 ? '' : 'es'}` : '')
+      + (matches.length > pageRows.length || start > 0
+          ? ` — showing ${matches.length ? start + 1 : 0}-${Math.min(start + pageSize, matches.length)}`
+          : '');
+    pageIndicator.textContent = `page ${currentPage} of ${totalPages}`;
+    prevPage.disabled = currentPage <= 1;
+    nextPage.disabled = currentPage >= totalPages;
     updateClamps();
   }
 
@@ -446,13 +498,17 @@
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
 
+  prevPage.addEventListener('click', () => { currentPage--; render(); });
+  nextPage.addEventListener('click', () => { currentPage++; render(); });
+  pageSizeEl.addEventListener('change', renderFromTop);
+
   let debounceTimer;
   searchBox.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(render, 120);
+    debounceTimer = setTimeout(renderFromTop, 120);
   });
-  volumeFilter.addEventListener('change', render);
-  categoryFilter.addEventListener('change', render);
+  volumeFilter.addEventListener('change', renderFromTop);
+  categoryFilter.addEventListener('change', renderFromTop);
   render();
 })();
 </script>
