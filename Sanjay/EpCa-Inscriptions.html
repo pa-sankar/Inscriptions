@@ -43,7 +43,13 @@
     margin: 0; background: var(--bg); color: var(--text);
     font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14.5px; line-height: 1.5;
   }
-  mark { background: var(--mark-bg); color: var(--mark-text); border-radius: 2px; padding: 0 1px; }
+  /* Fixed yellow/black in every theme, same as SII/ARE's shared shell
+     -- per the user 2026-09-13: the previous --mark-bg/--mark-text
+     dark-mode swap left search highlights unreadable (light text on a
+     light-enough dark-mode background read as white-on-white). A
+     highlight's whole job is to stand out regardless of theme, so it
+     doesn't need to follow the theme at all. */
+  mark { background: #fff3a0; color: #000; border-radius: 2px; padding: 0 1px; }
   .wrap { max-width: 1360px; margin: 0 auto; padding: 26px 22px 60px; }
   header.page-head {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px;
@@ -206,7 +212,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/epca.sqlite</code> via <code>scripts/build_epca_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 16:14</span></footer>
+  <footer>Built from <code>db/epca.sqlite</code> via <code>scripts/build_epca_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 16:17</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
