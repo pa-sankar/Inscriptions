@@ -92,7 +92,15 @@
   h1 { display: flex; align-items: baseline; gap: 8px; }
   .home-link { text-decoration: none; color: var(--accent-strong); }
   .home-link:hover { color: var(--accent-teal-strong); }
-  mark.cat-hit { background: var(--accent-teal); color: #fff; border-radius: 2px; padding: 0 1px; }
+  /* Fixed, not theme/variable-dependent -- per the user 2026-09-13,
+     after finding EpCa's identical rule silently broken (its
+     --accent-teal was referenced but never defined there, unlike
+     here). Kept consistent with EpCa's own fix rather than leaving
+     this one on a variable that's easy to lose track of when copying
+     this template to a new corpus in the future. Distinct shade from
+     plain `mark` above so a category hit is visually distinguishable
+     from a plain search hit. */
+  mark.cat-hit { background: #ffd699; color: #000; border-radius: 2px; padding: 0 1px; }
   .v-direct { color: inherit; }
   .v-derived { color: var(--accent-strong); font-style: italic; }
 
@@ -210,7 +218,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 16:17</span></footer>
+  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 18:32</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
