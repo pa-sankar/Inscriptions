@@ -233,7 +233,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-13 20:33</span></footer>
+  <footer>Built from <code>db/taka.sqlite</code> via <code>scripts/build_taka_inscriptions.py</code>. <span class="generated">Generated 2026-09-14 15:05</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
@@ -249,6 +249,21 @@
     </div>
     <div class="modal-body" id="modalBodyFields"></div>
     <div class="modal-body tamil" id="modalBodyText" hidden></div>
+  </div>
+</div>
+
+<!-- A remarks cell past the in-grid size cap (10 KB) opens here instead
+     of expanding in place -- per the user, 2026-09-14: past that size
+     the in-cell scroll window stops being a convenience and the reader
+     is better served by the full-page popup this project already uses
+     elsewhere (same #textModal shape, its own instance). -->
+<div id="remarksModal" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="remarksModalClose" title="Close">&times;</button>
+    <div class="modal-header">
+      <div class="mh-line1" id="remarksModalTitle"></div>
+    </div>
+    <div class="modal-body" id="remarksModalBody"></div>
   </div>
 </div>
 
@@ -336,6 +351,16 @@
     return out;
   }
 
+  // "Read more (N KB)" sizing -- per the user, 2026-09-14: the reader
+  // should know how much more text is behind the button before opening
+  // it. 10 KB is also the in-cell-vs-popup threshold (REMARKS_POPUP_BYTES
+  // below), so this and that stay next to each other on purpose.
+  const REMARKS_POPUP_BYTES = 10 * 1024;
+  function formatSizeKB(text) {
+    const n = (text || '').length;
+    return `${Math.max(1, Math.round(n / 1024))} KB`;
+  }
+
   function fieldRanges(r, field, q, catVal) {
     const ranges = [];
     if (catVal && r.spans && r.spans[field]) {
@@ -374,7 +399,7 @@
       <td title="${esc(r.regnal_year ? 'Regnal year ' + r.regnal_year : '')}">${highlight(r.historical_year, q)}</td>
       <td class="remarks-td">
         <div class="remarks-clamp">${applyRanges(r.remarks, fieldRanges(r, 'remarks', q, catVal)) || '<em style="color:var(--text-dim)">no summary</em>'}</div>
-        <button type="button" class="remarks-more-btn" hidden>Read more</button>
+        <button type="button" class="remarks-more-btn" data-id="${esc(r.id)}" hidden>Read more${r.remarks ? ` (${formatSizeKB(r.remarks)})` : ''}</button>
       </td>
       <td><button type="button" class="view-text-btn${hasTextHit ? ' has-hit' : ''}" data-id="${esc(r.id)}">${hasTextHit ? 'View text (match)' : 'View text'}</button></td>
     `;
@@ -454,11 +479,16 @@
   tbody.addEventListener('click', (e) => {
     const moreBtn = e.target.closest('button.remarks-more-btn');
     if (moreBtn) {
+      const r = records.find(rec => rec.id === moreBtn.dataset.id);
+      if (r && (r.remarks || '').length > REMARKS_POPUP_BYTES) {
+        openRemarksModal(r);
+        return;
+      }
       const clamp = moreBtn.previousElementSibling;
       const expanding = !clamp.classList.contains('expanded');
       clamp.classList.toggle('expanded');
       moreBtn.closest('td.remarks-td').classList.toggle('cell-expanded', expanding);
-      moreBtn.textContent = expanding ? 'Read less' : 'Read more';
+      moreBtn.textContent = expanding ? 'Read less' : `Read more (${formatSizeKB(r && r.remarks)})`;
       return;
     }
     const viewBtn = e.target.closest('button.view-text-btn');
@@ -530,6 +560,27 @@
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+  // Remarks-popup path for cells over REMARKS_POPUP_BYTES -- its own
+  // small modal instance, separate from #textModal above (that one is
+  // tab-based and record-specific in a different way; this is just the
+  // plain full remarks text, same shape as the ARE/SII shell's own
+  // #remarksModal).
+  const remarksModal = document.getElementById('remarksModal');
+  const remarksModalClose = document.getElementById('remarksModalClose');
+  const remarksModalTitle = document.getElementById('remarksModalTitle');
+  const remarksModalBody = document.getElementById('remarksModalBody');
+  function openRemarksModal(r) {
+    remarksModalTitle.innerHTML = `${esc(r.volume)} — ` +
+      `<button class="idchip" type="button" data-id="${esc(r.id)}" title="Copy ID">${esc(r.id)}</button>` +
+      ` <span class="mh-inscno">Serial No. ${esc(r.serial_no)}</span>`;
+    remarksModalBody.textContent = r.remarks || '';
+    remarksModal.hidden = false;
+  }
+  function closeRemarksModal() { remarksModal.hidden = true; }
+  remarksModalClose.addEventListener('click', closeRemarksModal);
+  remarksModal.addEventListener('click', (e) => { if (e.target === remarksModal) closeRemarksModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !remarksModal.hidden) closeRemarksModal(); });
 
   prevPage.addEventListener('click', () => { currentPage--; render(); });
   nextPage.addEventListener('click', () => { currentPage++; render(); });
