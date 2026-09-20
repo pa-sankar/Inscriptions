@@ -6,36 +6,42 @@
 <meta name="robots" content="noindex,nofollow">
 <title>EpAn Vol. IV/VI — Articles (review)</title>
 <style>
+  /* Same token values as EpCa's own template -- per the user,
+     2026-09-20: one consistent look-and-feel across every corpus's
+     review page. Variable NAMES kept as this file's own
+     (--accent-teal/-strong) rather than renamed to EpCa's
+     --accent-copper/-strong, so this stays a pure value swap with no
+     risk of missing a reference somewhere below. */
   :root {
-    --bg: #f4f1e6;
+    --bg: #f6f2e9;
     --surface: #ffffff;
-    --surface-2: #ece5d2;
-    --text: #2a2820;
-    --text-dim: #6d6858;
-    --border: #d9cfb4;
-    --accent: #a1472f;
-    --accent-strong: #7a331f;
-    --accent-teal: #2f6b63;
-    --accent-teal-strong: #1e4d47;
+    --surface-2: #efe9da;
+    --text: #2b2a24;
+    --text-dim: #6b6759;
+    --border: #ddd4bd;
+    --accent: #5f7a5a;
+    --accent-strong: #3f5a3c;
+    --accent-teal: #a6612f;
+    --accent-teal-strong: #7d431c;
     --mark-bg: #f6d989;
     --mark-text: #3a2a05;
-    --shadow: 0 1px 2px rgba(42,40,32,0.06), 0 8px 24px rgba(42,40,32,0.05);
+    --shadow: 0 1px 2px rgba(43,42,36,0.06), 0 8px 24px rgba(43,42,36,0.05);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1c1a15; --surface: #24221b; --surface-2: #2c291f;
-      --text: #ece6d6; --text-dim: #a39c86; --border: #453f2d;
-      --accent: #d68162; --accent-strong: #e59a7d;
-      --accent-teal: #6fb3a8; --accent-teal-strong: #8fc9c0;
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-teal: #d18a52; --accent-teal-strong: #e2a06c;
       --mark-bg: #6b5417; --mark-text: #ffe9b0;
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #1c1a15; --surface: #24221b; --surface-2: #2c291f;
-    --text: #ece6d6; --text-dim: #a39c86; --border: #453f2d;
-    --accent: #d68162; --accent-strong: #e59a7d;
-    --accent-teal: #6fb3a8; --accent-teal-strong: #8fc9c0;
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-teal: #d18a52; --accent-teal-strong: #e2a06c;
     --mark-bg: #6b5417; --mark-text: #ffe9b0;
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
   }
@@ -232,7 +238,7 @@
     </table>
   </div>
 
-  <footer>Built from <code>db/eptean.sqlite</code> via <code>scripts/build_epan_inscriptions.py</code>. <span class="generated">Generated 2026-09-20 17:05</span></footer>
+  <footer>Built from <code>db/eptean.sqlite</code> via <code>scripts/build_epan_inscriptions.py</code>. <span class="generated">Generated 2026-09-20 17:33</span></footer>
 </div>
 
 <div id="textModal" class="modal-overlay" hidden>
