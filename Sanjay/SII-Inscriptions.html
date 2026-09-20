@@ -332,7 +332,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-20 17:30</div>
+<div class="generated">Generated 2026-09-20 20:07</div>
 <div class="stats">15893 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). Volumes: Vol I, Vol II Pt I, Vol II Pt II, Vol III Pt I, Vol III Pt II, Vol III Pt III, Vol III Pt IV, Vol IV, Vol IX Pt I, Vol IX Pt II, Vol V, Vol VI, Vol VII, Vol VIII, Vol X, Vol XI Pt I, Vol XI Pt II, Vol XII Pt I, Vol XIII, Vol XIV, Vol XIX, Vol XL, Vol XLI, Vol XV Pt II, Vol XVI, Vol XVII, Vol XVIII, Vol XX, Vol XXII Pt I, Vol XXII Pt II, Vol XXIII, Vol XXIV, Vol XXVI, Vol XXVII, Vol XXVIII, Vol XXX, Vol XXXI, Vol XXXII Pt I, Vol XXXII Pt II, Vol XXXIII, Vol XXXIV, Vol XXXV, Vol XXXVI, Vol XXXVII, Vol XXXVIII. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, volume by volume — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
@@ -907,6 +907,23 @@ document.addEventListener('click', (e) => {
   let zoom = 1;
   const ZOOM_MIN = 0.25, ZOOM_MAX = 5, ZOOM_STEP = 0.25;
 
+  // page_image_button_cell()'s own data-images paths are relative to
+  // Web/'s own root (e.g. "images/sii/XVIII/p0142.jpg") -- correct as
+  // an <img src> on the public page (Web/SII-Inscriptions.html, same
+  // directory as images/), but this exact row data is ALSO reused
+  // verbatim on the Sanjay copy (Web/Sanjay/SII-Inscriptions.html, one
+  // directory deeper) -- confirmed live, 2026-09-20: every "View page"
+  // image 404'd there because the browser resolved the same relative
+  // path against the wrong base. IMAGE_BASE is a build-time constant
+  // (render_inscriptions_table's own image_base param, computed by
+  // each build script from its own --out path relative to Web/'s
+  // root) -- deliberately NOT sniffed from location.pathname at
+  // runtime (a '/Sanjay/'-in-the-URL check would silently break for
+  // any future page nested deeper than one level), so this stays
+  // correct for wherever a build script actually places its output.
+  const IMAGE_BASE = "../";
+  function resolveImagePath(p) { return IMAGE_BASE + p; }
+
   function applyZoom() {
     lbImg.style.transform = 'scale(' + zoom + ')';
     lbZoomLevel.textContent = Math.round(zoom * 100) + '%';
@@ -916,7 +933,7 @@ document.addEventListener('click', (e) => {
     applyZoom();
   }
   function show() {
-    lbImg.src = images[idx];
+    lbImg.src = resolveImagePath(images[idx]);
     lbPageIndicator.textContent = images.length > 1 ? (idx + 1) + ' / ' + images.length : '';
     lbPrev.style.display = images.length > 1 ? '' : 'none';
     lbNext.style.display = images.length > 1 ? '' : 'none';

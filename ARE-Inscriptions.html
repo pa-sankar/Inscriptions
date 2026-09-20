@@ -329,7 +329,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-20 17:31</div>
+<div class="generated">Generated 2026-09-20 20:08</div>
 <div class="stats">28616 records from 41 report(s), 4119 table pages read. See <a href="Sources.html">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
@@ -1182,6 +1182,23 @@ document.addEventListener('click', (e) => {
   let zoom = 1;
   const ZOOM_MIN = 0.25, ZOOM_MAX = 5, ZOOM_STEP = 0.25;
 
+  // page_image_button_cell()'s own data-images paths are relative to
+  // Web/'s own root (e.g. "images/sii/XVIII/p0142.jpg") -- correct as
+  // an <img src> on the public page (Web/SII-Inscriptions.html, same
+  // directory as images/), but this exact row data is ALSO reused
+  // verbatim on the Sanjay copy (Web/Sanjay/SII-Inscriptions.html, one
+  // directory deeper) -- confirmed live, 2026-09-20: every "View page"
+  // image 404'd there because the browser resolved the same relative
+  // path against the wrong base. IMAGE_BASE is a build-time constant
+  // (render_inscriptions_table's own image_base param, computed by
+  // each build script from its own --out path relative to Web/'s
+  // root) -- deliberately NOT sniffed from location.pathname at
+  // runtime (a '/Sanjay/'-in-the-URL check would silently break for
+  // any future page nested deeper than one level), so this stays
+  // correct for wherever a build script actually places its output.
+  const IMAGE_BASE = "";
+  function resolveImagePath(p) { return IMAGE_BASE + p; }
+
   function applyZoom() {
     lbImg.style.transform = 'scale(' + zoom + ')';
     lbZoomLevel.textContent = Math.round(zoom * 100) + '%';
@@ -1191,7 +1208,7 @@ document.addEventListener('click', (e) => {
     applyZoom();
   }
   function show() {
-    lbImg.src = images[idx];
+    lbImg.src = resolveImagePath(images[idx]);
     lbPageIndicator.textContent = images.length > 1 ? (idx + 1) + ' / ' + images.length : '';
     lbPrev.style.display = images.length > 1 ? '' : 'none';
     lbNext.style.display = images.length > 1 ? '' : 'none';
