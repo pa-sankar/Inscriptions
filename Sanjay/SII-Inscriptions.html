@@ -139,8 +139,7 @@
   col.c-sl_no { width: 3%; }
   col.c-survey_ref { width: 8%; }
   col.c-place { width: 10%; }
-  col.c-dynasty { width: 8%; }
-  col.c-king { width: 4%; }
+  col.c-dynasty { width: 12%; }
   col.c-date { width: 9%; }
   col.c-language { width: 4%; }
   col.c-remarks { width: 19%; }
@@ -332,7 +331,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-20 20:07</div>
+<div class="generated">Generated 2026-09-23 07:54</div>
 <div class="stats">15893 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). Volumes: Vol I, Vol II Pt I, Vol II Pt II, Vol III Pt I, Vol III Pt II, Vol III Pt III, Vol III Pt IV, Vol IV, Vol IX Pt I, Vol IX Pt II, Vol V, Vol VI, Vol VII, Vol VIII, Vol X, Vol XI Pt I, Vol XI Pt II, Vol XII Pt I, Vol XIII, Vol XIV, Vol XIX, Vol XL, Vol XLI, Vol XV Pt II, Vol XVI, Vol XVII, Vol XVIII, Vol XX, Vol XXII Pt I, Vol XXII Pt II, Vol XXIII, Vol XXIV, Vol XXVI, Vol XXVII, Vol XXVIII, Vol XXX, Vol XXXI, Vol XXXII Pt I, Vol XXXII Pt II, Vol XXXIII, Vol XXXIV, Vol XXXV, Vol XXXVI, Vol XXXVII, Vol XXXVIII. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, volume by volume — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
@@ -366,8 +365,8 @@
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id"><col class="c-source"><col class="c-kind"><col class="c-type"><col class="c-location"><col class="c-sl_no"><col class="c-survey_ref"><col class="c-place"><col class="c-dynasty"><col class="c-king"><col class="c-date"><col class="c-language"><col class="c-remarks"><col class="c-page"><col class="c-image"></colgroup>
-<thead><tr><th>ID</th><th>Volume</th><th>Kind</th><th>Type</th><th>Location</th><th>Sl.No</th><th>Survey Ref</th><th>Place/Source</th><th>Dynasty</th><th>King</th><th>Date</th><th>Language</th><th>Remarks</th><th>Page</th><th>Image</th></tr></thead>
+<colgroup><col class="c-id"><col class="c-source"><col class="c-kind"><col class="c-type"><col class="c-location"><col class="c-sl_no"><col class="c-survey_ref"><col class="c-place"><col class="c-dynasty"><col class="c-date"><col class="c-language"><col class="c-remarks"><col class="c-page"><col class="c-image"></colgroup>
+<thead><tr><th>ID</th><th>Volume</th><th>Kind</th><th>Type</th><th>Location</th><th>Sl.No</th><th>Survey Ref</th><th>Place/Source</th><th>Dynasty/King</th><th>Date</th><th>Language</th><th>Remarks</th><th>Page</th><th>Image</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -403,9 +402,9 @@
 <script>
 const FILTER_KEYS = ['kind', 'type', 'volume'];
 const SEARCHABLE_KEYS = new Set(['volume']);
-const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'survey_ref', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page', 'image'];
-const HIGHLIGHT_COLS = [7, 8, 10, 12];
-const REMARKS_COL_IDX = 12;
+const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'page', 'image'];
+const HIGHLIGHT_COLS = [7, 8, 9, 11];
+const REMARKS_COL_IDX = 11;
 const q = document.getElementById('q');
 const searchScope = document.getElementById('searchScope');
 const matchMode = document.getElementById('matchMode');
