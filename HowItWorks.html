@@ -17,12 +17,17 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>&#128301;</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap">
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2E18RX7LNT"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-2E18RX7LNT');
+  // page_group -- see inscriptions_table_html.py's own render_inscriptions_table()
+  // for why (per the user, 2026-09-25: distinguish public vs Sanjay
+  // traffic in GA). This page is public-only, no Sanjay variant, but
+  // tagged explicitly anyway for consistency across the whole site's
+  // reporting rather than leaving it blank here alone.
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'public'});
 </script>
 <style>
   /* Same token system as every other page on the site -- per the user,
