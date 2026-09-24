@@ -149,6 +149,13 @@
   th {
     background: var(--surface-2); color: var(--text-dim); position: sticky; top: 0; z-index: 1;
     text-transform: uppercase; letter-spacing: 0.04em; font-size: 11.5px;
+    /* A narrow column (Sl.No, Language, Image) was wrapping its own
+       header into a vertical stack of single letters -- per the user,
+       2026-09-24: give it room instead, since the table already
+       scrolls horizontally (.table-scroll) rather than trying to fit
+       every column into one screen width. Body cells (td) keep
+       wrapping as before -- this is header-only. */
+    white-space: nowrap;
   }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: var(--surface-2); }
@@ -157,13 +164,13 @@
   col.c-kind { width: 6%; }
   col.c-type { width: 5%; }
   col.c-location { width: 8%; }
-  col.c-sl_no { width: 3%; }
+  col.c-sl_no { width: 5%; }
   col.c-place { width: 10%; }
   col.c-dynasty { width: 6%; }
   col.c-king { width: 6%; }
   col.c-date { width: 10%; }
-  col.c-language { width: 5%; }
-  col.c-remarks { width: 24%; }
+  col.c-language { width: 6%; }
+  col.c-remarks { width: 21%; }
   col.c-page { width: 5%; }
   /* Click-to-copy ID chip — same pattern as SII's original
      build_review_report.py idchip, kept for visual/behavioral consistency
@@ -352,7 +359,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-24 14:14</div>
+<div class="generated">Generated 2026-09-24 14:52</div>
 <div class="stats">28616 records from 41 report(s), 4119 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
 <div class="controls">
