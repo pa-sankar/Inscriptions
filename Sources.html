@@ -47,6 +47,30 @@
   .nolink { color: var(--text-dim); font-size: 0.85rem; }
   .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
   .back:hover { color: var(--accent); }
+  /* Confirm-and-redirect modal -- per the user, 2026-09-24: track
+     clicks on a source PDF link (a GA event) and warn before leaving
+     the site, so a reader who taps a link isn't silently dropped onto
+     archive.org with no context. */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,18,10,0.5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; z-index: 10;
+  }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    max-width: 26rem; width: 100%; padding: 1.4rem 1.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 16px 40px rgba(0,0,0,0.18);
+  }
+  .modal-box h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+  .modal-box p { font-size: 0.92rem; color: var(--text-dim); margin: 0.4rem 0 1.1rem; word-break: break-word; }
+  .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+  .modal-actions button {
+    font: inherit; font-size: 0.9rem; padding: 0.45rem 1rem; border-radius: 6px;
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+  }
+  .modal-actions button:hover { border-color: var(--accent); }
+  .modal-actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .modal-actions .primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
 </style>
 </head>
 <body>
@@ -63,54 +87,114 @@ on the Internet Archive.</p>
 
 <h2 id="sii">South Indian Inscriptions (45 volumes/parts)</h2>
 <ul>
-<li id="sii-vol-i"><strong>Vol I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-01/South%20Indian%20Inscriptions%20Vol_01.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 01</a></li>
-<li id="sii-vol-ii-pt-i"><strong>Vol II Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-02-part-1/South%20Indian%20Inscriptions%20Vol_02%20Part%20-%201.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 02 Part 1</a></li>
-<li id="sii-vol-ii-pt-ii"><strong>Vol II Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-02-part-2/South%20Indian%20Inscriptions%20Vol_02%20Part%20-%202.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 02 Part 2</a></li>
-<li id="sii-vol-iii-pt-i"><strong>Vol III Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-1/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%201.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 1</a></li>
-<li id="sii-vol-iii-pt-ii"><strong>Vol III Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-2/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%202.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 2</a></li>
-<li id="sii-vol-iii-pt-iii"><strong>Vol III Pt III</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-3/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%203.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 3</a></li>
-<li id="sii-vol-iii-pt-iv"><strong>Vol III Pt IV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-4/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%204.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 4</a></li>
-<li id="sii-vol-iv"><strong>Vol IV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-04/South%20Indian%20Inscriptions%20Vol_04.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 04</a></li>
-<li id="sii-vol-ix-pt-i"><strong>Vol IX Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-09-part-1/South%20Indian%20Inscriptions%20Vol_09%20Part%20-%201_1.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 09 Part 1</a></li>
-<li id="sii-vol-ix-pt-ii"><strong>Vol IX Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-09-part-2/South%20Indian%20Inscriptions%20Vol_09%20Part%20-%202_1.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 09 Part 2</a></li>
-<li id="sii-vol-v"><strong>Vol V</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-05/South%20Indian%20Inscriptions%20Vol_05_1.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 05</a></li>
-<li id="sii-vol-vi"><strong>Vol VI</strong> — <a href="https://archive.org/download/tdl.40370-south-indian-inscriptions-miscellaneous-inscriptions-from-the-tamil-ma/ACL-FTS_00588_South_Indian_Inscriptions_Vol_6_1928.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 06</a></li>
-<li id="sii-vol-vii"><strong>Vol VII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-07/South%20Indian%20Inscriptions%20Vol_07.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 07</a></li>
-<li id="sii-vol-viii"><strong>Vol VIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-08/South%20Indian%20Inscriptions%20Vol_08.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 08</a></li>
-<li id="sii-vol-x"><strong>Vol X</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-10/South%20Indian%20Inscriptions%20Vol_10.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 10</a></li>
-<li id="sii-vol-xi-pt-i"><strong>Vol XI Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-11-part-1/South%20Indian%20Inscriptions%20Vol_11%20Part%20-%201.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 11 Part 1</a></li>
-<li id="sii-vol-xi-pt-ii"><strong>Vol XI Pt II</strong> — <a href="https://archive.org/download/tdl.57292-south-indian-inscriptions-bombay-karnataka-inscriptions-vol-11/ACL-ARCH-00644_South_Indian_inscriptions_Vol_11.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol XI (Bombay-Karnataka Inscriptions) -- full scan, part boundary unconfirmed</a></li>
-<li id="sii-vol-xii-pt-i"><strong>Vol XII Pt I</strong> — <a href="https://archive.org/download/dli.ernet.107391/107391-South%20Indian%20Inscriptions%20Vol.12.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 12 Part 1</a></li>
-<li id="sii-vol-xiii"><strong>Vol XIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-13/South%20Indian%20Inscriptions%20Vol_13.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 13</a></li>
-<li id="sii-vol-xiv"><strong>Vol XIV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-14/South%20Indian%20Inscriptions%20Vol_14.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 14</a></li>
-<li id="sii-vol-xix"><strong>Vol XIX</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-19/South%20Indian%20Inscriptions%20Vol_19.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 19</a></li>
-<li id="sii-vol-xl"><strong>Vol XL</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-40/South%20Indian%20Inscriptions%20Vol_40.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 40</a></li>
-<li id="sii-vol-xli"><strong>Vol XLI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-41/South%20Indian%20Inscriptions%20Vol_41.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 41</a></li>
-<li id="sii-vol-xv-pt-ii"><strong>Vol XV Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-15-part-2/South%20Indian%20Inscriptions%20Vol_15%20Part%20-%202.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 15 Part 2</a></li>
-<li id="sii-vol-xvi"><strong>Vol XVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-16/South%20Indian%20Inscriptions%20Vol_16.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 16</a></li>
-<li id="sii-vol-xvii"><strong>Vol XVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-17/South%20Indian%20Inscriptions%20Vol_17.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 17</a></li>
-<li id="sii-vol-xviii"><strong>Vol XVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-18/South%20Indian%20Inscriptions%20Vol_18.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 18</a></li>
-<li id="sii-vol-xx"><strong>Vol XX</strong> — <a href="https://archive.org/download/tdl.57287-south-indian-inscriptions-bombay-karnataka-inscriptions-vol-20/ACL-ARCH-00641_South_Indian_inscriptions_Vol_20.pdf" target="_blank" rel="noopener">South Indian Inscriptions, Vol. XX (Bombay-Karnataka Inscriptions)</a></li>
-<li id="sii-vol-xxii-pt-i"><strong>Vol XXII Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-22-part-1/South%20Indian%20Inscriptions%20Vol_22%20Part%20-%201.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 22 Part 1</a></li>
-<li id="sii-vol-xxii-pt-ii"><strong>Vol XXII Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-22-part-2/South%20Indian%20Inscriptions%20Vol_22%20Part%20-%202.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 22 Part 2</a></li>
-<li id="sii-vol-xxiii"><strong>Vol XXIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-23/South%20Indian%20Inscriptions%20Vol_23.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 23</a></li>
-<li id="sii-vol-xxiv"><strong>Vol XXIV</strong> — <a href="https://archive.org/download/dli.ernet.108432/108432-South%20Indian%20Inscriptions%20Vol.24.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 24</a></li>
-<li id="sii-vol-xxvi"><strong>Vol XXVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-26/South%20Indian%20Inscriptions%20Vol_26.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 26</a></li>
-<li id="sii-vol-xxvii"><strong>Vol XXVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-27/South%20Indian%20Inscriptions%20Vol_27.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 27</a></li>
-<li id="sii-vol-xxviii"><strong>Vol XXVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-28/South%20Indian%20Inscriptions%20Vol_28.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 28</a></li>
-<li id="sii-vol-xxx"><strong>Vol XXX</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-30/South%20Indian%20Inscriptions%20Vol_30.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 30</a></li>
-<li id="sii-vol-xxxi"><strong>Vol XXXI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-31/South%20Indian%20Inscriptions%20Vol_31.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 31</a></li>
-<li id="sii-vol-xxxii-pt-i"><strong>Vol XXXII Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-32/South%20Indian%20Inscriptions%20Vol_32.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 32</a></li>
-<li id="sii-vol-xxxii-pt-ii"><strong>Vol XXXII Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-32/South%20Indian%20Inscriptions%20Vol_32.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 32</a></li>
-<li id="sii-vol-xxxiii"><strong>Vol XXXIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-33/South%20Indian%20Inscriptions%20Vol_33.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 33</a></li>
-<li id="sii-vol-xxxiv"><strong>Vol XXXIV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-34/South%20Indian%20Inscriptions%20Vol_34.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 34</a></li>
-<li id="sii-vol-xxxv"><strong>Vol XXXV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-35/South%20Indian%20Inscriptions%20Vol_35.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 35</a></li>
-<li id="sii-vol-xxxvi"><strong>Vol XXXVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-36/South%20Indian%20Inscriptions%20Vol_36.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 36</a></li>
-<li id="sii-vol-xxxvii"><strong>Vol XXXVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-37/South%20Indian%20Inscriptions%20Vol_37.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 37</a></li>
-<li id="sii-vol-xxxviii"><strong>Vol XXXVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-38/South%20Indian%20Inscriptions%20Vol_38.pdf" target="_blank" rel="noopener">South Indian Inscriptions Vol 38</a></li>
+<li id="sii-vol-i"><strong>Vol I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-01/South%20Indian%20Inscriptions%20Vol_01.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol I" target="_blank" rel="noopener">South Indian Inscriptions Vol 01</a></li>
+<li id="sii-vol-ii-pt-i"><strong>Vol II Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-02-part-1/South%20Indian%20Inscriptions%20Vol_02%20Part%20-%201.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol II Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 02 Part 1</a></li>
+<li id="sii-vol-ii-pt-ii"><strong>Vol II Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-02-part-2/South%20Indian%20Inscriptions%20Vol_02%20Part%20-%202.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol II Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 02 Part 2</a></li>
+<li id="sii-vol-iii-pt-i"><strong>Vol III Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-1/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%201.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol III Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 1</a></li>
+<li id="sii-vol-iii-pt-ii"><strong>Vol III Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-2/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%202.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol III Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 2</a></li>
+<li id="sii-vol-iii-pt-iii"><strong>Vol III Pt III</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-3/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%203.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol III Pt III" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 3</a></li>
+<li id="sii-vol-iii-pt-iv"><strong>Vol III Pt IV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-03-part-4/South%20Indian%20Inscriptions%20Vol_03%20Part%20-%204.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol III Pt IV" target="_blank" rel="noopener">South Indian Inscriptions Vol 03 Part 4</a></li>
+<li id="sii-vol-iv"><strong>Vol IV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-04/South%20Indian%20Inscriptions%20Vol_04.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol IV" target="_blank" rel="noopener">South Indian Inscriptions Vol 04</a></li>
+<li id="sii-vol-ix-pt-i"><strong>Vol IX Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-09-part-1/South%20Indian%20Inscriptions%20Vol_09%20Part%20-%201_1.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol IX Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 09 Part 1</a></li>
+<li id="sii-vol-ix-pt-ii"><strong>Vol IX Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-09-part-2/South%20Indian%20Inscriptions%20Vol_09%20Part%20-%202_1.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol IX Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 09 Part 2</a></li>
+<li id="sii-vol-v"><strong>Vol V</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-05/South%20Indian%20Inscriptions%20Vol_05_1.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol V" target="_blank" rel="noopener">South Indian Inscriptions Vol 05</a></li>
+<li id="sii-vol-vi"><strong>Vol VI</strong> — <a href="https://archive.org/download/tdl.40370-south-indian-inscriptions-miscellaneous-inscriptions-from-the-tamil-ma/ACL-FTS_00588_South_Indian_Inscriptions_Vol_6_1928.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol VI" target="_blank" rel="noopener">South Indian Inscriptions Vol 06</a></li>
+<li id="sii-vol-vii"><strong>Vol VII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-07/South%20Indian%20Inscriptions%20Vol_07.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol VII" target="_blank" rel="noopener">South Indian Inscriptions Vol 07</a></li>
+<li id="sii-vol-viii"><strong>Vol VIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-08/South%20Indian%20Inscriptions%20Vol_08.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol VIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 08</a></li>
+<li id="sii-vol-x"><strong>Vol X</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-10/South%20Indian%20Inscriptions%20Vol_10.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol X" target="_blank" rel="noopener">South Indian Inscriptions Vol 10</a></li>
+<li id="sii-vol-xi-pt-i"><strong>Vol XI Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-11-part-1/South%20Indian%20Inscriptions%20Vol_11%20Part%20-%201.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XI Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 11 Part 1</a></li>
+<li id="sii-vol-xi-pt-ii"><strong>Vol XI Pt II</strong> — <a href="https://archive.org/download/tdl.57292-south-indian-inscriptions-bombay-karnataka-inscriptions-vol-11/ACL-ARCH-00644_South_Indian_inscriptions_Vol_11.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XI Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol XI (Bombay-Karnataka Inscriptions) -- full scan, part boundary unconfirmed</a></li>
+<li id="sii-vol-xii-pt-i"><strong>Vol XII Pt I</strong> — <a href="https://archive.org/download/dli.ernet.107391/107391-South%20Indian%20Inscriptions%20Vol.12.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XII Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 12 Part 1</a></li>
+<li id="sii-vol-xiii"><strong>Vol XIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-13/South%20Indian%20Inscriptions%20Vol_13.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 13</a></li>
+<li id="sii-vol-xiv"><strong>Vol XIV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-14/South%20Indian%20Inscriptions%20Vol_14.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XIV" target="_blank" rel="noopener">South Indian Inscriptions Vol 14</a></li>
+<li id="sii-vol-xix"><strong>Vol XIX</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-19/South%20Indian%20Inscriptions%20Vol_19.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XIX" target="_blank" rel="noopener">South Indian Inscriptions Vol 19</a></li>
+<li id="sii-vol-xl"><strong>Vol XL</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-40/South%20Indian%20Inscriptions%20Vol_40.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XL" target="_blank" rel="noopener">South Indian Inscriptions Vol 40</a></li>
+<li id="sii-vol-xli"><strong>Vol XLI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-41/South%20Indian%20Inscriptions%20Vol_41.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XLI" target="_blank" rel="noopener">South Indian Inscriptions Vol 41</a></li>
+<li id="sii-vol-xv-pt-ii"><strong>Vol XV Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-15-part-2/South%20Indian%20Inscriptions%20Vol_15%20Part%20-%202.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XV Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 15 Part 2</a></li>
+<li id="sii-vol-xvi"><strong>Vol XVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-16/South%20Indian%20Inscriptions%20Vol_16.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XVI" target="_blank" rel="noopener">South Indian Inscriptions Vol 16</a></li>
+<li id="sii-vol-xvii"><strong>Vol XVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-17/South%20Indian%20Inscriptions%20Vol_17.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XVII" target="_blank" rel="noopener">South Indian Inscriptions Vol 17</a></li>
+<li id="sii-vol-xviii"><strong>Vol XVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-18/South%20Indian%20Inscriptions%20Vol_18.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XVIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 18</a></li>
+<li id="sii-vol-xx"><strong>Vol XX</strong> — <a href="https://archive.org/download/tdl.57287-south-indian-inscriptions-bombay-karnataka-inscriptions-vol-20/ACL-ARCH-00641_South_Indian_inscriptions_Vol_20.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XX" target="_blank" rel="noopener">South Indian Inscriptions, Vol. XX (Bombay-Karnataka Inscriptions)</a></li>
+<li id="sii-vol-xxii-pt-i"><strong>Vol XXII Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-22-part-1/South%20Indian%20Inscriptions%20Vol_22%20Part%20-%201.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXII Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 22 Part 1</a></li>
+<li id="sii-vol-xxii-pt-ii"><strong>Vol XXII Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-22-part-2/South%20Indian%20Inscriptions%20Vol_22%20Part%20-%202.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXII Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 22 Part 2</a></li>
+<li id="sii-vol-xxiii"><strong>Vol XXIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-23/South%20Indian%20Inscriptions%20Vol_23.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 23</a></li>
+<li id="sii-vol-xxiv"><strong>Vol XXIV</strong> — <a href="https://archive.org/download/dli.ernet.108432/108432-South%20Indian%20Inscriptions%20Vol.24.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXIV" target="_blank" rel="noopener">South Indian Inscriptions Vol 24</a></li>
+<li id="sii-vol-xxvi"><strong>Vol XXVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-26/South%20Indian%20Inscriptions%20Vol_26.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXVI" target="_blank" rel="noopener">South Indian Inscriptions Vol 26</a></li>
+<li id="sii-vol-xxvii"><strong>Vol XXVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-27/South%20Indian%20Inscriptions%20Vol_27.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXVII" target="_blank" rel="noopener">South Indian Inscriptions Vol 27</a></li>
+<li id="sii-vol-xxviii"><strong>Vol XXVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-28/South%20Indian%20Inscriptions%20Vol_28.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXVIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 28</a></li>
+<li id="sii-vol-xxx"><strong>Vol XXX</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-30/South%20Indian%20Inscriptions%20Vol_30.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXX" target="_blank" rel="noopener">South Indian Inscriptions Vol 30</a></li>
+<li id="sii-vol-xxxi"><strong>Vol XXXI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-31/South%20Indian%20Inscriptions%20Vol_31.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXI" target="_blank" rel="noopener">South Indian Inscriptions Vol 31</a></li>
+<li id="sii-vol-xxxii-pt-i"><strong>Vol XXXII Pt I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-32/South%20Indian%20Inscriptions%20Vol_32.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXII Pt I" target="_blank" rel="noopener">South Indian Inscriptions Vol 32</a></li>
+<li id="sii-vol-xxxii-pt-ii"><strong>Vol XXXII Pt II</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-32/South%20Indian%20Inscriptions%20Vol_32.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXII Pt II" target="_blank" rel="noopener">South Indian Inscriptions Vol 32</a></li>
+<li id="sii-vol-xxxiii"><strong>Vol XXXIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-33/South%20Indian%20Inscriptions%20Vol_33.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 33</a></li>
+<li id="sii-vol-xxxiv"><strong>Vol XXXIV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-34/South%20Indian%20Inscriptions%20Vol_34.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXIV" target="_blank" rel="noopener">South Indian Inscriptions Vol 34</a></li>
+<li id="sii-vol-xxxv"><strong>Vol XXXV</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-35/South%20Indian%20Inscriptions%20Vol_35.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXV" target="_blank" rel="noopener">South Indian Inscriptions Vol 35</a></li>
+<li id="sii-vol-xxxvi"><strong>Vol XXXVI</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-36/South%20Indian%20Inscriptions%20Vol_36.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXVI" target="_blank" rel="noopener">South Indian Inscriptions Vol 36</a></li>
+<li id="sii-vol-xxxvii"><strong>Vol XXXVII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-37/South%20Indian%20Inscriptions%20Vol_37.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXVII" target="_blank" rel="noopener">South Indian Inscriptions Vol 37</a></li>
+<li id="sii-vol-xxxviii"><strong>Vol XXXVIII</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-38/South%20Indian%20Inscriptions%20Vol_38.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol XXXVIII" target="_blank" rel="noopener">South Indian Inscriptions Vol 38</a></li>
 </ul>
 
 <a class="back" href="index.html">&larr; Back</a>
 </div>
+
+<div class="modal-overlay" id="pdfModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
+    <h3 id="pdfModalTitle">Leaving this site</h3>
+    <p id="pdfModalText"></p>
+    <div class="modal-actions">
+      <button type="button" id="pdfModalCancel">Cancel</button>
+      <button type="button" id="pdfModalContinue" class="primary">Open PDF in new tab</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  // Every source link already has target="_blank" rel="noopener" for
+  // a no-JS/middle-click fallback -- this intercepts a plain left
+  // click only, so ctrl/cmd-click and middle-click still work exactly
+  // as a normal link would (no modal, no GA event -- accepted trade-off,
+  // not worth fighting browser-native new-tab gestures for).
+  var modal = document.getElementById('pdfModal');
+  var textEl = document.getElementById('pdfModalText');
+  var cancelBtn = document.getElementById('pdfModalCancel');
+  var continueBtn = document.getElementById('pdfModalContinue');
+  var pending = null;
+
+  function openModal(url, volume, corpus, title) {
+    pending = { url: url, volume: volume, corpus: corpus };
+    textEl.textContent = 'You are about to leave this site and open the PDF for '
+      + volume + ' (' + title + ') on archive.org, in a new tab.';
+    modal.hidden = false;
+    continueBtn.focus();
+  }
+  function closeModal() { modal.hidden = true; pending = null; }
+
+  document.querySelectorAll('a.pdf-link').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal(a.getAttribute('href'), a.dataset.volume, a.dataset.corpus, a.textContent);
+    });
+  });
+
+  continueBtn.addEventListener('click', function() {
+    if (!pending) return;
+    if (typeof gtag === 'function') {
+      // Fired only on confirmed navigation, not on every click of the
+      // link -- this is the "actually left the site for this PDF"
+      // signal, which is the one worth counting in GA.
+      gtag('event', 'source_pdf_click', {
+        corpus: pending.corpus, volume: pending.volume, link_url: pending.url,
+      });
+    }
+    window.open(pending.url, '_blank', 'noopener');
+    closeModal();
+  });
+  cancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+})();
+</script>
 </body>
 </html>
