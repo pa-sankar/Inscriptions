@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How It Works</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>&#128301;</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2E18RX7LNT"></script>
 <script>
@@ -42,6 +43,15 @@
     background: var(--bg); color: var(--text); line-height: 1.65;
   }
   .wrap { max-width: 46rem; margin: 0 auto; }
+  /* Project brand mark -- per the user, 2026-09-24: "Project
+     InscriptionSearch" in a distinct display face (Cinzel, an
+     inscriptional/lapidary-style serif), everywhere a page's own
+     title appears. */
+  .brand {
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif; font-weight: 600;
+    font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent-copper-strong); margin: 0 0 4px;
+  }
   h1 { font-size: 1.5rem; font-weight: 700; }
   h2 { font-size: 1.1rem; margin-top: 2.2rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
   p { margin: 0.85rem 0; }
@@ -66,6 +76,7 @@
 <body>
 <div class="wrap">
 <a href="index.html" class="home-link" title="Home">&#8962;</a>
+<div class="brand">Project InscriptionSearch</div>
 <h1>How were the volumes processed?</h1>
 
 <h2>Reading the original scans</h2>
