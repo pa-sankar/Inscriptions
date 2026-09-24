@@ -14,30 +14,70 @@
   gtag('config', 'G-NNRYDYCMW9');
 </script>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 42rem; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }
-  h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-  h2 { font-size: 1.1rem; margin-top: 2.5rem; }
-  p { margin: 0.9rem 0; }
-  .byline { color: #555; font-size: 0.95rem; margin-bottom: 1.5rem; }
-  ul.links { line-height: 2.3; font-size: 1.05rem; padding-left: 1.3rem; }
-  a { color: #1a4d8f; }
-  .note { color: #555; font-size: 0.88rem; }
-  .card {
-    border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.3rem;
-    margin: 0.75rem 0; background: #fafafa;
+  /* Same token system as every other page on the site (SII/ARE tables,
+     EpCa, TaKa, EpTe, EpAn, Sources.html) -- per the user, 2026-09-24:
+     bringing index.html/HowItWorks.html into line, the two pages left
+     out of the 2026-09-20 site-wide unification pass. */
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c;
+    --accent-copper: #a6612f; --accent-copper-strong: #7d431c;
+    --shadow: 0 1px 2px rgba(43,42,36,0.06), 0 8px 24px rgba(43,42,36,0.05);
   }
-  .card h3 { margin: 0 0 0.3rem 0; font-size: 1rem; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 3rem 1rem 4rem;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .wrap { max-width: 42rem; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.25rem; font-weight: 700; }
+  h2 { font-size: 1.15rem; margin-top: 2.5rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+  p { margin: 0.9rem 0; }
+  .byline { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.5rem; }
+  ul.links { line-height: 2.3; font-size: 1.05rem; padding-left: 1.3rem; }
+  a { color: var(--accent-strong); }
+  a:hover { color: var(--accent); }
+  .note { color: var(--text-dim); font-size: 0.88rem; }
+  .card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.3rem;
+    margin: 0.75rem 0; background: var(--surface); box-shadow: var(--shadow);
+  }
+  .card h3 { margin: 0 0 0.3rem 0; font-size: 1rem; color: var(--text); }
   .card p { margin: 0.4rem 0; font-size: 0.95rem; }
-  hr { border: none; border-top: 1px solid #e5e5e5; margin: 2rem 0; }
+  .card.soon { opacity: 0.75; }
+  .badge {
+    display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
+    text-transform: uppercase; color: var(--accent-copper-strong); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 0.1rem 0.6rem; margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 </style>
 </head>
 <body>
+<div class="wrap">
 <h1>Inscriptions</h1>
 <p class="byline">A project by Sankar &mdash; Senior Project Consultant, Cystar, IIT&nbsp;Madras</p>
 
-<p>Over the past several months, this project has built two easily
-keyword-searchable databases from two major published sources on South
-Indian epigraphy:</p>
+<p>Over the past several months, this project has built an easily
+keyword-searchable database from a major published source on South
+Indian epigraphy, with more sources on the way:</p>
 
 <div class="card">
   <h3>South Indian Inscriptions (SII)</h3>
@@ -45,25 +85,25 @@ Indian epigraphy:</p>
   the full text of stone and copper-plate inscriptions across South
   India, volume by volume since 1890.</p>
 </div>
-<div class="card">
-  <h3>Annual Report on [South] Indian Epigraphy (ARE)</h3>
+<div class="card soon">
+  <h3>Annual Report on [South] Indian Epigraphy (ARE) <span class="badge">Coming soon</span></h3>
   <p>The Archaeological Survey of India's yearly reports listing every
   inscription copied and examined that year &mdash; copper plates, stone
-  inscriptions, and pre-1945-46 collections.</p>
+  inscriptions, and pre-1945-46 collections. Being added to the searchable
+  site shortly after launch.</p>
 </div>
 
 <p>What started as a personal research effort has grown into something
 that may be useful to other researchers and enthusiasts working with
 these same sources &mdash; hence this page.</p>
 
-<h2>Search the tables</h2>
-<p>A simple, searchable view of both databases &mdash; basic details only
-(place, dynasty, king, date, language, remarks, and a citation ID for
+<h2>Search the table</h2>
+<p>A simple, searchable view of the database &mdash; basic details only
+(place, dynasty/king, date, language, remarks, and a citation ID for
 each record), with full-text search and a few filters to narrow results.</p>
 <ul class="links">
   <li><a href="SII-Inscriptions.html">South Indian Inscriptions</a></li>
-  <li><a href="ARE-Inscriptions.html">Annual Report on Indian Epigraphy</a></li>
-  <li><a href="Sources.html">Volume Finder</a> &mdash; every volume/report behind these tables (across all seven sources this project works with), linked to its original scan, with other copies found along the way</li>
+  <li><a href="Sources.html">Volume Finder</a> &mdash; every volume behind this table, linked to its original scan, with other copies found along the way</li>
   <li><a href="HowItWorks.html">How were the volumes processed?</a> &mdash; the OCR/reading and record-extraction process, explained</li>
 </ul>
 <p class="note">A note on page images: some records have the original
@@ -77,6 +117,7 @@ scanned page available to view alongside their transcription.</p>
 Feedback and requests are welcome via <a href="#">this form</a>.</p>
 
 <p class="note">Static snapshots &mdash; regenerated and re-published
-periodically as the underlying databases grow. Not a live database query.</p>
+periodically as the underlying database grows. Not a live database query.</p>
+</div>
 </body>
 </html>

@@ -14,42 +14,68 @@
   gtag('config', 'G-NNRYDYCMW9');
 </script>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; color: #1a1a1a; line-height: 1.65; }
-  h1 { font-size: 1.4rem; }
-  h2 { font-size: 1.1rem; margin-top: 2.2rem; }
+  /* Same token system as every other page on the site -- per the user,
+     2026-09-24: bringing this page into line with the 2026-09-20
+     site-wide unification pass, which missed it and index.html. */
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c;
+    --accent-copper: #a6612f; --accent-copper-strong: #7d431c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 2rem 1rem 4rem;
+    background: var(--bg); color: var(--text); line-height: 1.65;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  h2 { font-size: 1.1rem; margin-top: 2.2rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
   p { margin: 0.85rem 0; }
-  a { color: #1a4d8f; }
-  .home-link { text-decoration: none; color: #1a4d8f; margin-right: 0.4rem; }
-  .home-link:hover { color: #0a5; }
+  a { color: var(--accent-strong); }
+  a:hover { color: var(--accent); }
+  .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.4rem; font-size: 1.1rem; }
+  .home-link:hover { color: var(--accent); }
   .example {
-    background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 6px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
     padding: 0.8rem 1rem; margin: 0.9rem 0; font-size: 0.92rem;
   }
   .example .row { margin: 0.3rem 0; }
-  .example .label { color: #666; font-size: 0.8rem; }
+  .example .label { color: var(--text-dim); font-size: 0.8rem; }
   .v-direct { color: inherit; }
-  .v-derived { color: #8a4b00; font-style: italic; }
-  code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
-  .note { color: #555; font-size: 0.88rem; }
+  .v-derived { color: var(--accent-copper-strong); font-style: italic; }
+  code { background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+  .note { color: var(--text-dim); font-size: 0.88rem; }
+  .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
+  .back:hover { color: var(--accent); }
 </style>
 </head>
 <body>
+<div class="wrap">
 <a href="index.html" class="home-link" title="Home">&#8962;</a>
 <h1>How were the volumes processed?</h1>
 
 <h2>Reading the original scans</h2>
-<p>Both sources are scanned books, decades old, in a mix of English
+<p>The source is a scanned book, decades old, in a mix of English
 apparatus and vernacular (Tamil, Kannada, Telugu, Sanskrit) script, often
 with diacritical marks (ā, ṛ, ḻ, ñ, ...) that plain OCR software reads
 unreliably or drops outright. Every page was read using an AI vision
 model instructed to transcribe exactly what's printed, diacritics
 included, rather than a traditional OCR engine — the difference matters
 most on exactly the marks that carry real linguistic information.</p>
-<p>Some ARE (Annual Report on Indian Epigraphy) appendix tables are
-printed sideways on the page (rotated 90&deg;) to fit a wide table onto a
-portrait page. These needed the same careful reading, with the model
-told about the rotation so it reads the table in the right order rather
-than transcribing it as if it were upright.</p>
 
 <h2>Turning a page of text into structured records</h2>
 <p>Once a page is transcribed, each individual inscription record on it
@@ -69,7 +95,9 @@ page, or a value <span class="v-derived">derived</span> some other way —
 resolved by tracing back to whichever earlier record last stated a real
 place, matched against the volume's own contents/topographical table, or
 geocoded from the printed text. Hover either kind of value on the table
-itself to see exactly where it came from.</p>
+itself to see exactly where it came from. Where it can be determined
+unambiguously, the modern Indian state (Tamil Nadu, Karnataka, Andhra
+Pradesh, ...) is shown alongside the resolved location too.</p>
 
 <div class="example">
   <div class="label">A real example (South Indian Inscriptions, Vol. IV)</div>
@@ -85,11 +113,10 @@ itself to see exactly where it came from.</p>
 
 <p class="note">"Ibid."-style cross-references in the Remarks column
 (pointing back at an earlier citation, e.g. "Ibid., Vol. VIII, pp. 138
-ff.") are being resolved to their full citation the same way — volume by
-volume, or report-year by report-year for ARE. This is a work in
-progress: most records don't have a resolved citation yet. Where one has
-been resolved, the underlined word in Remarks carries the full citation
-as a hover tooltip.</p>
+ff.") are being resolved to their full citation the same way. This is a
+work in progress: most records don't have a resolved citation yet. Where
+one has been resolved, the underlined word in Remarks carries the full
+citation as a hover tooltip.</p>
 
 <h2>Reading a long record</h2>
 <p>A record's remarks can run to many lines for a heavily-discussed
@@ -101,10 +128,11 @@ this only affects how it's displayed, the full text is always there.</p>
 <p>Some records have a button to view the actual scanned page image
 alongside the transcription. This isn't available for every record —
 each page image adds real file size to what's published, and hosting a
-scan for every page of every volume of both sources would grow well
-beyond what's practical for this site's own repository. Page images are
-included selectively, not for the whole corpus.</p>
+scan for every page of the whole corpus would grow well beyond what's
+practical for this site's own repository. Page images are included
+selectively, not for the whole corpus.</p>
 
-<a href="index.html" style="display:inline-block; margin-top:2rem;">&larr; Back</a>
+<a href="index.html" class="back">&larr; Back</a>
+</div>
 </body>
 </html>
