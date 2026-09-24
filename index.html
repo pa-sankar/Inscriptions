@@ -113,10 +113,18 @@ scanned page available to view alongside their transcription.</p>
 
 <h2>Feedback</h2>
 <p>Found something useful, or think a different source should be added?
-Feedback and requests are welcome via <a href="https://forms.gle/qfXGVHuK1emDwzNe8" target="_blank" rel="noopener">this form</a>.</p>
+Feedback and requests are welcome via <a href="https://forms.gle/qfXGVHuK1emDwzNe8" target="_blank" rel="noopener" id="feedbackLink">this form</a>.</p>
 
 <p class="note">Static snapshots &mdash; regenerated and re-published
 periodically as the underlying database grows. Not a live database query.</p>
 </div>
+<script>
+  // Fires on click, doesn't block the default target="_blank" navigation --
+  // per the user, 2026-09-24: the form should open in a new tab (site stays
+  // loaded) the same way a source PDF link does, and be visible in GA.
+  document.getElementById('feedbackLink').addEventListener('click', function() {
+    if (typeof gtag === 'function') gtag('event', 'feedback_form_click');
+  });
+</script>
 </body>
 </html>

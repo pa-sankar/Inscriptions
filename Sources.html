@@ -47,6 +47,12 @@
   .nolink { color: var(--text-dim); font-size: 0.85rem; }
   .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
   .back:hover { color: var(--accent); }
+  /* Repeated above every corpus section (plus once at the very top),
+     not just at the page's own bottom -- per the user, 2026-09-24: a
+     long volume list shouldn't force a scroll back to find the way
+     out. The very top one sits flush against the page edge instead of
+     the usual 2rem gap every other placement wants. */
+  .back.top { margin-top: 0; margin-bottom: 0.4rem; font-size: 0.85rem; }
   /* Confirm-and-redirect modal -- per the user, 2026-09-24: track
      clicks on a source PDF link (a GA event) and warn before leaving
      the site, so a reader who taps a link isn't silently dropped onto
@@ -80,6 +86,7 @@
 </head>
 <body>
 <div class="wrap">
+<a class="back top" href="index.html">&larr; Back</a>
 <h1>Sources</h1>
 <p>Every volume/report shown in the searchable tables, linked to the exact
 PDF our own OCR pipeline read it from. A "Page #" cell in the search
@@ -90,6 +97,7 @@ whichever copy a search turns up, or the page number won't line up.</p>
 <p><strong>South Indian Inscriptions (SII)</strong> — digitized scans hosted
 on the Internet Archive.</p>
 
+<a class="back" href="index.html">&larr; Back</a>
 <h2 id="sii">South Indian Inscriptions (45 volumes/parts)</h2>
 <ul>
 <li id="sii-vol-i"><strong>Vol I</strong> — <a href="https://archive.org/download/south-indian-inscriptions-vol-01/South%20Indian%20Inscriptions%20Vol_01.pdf" class="pdf-link" data-corpus="sii" data-volume="Vol I" target="_blank" rel="noopener">South Indian Inscriptions Vol 01</a></li>
