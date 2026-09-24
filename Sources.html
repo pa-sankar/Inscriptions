@@ -56,6 +56,11 @@
     display: flex; align-items: center; justify-content: center;
     padding: 1rem; z-index: 10;
   }
+  /* [hidden] and this class's own `display: flex` are the same
+     specificity, and this stylesheet loads after the browser's UA
+     one -- without this override, `hidden` never actually hid the
+     modal and it showed on every page load. Found live 2026-09-24. */
+  .modal-overlay[hidden] { display: none; }
   .modal-box {
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     max-width: 26rem; width: 100%; padding: 1.4rem 1.5rem;
