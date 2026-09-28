@@ -463,7 +463,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 42 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-28 12:33</div>
+<div class="generated">Generated 2026-09-28 12:45</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">31551 records from 4423 table pages (342 index pages excluded) across 42 PDFs. 74666 &quot;Do.&quot; cells resolved, 6385 flagged (unresolved or partial — not auto-filled). 17 merged Serial/Findspot cells split, 11 stray Sl.No prefixes stripped, 4415 location prefixes moved to Location, 4 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -853,6 +853,14 @@ const DEFAULT_VISIBLE_KEYS = new Set(["id", "source", "location", "place", "rema
 const BASE_COL_WIDTHS = {"id": 7, "source": 5, "kind": 5, "type": 5, "location": 20, "sl_no": 5, "place": 18, "dynasty": 6, "king": 6, "date": 10, "language": 6, "remarks": 50, "page": 5};
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
+// The set of column keys actually shown right now — recomputed by
+// updateColumnVisibility() on every filter change, consulted by
+// buildRow() below so a hidden column's real text never lands in the
+// DOM at all (not just visually hidden), which is what stops its
+// content from wrapping and inflating row height. Starts at
+// DEFAULT_VISIBLE_KEYS so the very first paint (before
+// updateColumnVisibility() has run once) already agrees with it.
+let CURRENT_VISIBLE_KEYS = new Set(DEFAULT_VISIBLE_KEYS);
 const q = document.getElementById('q');
 const searchScope = document.getElementById('searchScope');
 const matchMode = document.getElementById('matchMode');
@@ -1098,7 +1106,18 @@ function buildRow(row, term, whole, scope, catVal) {
   tr.dataset.key = (row.text && row.text.id) || '';
   COLUMN_KEYS.forEach((key, i) => {
     const td = document.createElement('td');
-    const cellHtml = row.cells[key] || '';
+    // A column that isn't currently shown (col-optional-hidden, width
+    // forced to 0%) still gets a real <td> here, to keep column count
+    // aligned with <colgroup> -- but its actual text must NOT go in.
+    // Found live 2026-09-28, per the user ("large row height uniformly
+    // ... no content to fill all that space"): the hidden column's own
+    // real content (Type, Dynasty, Date, ...) was still being rendered
+    // into a 0%-wide cell, wrapping every word onto its own line and
+    // inflating that <td>'s height -- which, being the tallest cell in
+    // the row, set the whole row's height regardless of what Remarks or
+    // any other visible column actually needed. An empty hidden cell has
+    // no content to wrap, so it can no longer drive row height at all.
+    const cellHtml = CURRENT_VISIBLE_KEYS.has(key) ? (row.cells[key] || '') : '';
     let ranges = null;
     if (catVal) {
       const spans = row.spans[key];
@@ -1280,6 +1299,7 @@ function updateColumnVisibility() {
   FILTER_KEYS.forEach((k) => {
     if (FILTER_STATE[k] && FILTER_STATE[k].values.size > 0) visible.add(k);
   });
+  CURRENT_VISIBLE_KEYS = visible;
   let extra = 0;
   Object.keys(BASE_COL_WIDTHS).forEach((key) => {
     const col = document.querySelector('col[data-key="' + key + '"]');
