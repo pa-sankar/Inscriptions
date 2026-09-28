@@ -89,6 +89,16 @@
     color: var(--text-dim); line-height: 1.5;
   }
   .legend strong { color: var(--text); }
+  /* Explains the cascading-filter behavior and what Reset does — per the
+     user, 2026-09-28: "add additional text in the header to indicate
+     this for the user." Kept to the same quiet, secondary-text styling
+     as the legend/stats line rather than a loud banner, since it's
+     background info a returning reader won't need to re-read every time. */
+  .filters-help {
+    color: var(--text-dim); font-size: 0.82rem; line-height: 1.5;
+    margin-bottom: 0.75rem; max-width: 62rem;
+  }
+  .filters-help strong { color: var(--text); }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -132,6 +142,20 @@
   }
   .filter-dd-opt:hover { background: var(--surface-2); }
   .filter-dd-opt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Cascading filters — see recomputeFilterOptions(). A greyed, disabled
+     look for an option that would currently match zero rows given every
+     OTHER active filter, so a reader sees at a glance what's genuinely
+     available rather than discovering it only after picking a dead end. */
+  .filter-dd-opt-unavailable { opacity: 0.4; cursor: not-allowed; }
+  .filter-dd-opt-unavailable:hover { background: none; }
+  /* "Blank / not available" pseudo-option — see BLANK_FILTER_VALUE. Set
+     off from the real values above it with a divider and a slightly
+     dimmed, italic label, so it reads as the deliberate catch-all it is
+     rather than one more ordinary value in the list. */
+  .filter-dd-opt-blank {
+    border-top: 1px solid var(--border); margin-top: 0.25rem; padding-top: 0.4rem;
+    font-style: italic; color: var(--text-dim);
+  }
   .filter-dd-actions { display: flex; justify-content: flex-end; }
   .filter-dd-clear {
     padding: 4px 10px; cursor: pointer; background: none; border: 1px solid var(--border);
@@ -217,16 +241,26 @@
   col.c-remarks { width: 50%; }
   col.c-page { width: 5%; }
   col.c-image { width: 5%; }
-  /* Click-to-copy ID chip — same pattern as SII's original
-     build_review_report.py idchip, kept for visual/behavioral consistency
-     across every table that uses this shell. */
+  /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
+     text (see id_chip_html()'s own docstring), so a compact fixed-size
+     icon button replaces what used to size itself to a 15+ character
+     monospace string. font-size here sizes the emoji glyph itself, not
+     body text. */
   button.idchip {
-    font-family: 'Consolas', monospace; font-size: 12.5px; cursor: pointer;
-    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
+    font-size: 15px; line-height: 1; cursor: pointer;
+    padding: 4px 7px; border-radius: 6px; border: 1px solid var(--border);
     background: none; color: var(--accent-strong);
+    font-family: 'Consolas', monospace; /* only used for the flashed id-text/"copied" state below */
   }
   button.idchip:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
-  button.idchip.copied { color: #fff; background: var(--accent-strong); border-color: var(--accent-strong); }
+  /* The flashed state (copyIdChip() below) briefly shows real text (the
+     stable_id itself, or "press Ctrl+C") instead of the glyph, so it
+     needs to fit more than one character -- back to a normal small font
+     and no forced centering, only while .copied is applied. */
+  button.idchip.copied {
+    color: #fff; background: var(--accent-strong); border-color: var(--accent-strong);
+    font-size: 12px; white-space: nowrap;
+  }
   /* "As printed" vs "derived" two-color convention — see dual_span_cell(). */
   .v-direct { color: inherit; }
   .v-derived { color: var(--accent-copper-strong); font-style: italic; }
@@ -404,11 +438,17 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-28 08:50</div>
+<div class="generated">Generated 2026-09-28 09:08</div>
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
+<div class="filters-help">Filters narrow each other as you go — pick a
+Volume and every other filter's list shrinks to only the values that
+actually occur among that Volume's own records (a greyed-out option
+means nothing currently matches it; it reappears the moment you widen
+another filter back out). <strong>Reset</strong> clears every filter and
+the search box back to their starting state.</div>
 <div class="controls">
-  <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (16003)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (15594)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hero-stone"><span>Hero-stone (353)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (49)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sati-stone"><span>Sati-stone (7)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I (1)"><span>I (1) — 114 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt I (2)"><span>II Pt I (2) — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt II (2)"><span>II Pt II (2) — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I (3)"><span>III Pt I (3) — 40 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II (3)"><span>III Pt II (3) — 24 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt III (3)"><span>III Pt III (3) — 108 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt IV (3)"><span>III Pt IV (3) — 7 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV (4)"><span>IV (4) — 950 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V (5)"><span>V (5) — 1139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI (6)"><span>VI (6) — 646 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII (7)"><span>VII (7) — 806 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII (8)"><span>VIII (8) — 567 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt I (9)"><span>IX Pt I (9) — 339 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt II (9)"><span>IX Pt II (9) — 236 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X (10)"><span>X (10) — 691 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt I (11)"><span>XI Pt I (11) — 107 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt II (11)"><span>XI Pt II (11) — 201 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII Pt I (12)"><span>XII Pt I (12) — 256 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIII (13)"><span>XIII (13) — 336 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV (14)"><span>XIV (14) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV Pt II (15)"><span>XV Pt II (15) — 476 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI (16)"><span>XVI (16) — 270 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVII (17)"><span>XVII (17) — 632 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII (18)"><span>XVIII (18) — 417 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIX (19)"><span>XIX (19) — 453 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XX (20)"><span>XX (20) — 381 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt I (22)"><span>XXII Pt I (22) — 293 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt II (22)"><span>XXII Pt II (22) — 137 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIII (23)"><span>XXIII (23) — 528 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIV (24)"><span>XXIV (24) — 544 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVI (26)"><span>XXVI (26) — 689 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVII (27)"><span>XXVII (27) — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVIII (28)"><span>XXVIII (28) — 308 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXX (30)"><span>XXX (30) — 258 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXI (31)"><span>XXXI (31) — 359 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt I (32)"><span>XXXII Pt I (32) — 99 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt II (32)"><span>XXXII Pt II (32) — 224 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIII (33)"><span>XXXIII (33) — 216 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIV (34)"><span>XXXIV (34) — 402 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXV (35)"><span>XXXV (35) — 193 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVI (36)"><span>XXXVI (36) — 229 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVII (37)"><span>XXXVII (37) — 455 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVIII (38)"><span>XXXVIII (38) — 513 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XL (40)"><span>XL (40) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XLI (41)"><span>XLI (41) — 418 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (6739)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (3109)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (2389)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (29)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chhattisgarh"><span>Chhattisgarh (8)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (7)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (1)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+  <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (16003)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (15594)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hero-stone"><span>Hero-stone (353)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (49)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sati-stone"><span>Sati-stone (7)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I (1)"><span>I (1) — 114 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt I (2)"><span>II Pt I (2) — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt II (2)"><span>II Pt II (2) — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I (3)"><span>III Pt I (3) — 40 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II (3)"><span>III Pt II (3) — 24 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt III (3)"><span>III Pt III (3) — 108 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt IV (3)"><span>III Pt IV (3) — 7 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV (4)"><span>IV (4) — 950 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V (5)"><span>V (5) — 1139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI (6)"><span>VI (6) — 646 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII (7)"><span>VII (7) — 806 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII (8)"><span>VIII (8) — 567 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt I (9)"><span>IX Pt I (9) — 339 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt II (9)"><span>IX Pt II (9) — 236 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X (10)"><span>X (10) — 691 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt I (11)"><span>XI Pt I (11) — 107 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt II (11)"><span>XI Pt II (11) — 201 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII Pt I (12)"><span>XII Pt I (12) — 256 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIII (13)"><span>XIII (13) — 336 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV (14)"><span>XIV (14) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV Pt II (15)"><span>XV Pt II (15) — 476 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI (16)"><span>XVI (16) — 270 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVII (17)"><span>XVII (17) — 632 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII (18)"><span>XVIII (18) — 417 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIX (19)"><span>XIX (19) — 453 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XX (20)"><span>XX (20) — 381 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt I (22)"><span>XXII Pt I (22) — 293 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt II (22)"><span>XXII Pt II (22) — 137 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIII (23)"><span>XXIII (23) — 528 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIV (24)"><span>XXIV (24) — 544 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVI (26)"><span>XXVI (26) — 689 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVII (27)"><span>XXVII (27) — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVIII (28)"><span>XXVIII (28) — 308 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXX (30)"><span>XXX (30) — 258 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXI (31)"><span>XXXI (31) — 359 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt I (32)"><span>XXXII Pt I (32) — 99 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt II (32)"><span>XXXII Pt II (32) — 224 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIII (33)"><span>XXXIII (33) — 216 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIV (34)"><span>XXXIV (34) — 402 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXV (35)"><span>XXXV (35) — 193 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVI (36)"><span>XXXVI (36) — 229 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVII (37)"><span>XXXVII (37) — 455 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVIII (38)"><span>XXXVIII (38) — 513 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XL (40)"><span>XL (40) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XLI (41)"><span>XLI (41) — 418 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (6739)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (3109)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (2389)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (29)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chhattisgarh"><span>Chhattisgarh (8)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (7)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (1)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (21)</option><option value="woman_death_composite">woman_death_composite (15)</option><option value="incidental_sati_mention">incidental_sati_mention (3)</option><option value="memorial_samadhi">memorial_samadhi (2)</option><option value="memorial_shrine">memorial_shrine (2)</option><option value="sati_stone_direct">sati_stone_direct (1)</option></select>
   <select id="searchScope">
     <option value="all">Search: all columns</option>
@@ -473,6 +513,7 @@
   </div>
 </div>
 <script>
+const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'type', 'volume', 'state'];
 const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'page', 'image'];
 const HIGHLIGHT_COLS = [7, 8, 9, 11];
@@ -777,13 +818,14 @@ function render() {
       for (const k of FILTER_KEYS) {
         const st = FILTER_STATE[k];
         if (!st || st.values.size === 0) continue;
-        const cellVal = row.filters[k] || '';
-        const isIn = st.values.has(cellVal);
+        const isIn = st.values.has(filterValueOf(row, k));
         // Include mode: row matches iff its value is one of the checked
         // ones. Exclude mode: row matches iff its value is NOT one of
         // them (so a row with no value for this filter at all still
         // matches an exclude set — same rows an empty include set would
-        // otherwise have to be typed out one by one).
+        // otherwise have to be typed out one by one, UNLESS "Blank" is
+        // itself one of the excluded values, in which case a blank row
+        // is correctly excluded too, via the same Set-membership check).
         const ok = st.mode === 'exclude' ? !isIn : isIn;
         if (!ok) { match = false; break; }
       }
@@ -838,6 +880,66 @@ function runSearch() {
   render();
 }
 
+// A row's own value for filter `key`, normalized so a missing/empty
+// value always compares equal to the "Blank / not available" checkbox's
+// own sentinel (see BLANK_FILTER_VALUE's Python-side docstring) — the
+// one place both render()'s matching loop and recomputeFilterOptions()
+// below read a row's filter value, so the two can never disagree on
+// what "blank" means.
+function filterValueOf(row, key) {
+  const v = row.filters[key];
+  return v ? v : BLANK_FILTER_VALUE;
+}
+
+// Cascading filters — per the user, 2026-09-28: "if Vol is set to
+// volume 2, only states which appear in inscriptions of that volume
+// should get displayed" in every OTHER filter's own option list.
+// Recomputed from scratch on every filter change (not just once at
+// load), since narrowing OR widening any filter can change what's
+// actually available in every other one.
+//
+// For each filter `key`, the option list reflects rows matching every
+// OTHER active filter — deliberately excluding `key`'s own current
+// selection from this pass, or a filter could never be widened back
+// out again once narrowed (checking Volume=II would otherwise instantly
+// hide every other Volume checkbox, since no row can be both II and
+// III at once). Text search / category filter are NOT part of this
+// computation on purpose — cascading is a relationship between the
+// filters themselves, not the free-text search box, which the user's
+// own request only ever describes in terms of filters.
+function recomputeFilterOptions() {
+  FILTER_KEYS.forEach((key) => {
+    const panel = filterPanels[key];
+    if (!panel) return;
+    const available = new Set();
+    for (const row of ROWS) {
+      let ok = true;
+      for (const k of FILTER_KEYS) {
+        if (k === key) continue;
+        const st = FILTER_STATE[k];
+        if (!st || st.values.size === 0) continue;
+        const isIn = st.values.has(filterValueOf(row, k));
+        if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
+      }
+      if (ok) available.add(filterValueOf(row, key));
+    }
+    panel.querySelectorAll('.filter-dd-opt').forEach((opt) => {
+      const cb = opt.querySelector('input[type=checkbox]');
+      const stillPossible = available.has(cb.value);
+      // A checked box always stays enabled and visible, even if it would
+      // now match zero rows — otherwise a reader could never uncheck
+      // the very selection that narrowed everything else away. An
+      // unchecked, now-impossible option is disabled (greyed, not
+      // clickable) rather than hidden outright, so the reader can see
+      // AT A GLANCE what widening another filter would bring back,
+      // rather than the option just silently vanishing.
+      const shouldDisable = !stillPossible && !cb.checked;
+      cb.disabled = shouldDisable;
+      opt.classList.toggle('filter-dd-opt-unavailable', shouldDisable);
+    });
+  });
+}
+
 // Column visibility/width — see Column.default_visible's own docstring.
 // A column (matched by key against a <col data-key>) is shown if it
 // ships default-visible OR its own Filter currently has an active
@@ -872,7 +974,12 @@ function updateColumnVisibility() {
 // Any change that could change *which* rows match (not just how a page
 // of them is painted) resets to page 1 — staying on page 6 of a result
 // set that's now 2 rows long would just show an empty page.
-function renderFromTop() { updateColumnVisibility(); currentPage = 1; render(); }
+function renderFromTop() {
+  updateColumnVisibility();
+  recomputeFilterOptions();
+  currentPage = 1;
+  render();
+}
 
 searchBtn.addEventListener('click', runSearch);
 q.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
@@ -900,6 +1007,7 @@ resetBtn.addEventListener('click', () => {
   pageSizeEl.value = '50';
   currentPage = 1;
   updateColumnVisibility();
+  recomputeFilterOptions();
   render();
 });
 updateColumnVisibility();
@@ -967,6 +1075,7 @@ async function loadData() {
     loadOverlay.hidden = true;
     document.body.classList.remove('loading');
     setControlsDisabled(false);
+    recomputeFilterOptions();
     render();
     // A cross-reference click on the OTHER corpus's page (jumpToKey()
     // below) navigates here with ?jump=<stable_key> rather than trying
@@ -1014,6 +1123,7 @@ function jumpToKey(key) {
     }
   });
   updateColumnVisibility();
+  recomputeFilterOptions();
   // With every filter cleared, `matches` in render() is ROWS in its
   // original order, so the target's page follows directly from its
   // index — no need to re-derive position from the DOM.
@@ -1060,7 +1170,11 @@ document.addEventListener('click', (e) => {
     b.dataset.label = was;
     b.classList.add('copied');
     b.textContent = msg;
-    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1000);
+    // 1.8s, not the original 1s -- the flashed text is now often the
+    // full stable_id (15+ characters on this project's longer keys),
+    // which needs more than a flash of a screen to actually read on a
+    // tap, not just enough to notice something happened.
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1800);
   }
   function legacyCopy(text) {
     const ta = document.createElement('textarea');
@@ -1084,16 +1198,25 @@ document.addEventListener('click', (e) => {
     sel.removeAllRanges();
     sel.addRange(r);
   }
+  // The flashed message on a successful copy is the real stable_id text
+  // itself, not a generic "copied" word — per the user, 2026-09-28: a
+  // touchscreen has no hover, so tapping the icon is the ONLY way a
+  // touch reader ever sees the full ID at all, and this same click
+  // already has to fire for the copy to work, so no second gesture
+  // (long-press, a separate reveal button) is needed to satisfy both at
+  // once. Desktop readers get the same full text on hover via the
+  // button's own `title` attribute (set in id_chip_html()) without
+  // needing to click anything first.
   document.addEventListener('click', (e) => {
     const b = e.target.closest('button.idchip');
     if (!b) return;
     e.preventDefault();
     const id = b.dataset.id;
-    if (legacyCopy(id)) { flash(b, 'copied'); return; }
+    if (legacyCopy(id)) { flash(b, id); return; }
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(id).then(
-          () => flash(b, 'copied'),
+          () => flash(b, id),
           () => { selectOnly(b); flash(b, 'press Ctrl+C'); }
         );
         return;

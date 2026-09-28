@@ -89,6 +89,16 @@
     color: var(--text-dim); line-height: 1.5;
   }
   .legend strong { color: var(--text); }
+  /* Explains the cascading-filter behavior and what Reset does — per the
+     user, 2026-09-28: "add additional text in the header to indicate
+     this for the user." Kept to the same quiet, secondary-text styling
+     as the legend/stats line rather than a loud banner, since it's
+     background info a returning reader won't need to re-read every time. */
+  .filters-help {
+    color: var(--text-dim); font-size: 0.82rem; line-height: 1.5;
+    margin-bottom: 0.75rem; max-width: 62rem;
+  }
+  .filters-help strong { color: var(--text); }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -132,6 +142,20 @@
   }
   .filter-dd-opt:hover { background: var(--surface-2); }
   .filter-dd-opt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Cascading filters — see recomputeFilterOptions(). A greyed, disabled
+     look for an option that would currently match zero rows given every
+     OTHER active filter, so a reader sees at a glance what's genuinely
+     available rather than discovering it only after picking a dead end. */
+  .filter-dd-opt-unavailable { opacity: 0.4; cursor: not-allowed; }
+  .filter-dd-opt-unavailable:hover { background: none; }
+  /* "Blank / not available" pseudo-option — see BLANK_FILTER_VALUE. Set
+     off from the real values above it with a divider and a slightly
+     dimmed, italic label, so it reads as the deliberate catch-all it is
+     rather than one more ordinary value in the list. */
+  .filter-dd-opt-blank {
+    border-top: 1px solid var(--border); margin-top: 0.25rem; padding-top: 0.4rem;
+    font-style: italic; color: var(--text-dim);
+  }
   .filter-dd-actions { display: flex; justify-content: flex-end; }
   .filter-dd-clear {
     padding: 4px 10px; cursor: pointer; background: none; border: 1px solid var(--border);
@@ -216,16 +240,26 @@
   col.c-language { width: 6%; }
   col.c-remarks { width: 50%; }
   col.c-page { width: 5%; }
-  /* Click-to-copy ID chip — same pattern as SII's original
-     build_review_report.py idchip, kept for visual/behavioral consistency
-     across every table that uses this shell. */
+  /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
+     text (see id_chip_html()'s own docstring), so a compact fixed-size
+     icon button replaces what used to size itself to a 15+ character
+     monospace string. font-size here sizes the emoji glyph itself, not
+     body text. */
   button.idchip {
-    font-family: 'Consolas', monospace; font-size: 12.5px; cursor: pointer;
-    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
+    font-size: 15px; line-height: 1; cursor: pointer;
+    padding: 4px 7px; border-radius: 6px; border: 1px solid var(--border);
     background: none; color: var(--accent-strong);
+    font-family: 'Consolas', monospace; /* only used for the flashed id-text/"copied" state below */
   }
   button.idchip:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
-  button.idchip.copied { color: #fff; background: var(--accent-strong); border-color: var(--accent-strong); }
+  /* The flashed state (copyIdChip() below) briefly shows real text (the
+     stable_id itself, or "press Ctrl+C") instead of the glyph, so it
+     needs to fit more than one character -- back to a normal small font
+     and no forced centering, only while .copied is applied. */
+  button.idchip.copied {
+    color: #fff; background: var(--accent-strong); border-color: var(--accent-strong);
+    font-size: 12px; white-space: nowrap;
+  }
   /* "As printed" vs "derived" two-color convention — see dual_span_cell(). */
   .v-direct { color: inherit; }
   .v-derived { color: var(--accent-copper-strong); font-style: italic; }
@@ -403,9 +437,15 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 42 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-28 08:51</div>
+<div class="generated">Generated 2026-09-28 09:10</div>
 <div class="stats">31551 records from 4423 table pages (342 index pages excluded) across 42 PDFs. 74666 &quot;Do.&quot; cells resolved, 6385 flagged (unresolved or partial — not auto-filled). 17 merged Serial/Findspot cells split, 11 stray Sl.No prefixes stripped, 4415 location prefixes moved to Location, 4 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
+<div class="filters-help">Filters narrow each other as you go — pick a
+Volume and every other filter's list shrinks to only the values that
+actually occur among that Volume's own records (a greyed-out option
+means nothing currently matches it; it reappears the moment you widen
+another filter back out). <strong>Reset</strong> clears every filter and
+the search box back to their starting state.</div>
 <div class="controls">
   <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian"><span>Arabic and Persian (6903)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Copper Plate"><span>Copper Plate (738)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Pre-1945-46 Collection"><span>Pre-1945-46 Collection (1563)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (21317)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials (Bombay-Karnatak)"><span>Stone and Other Materials (Bombay-Karnatak) (1030)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="lang"><button type="button" class="filter-dd-btn" id="langFilterBtn">All languages</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="langMode" value="include" checked> Include</label><label><input type="radio" name="langMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (9222)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit"><span>Sanskrit (2532)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local dialect"><span>Local dialect (2511)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada"><span>Kannada (2176)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic"><span>Arabic (1998)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telugu"><span>Telugu (1992)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian"><span>Persian (1387)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse"><span>Persian verse (1325)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannaḍa"><span>Kannaḍa (415)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kanarese"><span>Kanarese (377)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit (corrupt)"><span>Sanskrit (corrupt) (288)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prakrit"><span>Prakrit (274)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic &amp; Persian"><span>Arabic &amp; Persian (219)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian"><span>Arabic and Persian (211)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prākṛit"><span>Prākṛit (179)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Nāgarī"><span>Nāgarī (147)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Grantha and Tamil"><span>Grantha and Tamil (122)</span></label><label class="filter-dd-opt"><input type="checkbox" value="—"><span>— (120)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Telugu"><span>Sanskrit and Telugu (99)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local Dialect"><span>Local Dialect (98)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse &amp; prose"><span>Persian verse &amp; prose (92)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian prose &amp; verse"><span>Persian prose &amp; verse (91)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose and Persian verse"><span>Arabic prose and Persian verse (89)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose &amp; Persian verse"><span>Arabic prose &amp; Persian verse (85)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū"><span>Urdū (81)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prākrit"><span>Prākrit (71)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Vaṭṭeḻuttu"><span>Vaṭṭeḻuttu (69)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Local dialect"><span>Sanskrit and Local dialect (61)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil verse"><span>Tamil verse (60)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic verse"><span>Arabic verse (59)</span></label><label class="filter-dd-opt"><input type="checkbox" value="English"><span>English (58)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian prose and verse"><span>Persian prose and verse (58)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu"><span>Urdu (54)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tribhuvana- chakravartti"><span>Tribhuvana- chakravartti (54)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Brāhmī"><span>Brāhmī (52)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū verse"><span>Urdū verse (51)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil (verse)"><span>Tamil (verse) (49)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Kannada"><span>Sanskrit and Kannada (49)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Grantha"><span>Grantha (48)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse and prose"><span>Persian verse and prose (44)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic &amp; Persian verse"><span>Arabic &amp; Persian verse (42)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Mixed dialect"><span>Mixed dialect (40)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu verse"><span>Urdu verse (38)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Portuguese"><span>Portuguese (37)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian verse"><span>Arabic and Persian verse (37)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil (verse and prose)"><span>Tamil (verse and prose) (35)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian Nasta‘līq"><span>Persian Nasta‘līq (34)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do. (archaic)"><span>Do. (archaic) (32)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit Nāgarī"><span>Sanskrit Nāgarī (32)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannarese"><span>Kannarese (31)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Marāṭhī"><span>Marāṭhī (30)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada (archaic)"><span>Kannada (archaic) (29)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local Nāgarī"><span>Local Nāgarī (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannaḍa (archaic)"><span>Kannaḍa (archaic) (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Vatteluttu"><span>Vatteluttu (25)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose and verse"><span>Arabic prose and verse (25)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hebrew"><span>Hebrew (25)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit in Telugu"><span>Sanskrit in Telugu (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit mixed with local dialect"><span>Sanskrit mixed with local dialect (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D"><span>Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do"><span>Do (23)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic Naskh"><span>Arabic Naskh (23)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do. (verse)"><span>Do. (verse) (22)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local
 Nágari"><span>Local
@@ -707,7 +747,7 @@ Urdū verse (1)</span></label><label class="filter-dd-opt"><input type="checkbox
 &amp; verse &amp;
 Persian verse"><span>Arabic prose
 &amp; verse &amp;
-Persian verse (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū verse. Nasta‘līq"><span>Urdū verse. Nasta‘līq (1)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="year"><button type="button" class="filter-dd-btn" id="yearFilterBtn">All years</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="yearMode" value="include" checked> Include</label><label><input type="radio" name="yearMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="1911-14"><span>1911-14 (2036)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1918-21"><span>1918-21 (2284)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1922-23"><span>1922-23 (792)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1923-24"><span>1923-24 (710)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1924-25"><span>1924-25 (429)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1925-26"><span>1925-26 (672)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1926-27"><span>1926-27 (863)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1930-31"><span>1930-31 (387)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1931-32"><span>1931-32 (349)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1932-33"><span>1932-33 (566)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1933-34"><span>1933-34 (359)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1934-35"><span>1934-35 (467)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1939-44"><span>1939-44 (2436)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1952-53"><span>1952-53 (742)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1964-65"><span>1964-65 (1244)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1965-66"><span>1965-66 (1419)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1966-67"><span>1966-67 (657)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1967-68"><span>1967-68 (783)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1969-70"><span>1969-70 (772)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1971-72"><span>1971-72 (628)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1972-73"><span>1972-73 (992)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1973-74"><span>1973-74 (804)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1974-75"><span>1974-75 (537)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1975-76"><span>1975-76 (671)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1976-77"><span>1976-77 (638)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1977-78"><span>1977-78 (568)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1978-79"><span>1978-79 (531)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1979-80"><span>1979-80 (460)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1980-81"><span>1980-81 (462)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1981-82"><span>1981-82 (828)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1982-83"><span>1982-83 (1068)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1983-84"><span>1983-84 (450)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1984-85"><span>1984-85 (753)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1985-86"><span>1985-86 (650)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1986-87"><span>1986-87 (659)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1987-88"><span>1987-88 (317)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1988-89"><span>1988-89 (367)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1992-93"><span>1992-93 (613)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1993-94"><span>1993-94 (783)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1994-95"><span>1994-95 (463)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1995-96"><span>1995-96 (342)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (2822)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (195)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (178)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Madhya Pradesh"><span>Madhya Pradesh (177)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Rajasthan"><span>Rajasthan (154)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Uttar Pradesh"><span>Uttar Pradesh (119)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (92)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Delhi"><span>Delhi (66)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Bihar"><span>Bihar (55)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (45)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Goa"><span>Goa (43)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Gujarat"><span>Gujarat (35)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Jammu and Kashmir"><span>Jammu and Kashmir (14)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Himachal Pradesh"><span>Himachal Pradesh (13)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (12)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (11)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Punjab"><span>Punjab (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Haryana"><span>Haryana (4)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Manipur"><span>Manipur (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Assam"><span>Assam (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chandigarh"><span>Chandigarh (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="West Bengal"><span>West Bengal (1)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+Persian verse (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū verse. Nasta‘līq"><span>Urdū verse. Nasta‘līq (1)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="year"><button type="button" class="filter-dd-btn" id="yearFilterBtn">All years</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="yearMode" value="include" checked> Include</label><label><input type="radio" name="yearMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="1911-14"><span>1911-14 (2036)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1918-21"><span>1918-21 (2284)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1922-23"><span>1922-23 (792)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1923-24"><span>1923-24 (710)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1924-25"><span>1924-25 (429)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1925-26"><span>1925-26 (672)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1926-27"><span>1926-27 (863)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1930-31"><span>1930-31 (387)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1931-32"><span>1931-32 (349)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1932-33"><span>1932-33 (566)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1933-34"><span>1933-34 (359)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1934-35"><span>1934-35 (467)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1939-44"><span>1939-44 (2436)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1952-53"><span>1952-53 (742)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1964-65"><span>1964-65 (1244)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1965-66"><span>1965-66 (1419)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1966-67"><span>1966-67 (657)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1967-68"><span>1967-68 (783)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1969-70"><span>1969-70 (772)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1971-72"><span>1971-72 (628)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1972-73"><span>1972-73 (992)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1973-74"><span>1973-74 (804)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1974-75"><span>1974-75 (537)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1975-76"><span>1975-76 (671)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1976-77"><span>1976-77 (638)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1977-78"><span>1977-78 (568)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1978-79"><span>1978-79 (531)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1979-80"><span>1979-80 (460)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1980-81"><span>1980-81 (462)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1981-82"><span>1981-82 (828)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1982-83"><span>1982-83 (1068)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1983-84"><span>1983-84 (450)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1984-85"><span>1984-85 (753)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1985-86"><span>1985-86 (650)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1986-87"><span>1986-87 (659)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1987-88"><span>1987-88 (317)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1988-89"><span>1988-89 (367)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1992-93"><span>1992-93 (613)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1993-94"><span>1993-94 (783)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1994-95"><span>1994-95 (463)</span></label><label class="filter-dd-opt"><input type="checkbox" value="1995-96"><span>1995-96 (342)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (2822)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (195)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (178)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Madhya Pradesh"><span>Madhya Pradesh (177)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Rajasthan"><span>Rajasthan (154)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Uttar Pradesh"><span>Uttar Pradesh (119)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (92)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Delhi"><span>Delhi (66)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Bihar"><span>Bihar (55)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (45)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Goa"><span>Goa (43)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Gujarat"><span>Gujarat (35)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Jammu and Kashmir"><span>Jammu and Kashmir (14)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Himachal Pradesh"><span>Himachal Pradesh (13)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (12)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (11)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Punjab"><span>Punjab (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Haryana"><span>Haryana (4)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Manipur"><span>Manipur (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Assam"><span>Assam (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chandigarh"><span>Chandigarh (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="West Bengal"><span>West Bengal (1)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (586)</option><option value="woman_death_composite">woman_death_composite (325)</option><option value="incidental_sati_mention">incidental_sati_mention (237)</option><option value="sati_stone_direct">sati_stone_direct (123)</option><option value="memorial_samadhi">memorial_samadhi (53)</option><option value="memorial_nisidhi">memorial_nisidhi (18)</option><option value="incidental_hero_death_mention">incidental_hero_death_mention (14)</option><option value="memorial_shrine">memorial_shrine (1)</option></select>
   <select id="searchScope">
     <option value="all">Search: all columns</option>
@@ -772,6 +812,7 @@ Persian verse (1)</span></label><label class="filter-dd-opt"><input type="checkb
   </div>
 </div>
 <script>
+const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'lang', 'year', 'state'];
 const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page'];
 const HIGHLIGHT_COLS = [6, 7, 8, 9, 10, 11];
@@ -1076,13 +1117,14 @@ function render() {
       for (const k of FILTER_KEYS) {
         const st = FILTER_STATE[k];
         if (!st || st.values.size === 0) continue;
-        const cellVal = row.filters[k] || '';
-        const isIn = st.values.has(cellVal);
+        const isIn = st.values.has(filterValueOf(row, k));
         // Include mode: row matches iff its value is one of the checked
         // ones. Exclude mode: row matches iff its value is NOT one of
         // them (so a row with no value for this filter at all still
         // matches an exclude set — same rows an empty include set would
-        // otherwise have to be typed out one by one).
+        // otherwise have to be typed out one by one, UNLESS "Blank" is
+        // itself one of the excluded values, in which case a blank row
+        // is correctly excluded too, via the same Set-membership check).
         const ok = st.mode === 'exclude' ? !isIn : isIn;
         if (!ok) { match = false; break; }
       }
@@ -1137,6 +1179,66 @@ function runSearch() {
   render();
 }
 
+// A row's own value for filter `key`, normalized so a missing/empty
+// value always compares equal to the "Blank / not available" checkbox's
+// own sentinel (see BLANK_FILTER_VALUE's Python-side docstring) — the
+// one place both render()'s matching loop and recomputeFilterOptions()
+// below read a row's filter value, so the two can never disagree on
+// what "blank" means.
+function filterValueOf(row, key) {
+  const v = row.filters[key];
+  return v ? v : BLANK_FILTER_VALUE;
+}
+
+// Cascading filters — per the user, 2026-09-28: "if Vol is set to
+// volume 2, only states which appear in inscriptions of that volume
+// should get displayed" in every OTHER filter's own option list.
+// Recomputed from scratch on every filter change (not just once at
+// load), since narrowing OR widening any filter can change what's
+// actually available in every other one.
+//
+// For each filter `key`, the option list reflects rows matching every
+// OTHER active filter — deliberately excluding `key`'s own current
+// selection from this pass, or a filter could never be widened back
+// out again once narrowed (checking Volume=II would otherwise instantly
+// hide every other Volume checkbox, since no row can be both II and
+// III at once). Text search / category filter are NOT part of this
+// computation on purpose — cascading is a relationship between the
+// filters themselves, not the free-text search box, which the user's
+// own request only ever describes in terms of filters.
+function recomputeFilterOptions() {
+  FILTER_KEYS.forEach((key) => {
+    const panel = filterPanels[key];
+    if (!panel) return;
+    const available = new Set();
+    for (const row of ROWS) {
+      let ok = true;
+      for (const k of FILTER_KEYS) {
+        if (k === key) continue;
+        const st = FILTER_STATE[k];
+        if (!st || st.values.size === 0) continue;
+        const isIn = st.values.has(filterValueOf(row, k));
+        if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
+      }
+      if (ok) available.add(filterValueOf(row, key));
+    }
+    panel.querySelectorAll('.filter-dd-opt').forEach((opt) => {
+      const cb = opt.querySelector('input[type=checkbox]');
+      const stillPossible = available.has(cb.value);
+      // A checked box always stays enabled and visible, even if it would
+      // now match zero rows — otherwise a reader could never uncheck
+      // the very selection that narrowed everything else away. An
+      // unchecked, now-impossible option is disabled (greyed, not
+      // clickable) rather than hidden outright, so the reader can see
+      // AT A GLANCE what widening another filter would bring back,
+      // rather than the option just silently vanishing.
+      const shouldDisable = !stillPossible && !cb.checked;
+      cb.disabled = shouldDisable;
+      opt.classList.toggle('filter-dd-opt-unavailable', shouldDisable);
+    });
+  });
+}
+
 // Column visibility/width — see Column.default_visible's own docstring.
 // A column (matched by key against a <col data-key>) is shown if it
 // ships default-visible OR its own Filter currently has an active
@@ -1171,7 +1273,12 @@ function updateColumnVisibility() {
 // Any change that could change *which* rows match (not just how a page
 // of them is painted) resets to page 1 — staying on page 6 of a result
 // set that's now 2 rows long would just show an empty page.
-function renderFromTop() { updateColumnVisibility(); currentPage = 1; render(); }
+function renderFromTop() {
+  updateColumnVisibility();
+  recomputeFilterOptions();
+  currentPage = 1;
+  render();
+}
 
 searchBtn.addEventListener('click', runSearch);
 q.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
@@ -1199,6 +1306,7 @@ resetBtn.addEventListener('click', () => {
   pageSizeEl.value = '50';
   currentPage = 1;
   updateColumnVisibility();
+  recomputeFilterOptions();
   render();
 });
 updateColumnVisibility();
@@ -1266,6 +1374,7 @@ async function loadData() {
     loadOverlay.hidden = true;
     document.body.classList.remove('loading');
     setControlsDisabled(false);
+    recomputeFilterOptions();
     render();
     // A cross-reference click on the OTHER corpus's page (jumpToKey()
     // below) navigates here with ?jump=<stable_key> rather than trying
@@ -1313,6 +1422,7 @@ function jumpToKey(key) {
     }
   });
   updateColumnVisibility();
+  recomputeFilterOptions();
   // With every filter cleared, `matches` in render() is ROWS in its
   // original order, so the target's page follows directly from its
   // index — no need to re-derive position from the DOM.
@@ -1359,7 +1469,11 @@ document.addEventListener('click', (e) => {
     b.dataset.label = was;
     b.classList.add('copied');
     b.textContent = msg;
-    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1000);
+    // 1.8s, not the original 1s -- the flashed text is now often the
+    // full stable_id (15+ characters on this project's longer keys),
+    // which needs more than a flash of a screen to actually read on a
+    // tap, not just enough to notice something happened.
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1800);
   }
   function legacyCopy(text) {
     const ta = document.createElement('textarea');
@@ -1383,16 +1497,25 @@ document.addEventListener('click', (e) => {
     sel.removeAllRanges();
     sel.addRange(r);
   }
+  // The flashed message on a successful copy is the real stable_id text
+  // itself, not a generic "copied" word — per the user, 2026-09-28: a
+  // touchscreen has no hover, so tapping the icon is the ONLY way a
+  // touch reader ever sees the full ID at all, and this same click
+  // already has to fire for the copy to work, so no second gesture
+  // (long-press, a separate reveal button) is needed to satisfy both at
+  // once. Desktop readers get the same full text on hover via the
+  // button's own `title` attribute (set in id_chip_html()) without
+  // needing to click anything first.
   document.addEventListener('click', (e) => {
     const b = e.target.closest('button.idchip');
     if (!b) return;
     e.preventDefault();
     const id = b.dataset.id;
-    if (legacyCopy(id)) { flash(b, 'copied'); return; }
+    if (legacyCopy(id)) { flash(b, id); return; }
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(id).then(
-          () => flash(b, 'copied'),
+          () => flash(b, id),
           () => { selectOnly(b); flash(b, 'press Ctrl+C'); }
         );
         return;
