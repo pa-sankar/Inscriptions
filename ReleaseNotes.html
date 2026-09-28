@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Release Notes — Project InscriptionSearch</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Project InscriptionSearch">
+<meta property="og:title" content="Release Notes — Project InscriptionSearch">
+<meta property="og:url" content="https://pa-sankar.github.io/Inscriptions/ReleaseNotes.html">
+<meta property="og:image" content="https://pa-sankar.github.io/Inscriptions/images/inscription-search-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Release Notes — Project InscriptionSearch">
+<meta name="twitter:image" content="https://pa-sankar.github.io/Inscriptions/images/inscription-search-image.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>&#128203;</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'public'});
+</script>
+<style>
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c;
+    --accent-copper: #a6612f; --accent-copper-strong: #7d431c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 2rem 1rem 4rem;
+    background: var(--bg); color: var(--text); line-height: 1.65;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; }
+  .brand {
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif; font-weight: 600;
+    font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent-copper-strong); margin: 0 0 4px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  h2 { font-size: 1.1rem; margin-top: 2.2rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+  p { margin: 0.85rem 0; }
+  a { color: var(--accent-strong); }
+  a:hover { color: var(--accent); }
+  .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.4rem; font-size: 1.1rem; }
+  .home-link:hover { color: var(--accent); }
+  .date { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 1.6rem; }
+  ul.changes { margin: 0.6rem 0 0; padding-left: 1.3rem; }
+  ul.changes li { margin: 0.55rem 0; }
+  .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
+  .back:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="index.html" class="home-link" title="Home">&#8962;</a>
+<div class="brand">Project InscriptionSearch</div>
+<h1>Release Notes</h1>
+<p class="date">2026-09-28</p>
+
+<h2>Finding and narrowing records</h2>
+<ul class="changes">
+  <li><strong>Filters now support multiple selections at once</strong>, with
+  an Include/Exclude toggle — pick several volumes, states, or languages
+  together, or exclude a few instead of listing everything else you want.</li>
+  <li><strong>Filters narrow each other as you go.</strong> Pick a volume and
+  every other filter's own list shrinks to only the values that actually
+  occur among that volume's records — no more picking a state that turns
+  out to have zero matches for what you already selected. A short note above
+  the filters explains this, and what <strong>Reset</strong> does.</li>
+  <li><strong>A "Blank / not available" option</strong> now appears in any
+  filter where some records genuinely have nothing recorded for that field —
+  select it to find exactly those records.</li>
+  <li><strong>A plain-language summary of your active filters</strong> now
+  shows just below the filter row (e.g. "Volume = II · State ≠ Tamil Nadu"),
+  since the filter buttons alone don't say which values are selected.</li>
+  <li>The category filter (where available) now narrows and updates its own
+  counts the same way every other filter does.</li>
+</ul>
+
+<h2>Reading the table</h2>
+<ul class="changes">
+  <li><strong>Click anywhere on a row</strong> to open a popup with every
+  field for that record, clearly labeled ("Unique ID:", "Language:",
+  "Dynasty:", ...) — including fields the table itself doesn't show by
+  default. A field with nothing recorded shows "Not available" rather than
+  being left out, so you can tell "checked, nothing there" from "not shown."
+  Remarks gets the most room in the popup, since it's usually what you're
+  most interested in.</li>
+  <li>Only a curated set of columns is shown by default, with the
+  <strong>Remarks</strong> column given at least half the table's width —
+  any column you filter on is shown automatically. <strong>Sl.No</strong>
+  now shows right next to the ID by default too, since a volume + serial
+  number is usually enough to pinpoint one specific record.</li>
+  <li>The ID column now shows a compact icon instead of the full record ID —
+  hover it (or tap, on a phone) to see the full ID, or click to copy it.
+  Copy-to-clipboard works exactly as before.</li>
+  <li>Alternating row shading and visible column borders make it easier to
+  read across a row without losing your place.</li>
+  <li>Row height now follows the actual content of each row, instead of
+  every row being padded to a uniform height regardless of how much text it
+  actually has.</li>
+  <li>The "Kind" column shows a short label (e.g. "Stone", "Copper") with
+  the full description available on hover.</li>
+  <li>Page headers were trimmed to the essentials — the sources link and the
+  color legend (explaining what the different text colors/styles mean) are
+  still there, just without a long list of every volume number.</li>
+</ul>
+
+<h2>Fixed</h2>
+<ul class="changes">
+  <li>The "View page" button (for records with a scanned page image
+  available) had stopped appearing for some records — fixed.</li>
+  <li>A number of records in South Indian Inscriptions Vol. I were missing
+  their description and find-spot entirely, even though the information was
+  present in the original scan — fixed for the affected records.</li>
+  <li>A handful of records had been mis-tagged as hero-stone memorials based
+  on a misread index entry (an old word meaning "hero" used as a royal
+  title, not naming an actual memorial) — corrected.</li>
+  <li>Annual Reports on Epigraphy (ARE) records: a "corrections/addenda"
+  table style used in some years was silently dropping its own content —
+  fixed, recovering the missing details for those records.</li>
+  <li>Remarks for a small number of records that run across a page boundary
+  in the original scan had picked up a stray page heading or page number in
+  the middle of the text — cleaned up across the whole South Indian
+  Inscriptions collection.</li>
+</ul>
+
+<a href="index.html" class="back">&larr; Back</a>
+</div>
+</body>
+</html>
