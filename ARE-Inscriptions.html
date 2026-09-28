@@ -498,6 +498,11 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.9rem; color: var(--text);
   }
+  /* A field this record genuinely has nothing for — per the user,
+     2026-09-28: still list the attribute, don't just omit it, so
+     "checked and blank" reads differently from "never shown at all".
+     Muted + italic, distinct from a real value's plain color. */
+  .row-detail-na { color: var(--text-dim); font-style: italic; }
   .row-detail-remarks { margin-top: 1.1rem; }
   .row-detail-remarks .row-detail-label {
     display: block; margin-bottom: 0.4rem; font-size: 0.85rem;
@@ -523,7 +528,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-28 15:12</div>
+<div class="generated">Generated 2026-09-28 15:18</div>
 
 <div class="stats">34328 records from 43 report(s), 4710 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -2028,7 +2033,6 @@ function updateRemarksClamp(cell) {
     COLUMN_KEYS.forEach((key) => {
       if (key === REMARKS_KEY) return; // shown separately, below, with more room
       const html = row.cells[key];
-      if (!html) return; // empty fields are simply omitted, not shown blank
       const field = document.createElement('div');
       field.className = 'row-detail-field';
       const dt = document.createElement('div');
@@ -2036,7 +2040,20 @@ function updateRemarksClamp(cell) {
       dt.textContent = fieldLabel(key) + ':';
       const dd = document.createElement('div');
       dd.className = 'row-detail-value';
-      dd.innerHTML = html;
+      // Every field is listed, even when this record has nothing for it
+      // -- per the user, 2026-09-28: seeing "Language: Not available" is
+      // itself information (this record was checked and genuinely has
+      // none), which an omitted row can't convey nearly as clearly.
+      // Muted/italic, not the same color as a real value, so the two are
+      // never mistaken for each other at a glance.
+      if (html) {
+        dd.innerHTML = html;
+      } else {
+        const na = document.createElement('span');
+        na.className = 'row-detail-na';
+        na.textContent = 'Not available';
+        dd.appendChild(na);
+      }
       // The ID field's own cell is just the tag-glyph copy button (its
       // real text lives only in a title/data-id attribute) -- per the
       // user, 2026-09-28: show the complete ID as plain, readable text
@@ -2051,7 +2068,7 @@ function updateRemarksClamp(cell) {
       field.appendChild(dd);
       modalBody.appendChild(field);
     });
-    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+    if (REMARKS_KEY) {
       const section = document.createElement('div');
       section.className = 'row-detail-remarks';
       const dt = document.createElement('div');
@@ -2059,7 +2076,14 @@ function updateRemarksClamp(cell) {
       dt.textContent = fieldLabel(REMARKS_KEY) + ':';
       const dd = document.createElement('div');
       dd.className = 'row-detail-remarks-body';
-      dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      if (row.cells[REMARKS_KEY]) {
+        dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      } else {
+        const na = document.createElement('span');
+        na.className = 'row-detail-na';
+        na.textContent = 'Not available';
+        dd.appendChild(na);
+      }
       section.appendChild(dt);
       section.appendChild(dd);
       modalBody.appendChild(section);
