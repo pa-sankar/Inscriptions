@@ -273,6 +273,10 @@
     white-space: nowrap;
   }
   tbody tr:last-child td { border-bottom: none; }
+  /* Signals the row itself is clickable (opens the full-detail popup —
+     see the row-detail IIFE in the script below), same as the darker
+     hover shade. */
+  tbody tr { cursor: pointer; }
   tbody tr:hover { background: var(--surface-2); }
   col.c-id { width: 8%; }
   col.c-source { width: 7%; }
@@ -470,6 +474,34 @@
   }
   .remarks-modal-close:hover { color: var(--text); }
   .remarks-modal-body { white-space: pre-wrap; line-height: 1.5; }
+  /* Row-detail popup — a wider box than the plain remarks-only one
+     (there's a lot more to show), header fields in a compact two-column
+     grid, Remarks given the most vertical room since it's what the user
+     actually cares about (per the user: "most of the pop-up space used
+     for remarks"). */
+  .row-detail-box { max-width: 56rem; }
+  .row-detail-field {
+    display: grid; grid-template-columns: 9rem 1fr; gap: 0.4rem 0.75rem;
+    padding: 0.3rem 0; border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .row-detail-field:last-child { border-bottom: none; }
+  .row-detail-label {
+    color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.03em; font-weight: 600;
+  }
+  .row-detail-value { line-height: 1.5; overflow-wrap: break-word; }
+  .row-detail-remarks { margin-top: 1.1rem; }
+  .row-detail-remarks .row-detail-label {
+    display: block; margin-bottom: 0.4rem; font-size: 0.85rem;
+  }
+  .row-detail-remarks-body {
+    white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
+    background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
+  }
+  @media (max-width: 640px) {
+    .row-detail-field { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
   footer {
     margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--border);
     font-size: 12px; color: var(--text-dim);
@@ -484,7 +516,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-28 14:30</div>
+<div class="generated">Generated 2026-09-28 14:46</div>
 
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -560,10 +592,28 @@ the search box back to their starting state.</div>
     <div id="remarksModalBody" class="remarks-modal-body"></div>
   </div>
 </div>
+<!-- Full-row detail popup — per the user, 2026-09-28: clicking a row
+     should show every field (not just the currently-visible columns),
+     labeled explicitly ("Unique ID: ...", "Language: ...", ...), with
+     Remarks given most of the popup's own space since it's the field of
+     greatest interest. Reuses the remarks-modal-* box/overlay/close CSS
+     (same look, same Escape/click-outside-to-close behavior) with its
+     own body layout — see openRowDetailModal() in the script below. -->
+<div id="rowDetailModal" class="remarks-modal-overlay" hidden>
+  <div class="remarks-modal-box row-detail-box">
+    <button type="button" id="rowDetailModalClose" class="remarks-modal-close" title="Close">&times;</button>
+    <div id="rowDetailModalBody" class="row-detail-body"></div>
+  </div>
+</div>
 <script>
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'volume', 'state'];
 const COLUMN_KEYS = ['id', 'source', 'kind', 'location', 'sl_no', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'page', 'image'];
+// key -> column header text, for the row-detail popup's own field
+// labels (openRowDetailModal() below) — "id" is special-cased there to
+// "Unique ID" per the user, 2026-09-28; everything else uses the same
+// header text the table column itself shows.
+const COLUMN_HEADERS = {"id": "ID", "source": "Volume", "kind": "Kind", "location": "Location", "sl_no": "Sl.No", "survey_ref": "Survey Ref", "place": "Place/Source", "dynasty": "Dynasty/King", "date": "Date", "language": "Language", "remarks": "Remarks", "page": "Page", "image": "Image"};
 const HIGHLIGHT_COLS = [6, 7, 8, 10];
 const REMARKS_COL_IDX = 10;
 // Column visibility/width policy — see Column.default_visible's own
@@ -649,6 +699,9 @@ function filterDisplayName(allLabel) {
 // group generically first; wrong for Volume, whose label ends
 // "record(s)" -- found live 2026-09-28, testing this for real, not
 // just reading the code: it silently mangled "record(s)" into "record".
+// Shared with recomputeFilterOptions()/recomputeCategoryOptions() below,
+// so a checkbox's own label and the active-filters summary line can
+// never disagree on what one value is called.
 function filterValueLabel(key, value) {
   return value === BLANK_FILTER_VALUE ? 'Blank / not available' : value;
 }
@@ -1009,27 +1062,38 @@ function filterValueOf(row, key) {
   return v ? v : BLANK_FILTER_VALUE;
 }
 
+// filterValueLabel() (value -> display text, Blank sentinel included) is
+// already defined above, for updateActiveFiltersSummary() — reused here
+// as-is so an option's checkbox-list label and its summary-line label
+// can never disagree.
+
 // Cascading filters — per the user, 2026-09-28: "if Vol is set to
 // volume 2, only states which appear in inscriptions of that volume
-// should get displayed" in every OTHER filter's own option list.
-// Recomputed from scratch on every filter change (not just once at
-// load), since narrowing OR widening any filter can change what's
-// actually available in every other one.
+// should get displayed" in every OTHER filter's own option list, AND
+// (per the user's own follow-up the same day) the "(N)" count shown
+// next to each option should reflect the CURRENT filter combination,
+// not the whole corpus's static build-time count — "Tamil Nadu (x)
+// will look different... compared to Language = Tamil filter". Both are
+// naturally the same computation (a per-value row count under the
+// current filter combination), so this rebuilds each option's full
+// label from that count on every call rather than just toggling
+// disabled -- recomputed from scratch on every filter change (not just
+// once at load), since narrowing OR widening any filter changes both.
 //
-// For each filter `key`, the option list reflects rows matching every
+// For each filter `key`, counts are tallied over rows matching every
 // OTHER active filter — deliberately excluding `key`'s own current
 // selection from this pass, or a filter could never be widened back
 // out again once narrowed (checking Volume=II would otherwise instantly
-// hide every other Volume checkbox, since no row can be both II and
-// III at once). Text search / category filter are NOT part of this
-// computation on purpose — cascading is a relationship between the
-// filters themselves, not the free-text search box, which the user's
-// own request only ever describes in terms of filters.
+// zero out every other Volume checkbox, since no row can be both II and
+// III at once). The free-text search box stays out of this on purpose —
+// cascading is a relationship between the filters/category themselves,
+// which the user's own request describes in terms of ("Language =
+// Tamil filter"), not the search box.
 function recomputeFilterOptions() {
   FILTER_KEYS.forEach((key) => {
     const panel = filterPanels[key];
     if (!panel) return;
-    const available = new Set();
+    const counts = new Map();
     for (const row of ROWS) {
       let ok = true;
       for (const k of FILTER_KEYS) {
@@ -1039,11 +1103,14 @@ function recomputeFilterOptions() {
         const isIn = st.values.has(filterValueOf(row, k));
         if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
       }
-      if (ok) available.add(filterValueOf(row, key));
+      if (ok) {
+        const v = filterValueOf(row, key);
+        counts.set(v, (counts.get(v) || 0) + 1);
+      }
     }
     panel.querySelectorAll('.filter-dd-opt').forEach((opt) => {
       const cb = opt.querySelector('input[type=checkbox]');
-      const stillPossible = available.has(cb.value);
+      const count = counts.get(cb.value) || 0;
       // A checked box always stays enabled and visible, even if it would
       // now match zero rows — otherwise a reader could never uncheck
       // the very selection that narrowed everything else away. An
@@ -1051,10 +1118,49 @@ function recomputeFilterOptions() {
       // clickable) rather than hidden outright, so the reader can see
       // AT A GLANCE what widening another filter would bring back,
       // rather than the option just silently vanishing.
-      const shouldDisable = !stillPossible && !cb.checked;
+      const shouldDisable = count === 0 && !cb.checked;
       cb.disabled = shouldDisable;
       opt.classList.toggle('filter-dd-opt-unavailable', shouldDisable);
+      opt.querySelector('span').textContent =
+        filterValueLabel(key, cb.value) + ' (' + count + ')';
     });
+  });
+  recomputeCategoryOptions();
+}
+
+// The category <select>'s own dynamic-count/cascading counterpart —
+// per the user, 2026-09-28: "one item where filter is not effective is
+// in categories... it would be great if the number inside () can
+// actually be updated based on the filter selection." A row can carry
+// several categories at once (Row.categories is a list, unlike every
+// other filter's single value), so this tallies by iterating each row's
+// own category list rather than a single filterValueOf() lookup.
+// Mirrors recomputeFilterOptions()'s own "exclude self" reasoning: does
+// NOT exclude the category filter's own current selection from the
+// count basis, since (unlike Include/Exclude checkbox filters) there's
+// only one <select> value active at a time here and nothing else in
+// this same dropdown to widen back out to.
+function recomputeCategoryOptions() {
+  if (!categoryFilterEl) return;
+  const counts = new Map();
+  for (const row of ROWS) {
+    let ok = true;
+    for (const k of FILTER_KEYS) {
+      const st = FILTER_STATE[k];
+      if (!st || st.values.size === 0) continue;
+      const isIn = st.values.has(filterValueOf(row, k));
+      if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
+    }
+    if (!ok) continue;
+    (row.categories || []).forEach((cat) => counts.set(cat, (counts.get(cat) || 0) + 1));
+  }
+  Array.from(categoryFilterEl.options).forEach((opt) => {
+    if (!opt.value) return; // the "All categories" placeholder itself
+    const count = counts.get(opt.value) || 0;
+    opt.textContent = opt.value + ' (' + count + ')';
+    // Same rule as the checkbox filters: a currently-selected option
+    // never disables itself, even at zero, so it can still be cleared.
+    opt.disabled = count === 0 && categoryFilterEl.value !== opt.value;
   });
 }
 
@@ -1531,6 +1637,90 @@ function updateRemarksClamp(cell) {
     const clampEl = btn.previousElementSibling;
     if (!clampEl) return;
     openRemarksModal(clampEl.innerHTML);
+  });
+})();
+
+// Full-row detail popup — click anywhere on a row (that isn't one of
+// its own buttons: the ID copy chip, a page-image button, a "Read more"
+// button, or a cross-reference link, each already handled elsewhere) to
+// see every field, not just the currently-visible columns. Per the
+// user, 2026-09-28: labeled explicitly ("Unique ID: ...", "Language:
+// ...", ...), Remarks given most of the popup's own space.
+(function() {
+  const modal = document.getElementById('rowDetailModal');
+  const modalBody = document.getElementById('rowDetailModalBody');
+  const modalClose = document.getElementById('rowDetailModalClose');
+
+  function fieldLabel(key) {
+    return key === 'id' ? 'Unique ID' : (COLUMN_HEADERS[key] || key);
+  }
+
+  // The remarks cell's own HTML is wrapped in the 5-line CSS clamp (see
+  // remarks_cell_html()) — the popup wants the full text unclamped, the
+  // same content the "Read more" button already opens, so this pulls
+  // straight out of .remarks-clamp rather than duplicating that markup.
+  function fullRemarksHtml(cellHtml) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = cellHtml || '';
+    const clamp = tmp.querySelector('.remarks-clamp');
+    return clamp ? clamp.innerHTML : tmp.innerHTML;
+  }
+
+  function openRowDetailModal(row) {
+    modalBody.innerHTML = '';
+    COLUMN_KEYS.forEach((key) => {
+      if (key === REMARKS_KEY) return; // shown separately, below, with more room
+      const html = row.cells[key];
+      if (!html) return; // empty fields are simply omitted, not shown blank
+      const field = document.createElement('div');
+      field.className = 'row-detail-field';
+      const dt = document.createElement('div');
+      dt.className = 'row-detail-label';
+      dt.textContent = fieldLabel(key) + ':';
+      const dd = document.createElement('div');
+      dd.className = 'row-detail-value';
+      dd.innerHTML = html;
+      field.appendChild(dt);
+      field.appendChild(dd);
+      modalBody.appendChild(field);
+    });
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+      const section = document.createElement('div');
+      section.className = 'row-detail-remarks';
+      const dt = document.createElement('div');
+      dt.className = 'row-detail-label';
+      dt.textContent = fieldLabel(REMARKS_KEY) + ':';
+      const dd = document.createElement('div');
+      dd.className = 'row-detail-remarks-body';
+      dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      section.appendChild(dt);
+      section.appendChild(dd);
+      modalBody.appendChild(section);
+    }
+    modal.hidden = false;
+  }
+  function closeRowDetailModal() {
+    modal.hidden = true;
+    modalBody.innerHTML = '';
+  }
+  modalClose.addEventListener('click', closeRowDetailModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRowDetailModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeRowDetailModal();
+  });
+  tbody.addEventListener('click', (e) => {
+    // A row's own interactive elements (idchip, page-img-btn,
+    // remarks-more-btn, xref-link) are all <button>s with their own
+    // handlers -- let those run instead of also opening this popup.
+    if (e.target.closest('button')) return;
+    // Don't hijack a text selection someone just finished dragging out
+    // of a cell to copy -- a real click leaves nothing selected.
+    if (window.getSelection().toString()) return;
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    const idx = STABLE_KEY_INDEX.get(tr.dataset.key);
+    if (idx === undefined) return;
+    openRowDetailModal(ROWS[idx]);
   });
 })();
 </script>
