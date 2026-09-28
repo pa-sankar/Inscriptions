@@ -482,7 +482,14 @@
     color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;
     letter-spacing: 0.03em; font-weight: 600;
   }
-  .row-detail-value { line-height: 1.5; overflow-wrap: break-word; }
+  .row-detail-value {
+    line-height: 1.5; overflow-wrap: break-word;
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .row-detail-id-text {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9rem; color: var(--text);
+  }
   .row-detail-remarks { margin-top: 1.1rem; }
   .row-detail-remarks .row-detail-label {
     display: block; margin-bottom: 0.4rem; font-size: 0.85rem;
@@ -508,7 +515,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-28 14:46</div>
+<div class="generated">Generated 2026-09-28 15:10</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -916,12 +923,18 @@ function pageSizeValue() {
 // own highlighting.
 function buildRow(row, term, whole, scope, catVal) {
   const tr = document.createElement('tr');
-  // The row's own stable_key (the ID column's plain text, same value
-  // its idchip button already carries as data-id) — used by jumpToKey()
-  // below to find and scroll to this <tr> after a cross-reference click
-  // repaints the table. Set unconditionally, not just when an "id"
-  // column exists, so a future caller without one just gets ''.
-  tr.dataset.key = (row.text && row.text.id) || '';
+  // The row's own real stable_key — used by jumpToKey() below to find
+  // and scroll to this <tr> after a cross-reference click repaints the
+  // table, and by the row-detail popup's own click handler to look the
+  // clicked row back up in ROWS. row.id (NOT row.text.id) is the source
+  // of truth -- found live 2026-09-28, per the user ("Pop-up information
+  // ... does not match the information of the row clicked"): row.text.id
+  // is derived by stripping HTML tags out of the ID cell (see
+  // write_shared_data_json's own "text" comprehension), and since the ID
+  // column now renders as a tag-glyph button with the real ID only in an
+  // attribute, its stripped-tags text is the SAME glyph on every row --
+  // every <tr> collided on one identical (wrong) dataset.key.
+  tr.dataset.key = row.id || '';
   COLUMN_KEYS.forEach((key, i) => {
     const td = document.createElement('td');
     // A column that isn't currently shown (col-optional-hidden, width
@@ -1294,13 +1307,13 @@ async function loadData() {
       if (!r.categories) r.categories = [];
     });
     ROWS = data;
-    // stable_key -> ROWS index, for jumpToKey() below. Built once here,
-    // not per-jump, since ROWS never changes after load — the ID
-    // column's plain text (row.text.id) already equals its own
-    // stable_key (build_sii_inscriptions.py / build_are_inscriptions.py
-    // both render it verbatim into the idchip button), so no separate
-    // data field was needed to support this.
-    STABLE_KEY_INDEX = new Map(ROWS.map((r, i) => [(r.text && r.text.id) || '', i]));
+    // stable_key -> ROWS index, for jumpToKey() and the row-detail
+    // popup's own row lookup, both below. Built once here, not per-use,
+    // since ROWS never changes after load. Keyed on each row's own real
+    // ``id`` field (write_shared_data_json's own top-level "id", NOT
+    // r.text.id — see buildRow()'s tr.dataset.key comment for why that
+    // collided on one shared, wrong value for every row).
+    STABLE_KEY_INDEX = new Map(ROWS.map((r, i) => [r.id || '', i]));
     loadOverlay.hidden = true;
     document.body.classList.remove('loading');
     setControlsDisabled(false);
@@ -1672,6 +1685,16 @@ function updateRemarksClamp(cell) {
       const dd = document.createElement('div');
       dd.className = 'row-detail-value';
       dd.innerHTML = html;
+      // The ID field's own cell is just the tag-glyph copy button (its
+      // real text lives only in a title/data-id attribute) -- per the
+      // user, 2026-09-28: show the complete ID as plain, readable text
+      // right next to the icon, not hidden behind a hover/tap.
+      if (key === 'id' && row.id) {
+        const idText = document.createElement('code');
+        idText.className = 'row-detail-id-text';
+        idText.textContent = row.id;
+        dd.appendChild(idText);
+      }
       field.appendChild(dt);
       field.appendChild(dd);
       modalBody.appendChild(field);
