@@ -225,7 +225,21 @@
   /* Hidden by default (see Column.default_visible / updateColumnVisibility()
      in the script below) — a column starts out of the way and reappears
      automatically the moment its own filter has an active selection. */
-  col.col-optional-hidden { display: none; }
+  /* `display: none` on a <col> is NOT reliably honored by browsers --
+     it can affect the column-width distribution but does nothing to
+     suppress the actual <td>/<th> cells at that column position, since
+     those are independent boxes a <col> only lends styling hints to.
+     Found live 2026-09-28, per the user ("remarks is using very less
+     [space]"): every "hidden" column (Kind, Type, Sl.No, Survey Ref,
+     Dynasty, Date, Language, Page, Image) was still rendering its full
+     content and width in Chrome, pushing the table's real total width
+     to ~159% of the declared 100% and leaving Remarks' nominal 50%
+     looking like a sliver of the visible viewport. `visibility: collapse`
+     is the actual standards mechanism for this -- applied to a <col>,
+     it removes that column's cells from rendering entirely (well
+     supported in Chrome/Firefox), which `display: none` was never
+     specified to do. */
+  col.col-optional-hidden { visibility: collapse; }
   @media (max-width: 640px) {
     .wrap { padding: 14px 12px 40px; }
     input[type=search] { width: 100%; }
@@ -458,7 +472,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-28 09:13</div>
+<div class="generated">Generated 2026-09-28 11:15</div>
 
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
