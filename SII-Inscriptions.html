@@ -120,6 +120,18 @@
     margin-bottom: 0.75rem; max-width: 62rem;
   }
   .filters-help strong { color: var(--text); }
+  /* Plain-language readout of what's actually selected right now — per
+     the user, 2026-09-28: a filter button only ever says "Include 2
+     selected", which doesn't say WHICH 2. This spells it out ("State =
+     Tamil Nadu, Karnataka") for every active filter at once, hidden
+     entirely (see updateActiveFiltersSummary() in the script below)
+     when nothing is filtered. */
+  .active-filters-summary {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.5rem 0.9rem; margin-bottom: 0.75rem; font-size: 0.85rem;
+    color: var(--text); line-height: 1.6;
+  }
+  .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -472,7 +484,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-28 12:44</div>
+<div class="generated">Generated 2026-09-28 14:30</div>
 
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -497,6 +509,7 @@ the search box back to their starting state.</div>
   <button type="button" id="searchBtn">Search</button>
   <button type="button" id="resetBtn">Reset</button>
 </div>
+<div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -616,6 +629,57 @@ function filterButtonLabel(key, allLabel) {
   if (!st || st.values.size === 0) return allLabel;
   const verb = st.mode === 'exclude' ? 'Exclude' : 'Include';
   return verb + ' ' + st.values.size + ' selected';
+}
+
+// Human name for a filter, derived from its own "All ..." button label
+// ("All states" -> "State") rather than a separate name baked into the
+// page — one less thing for a build script to keep in sync by hand.
+function filterDisplayName(allLabel) {
+  const rest = (allLabel || '').replace(/^All\s+/i, '');
+  const singular = rest.replace(/s$/i, '');
+  return singular ? singular[0].toUpperCase() + singular.slice(1) : rest;
+}
+
+// The value itself is what a reader picked and what actually matches
+// rows (checkbox.value, e.g. "Tamil Nadu", or "I (1)" for a volume
+// disambiguated from a same-numbered other part) -- not its <span>
+// label, which carries a per-filter-formatted count suffix ("Tamil Nadu
+// (412)", "I — 114 record(s)") with no single safe way to strip across
+// every filter's own formatting. Tried stripping a trailing "(...)"
+// group generically first; wrong for Volume, whose label ends
+// "record(s)" -- found live 2026-09-28, testing this for real, not
+// just reading the code: it silently mangled "record(s)" into "record".
+function filterValueLabel(key, value) {
+  return value === BLANK_FILTER_VALUE ? 'Blank / not available' : value;
+}
+
+// Plain-language readout of every active filter at once — per the user,
+// 2026-09-28: the filter button itself only ever says "Include 2
+// selected", never which 2. Rebuilt on every filter change (called
+// alongside updateColumnVisibility(), same call sites) since it has to
+// reflect all filters together, not just the one that just changed.
+function updateActiveFiltersSummary() {
+  const el = document.getElementById('activeFiltersSummary');
+  if (!el) return;
+  const active = FILTER_KEYS.filter((k) => FILTER_STATE[k] && FILTER_STATE[k].values.size > 0);
+  el.hidden = active.length === 0;
+  el.textContent = '';
+  if (!active.length) return;
+  // Built with real DOM nodes, not innerHTML string concatenation --
+  // this text ultimately comes from checkbox labels (filter option
+  // values, corpus data), so it must go through textContent rather than
+  // needing its own ad hoc HTML-escaping helper.
+  el.appendChild(document.createTextNode('Active filters: '));
+  active.forEach((k, i) => {
+    if (i > 0) el.appendChild(document.createTextNode('  ·  '));
+    const st = FILTER_STATE[k];
+    const strong = document.createElement('strong');
+    strong.textContent = filterDisplayName(FILTER_ALL_LABELS[k]);
+    el.appendChild(strong);
+    const values = Array.from(st.values).map((v) => filterValueLabel(k, v)).join(', ');
+    const verb = st.mode === 'exclude' ? ' ≠ ' : ' = ';
+    el.appendChild(document.createTextNode(verb + values));
+  });
 }
 
 function updateFilterButton(key, allLabel) {
@@ -1003,6 +1067,7 @@ function recomputeFilterOptions() {
 // than 100% (already inside a horizontally-scrolling .table-scroll) in
 // the rare case several optional columns are visible at once.
 function updateColumnVisibility() {
+  updateActiveFiltersSummary();
   if (!REMARKS_KEY) return;
   const visible = new Set(DEFAULT_VISIBLE_KEYS);
   FILTER_KEYS.forEach((k) => {
