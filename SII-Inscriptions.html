@@ -528,7 +528,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-28 15:17</div>
+<div class="generated">Generated 2026-09-28 16:28</div>
 
 <div class="stats">16003 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (267 of 270, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -652,8 +652,13 @@ const searchBtn = document.getElementById('searchBtn');
 const resetBtn = document.getElementById('resetBtn');
 const categoryFilterEl = document.getElementById('categoryFilter'); // null if no row has any category
 const tbody = document.getElementById('tbody');
-const DATA_URL = "data/SII-Inscriptions.json";
+const DATA_URL = "data/sii/index.json";
 const CATEGORIES_URL = null;
+// The human name for one chunk ("volume"/"year") — loadData()'s own
+// progress text below reads "Loading volume XI… (45%)", never
+// "chunk 12 of 27", per the user, 2026-09-28: "X of N chunks is ok for
+// a software - not ok for a user."
+const CHUNK_LABEL = "volume";
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1285,6 +1290,28 @@ function setControlsDisabled(disabled) {
   CONTROL_ELS.forEach((el) => { el.disabled = disabled; });
 }
 
+// url with its own last path segment (the index.json filename itself)
+// dropped, so a chunk's own bare filename (from the index it came from)
+// resolves next to it — e.g. "../data/sii/index.json" -> "../data/sii/".
+function dirOf(url) {
+  return url.slice(0, url.lastIndexOf('/') + 1);
+}
+
+async function fetchJson(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
+  return resp.json();
+}
+
+// DATA_URL/CATEGORIES_URL are each an index.json manifest now, not a
+// single data file — see write_shared_data_json()'s own docstring for
+// why (one file per SII volume / ARE report year, so no chunk ever
+// grows unbounded the way one flat corpus-wide file did). This fetches
+// the index, then every chunk it lists, then flattens them into the
+// same plain ROWS array the rest of this script already expects — every
+// other function (pagination, filtering, the row-detail popup, ...)
+// keeps working completely unchanged, since a flat array is a flat
+// array regardless of how many requests built it.
 async function loadData() {
   document.body.classList.add('loading');
   loadOverlay.hidden = false;
@@ -1292,29 +1319,63 @@ async function loadData() {
   loadRetryBtn.hidden = true;
   setControlsDisabled(true);
   try {
-    const dataResp = await fetch(DATA_URL);
-    if (!dataResp.ok) throw new Error('HTTP ' + dataResp.status + ' fetching ' + DATA_URL);
-    const data = await dataResp.json();
+    const dataDir = dirOf(DATA_URL);
+    const dataIndex = await fetchJson(DATA_URL);
+
+    let suppByKey = null, suppCount = 0;
     if (CATEGORIES_URL) {
-      const suppResp = await fetch(CATEGORIES_URL);
-      if (!suppResp.ok) throw new Error('HTTP ' + suppResp.status + ' fetching ' + CATEGORIES_URL);
-      const supp = await suppResp.json();
-      // Keyed by array index (a string, since JSON object keys always
-      // are) — safe because both files are written from the same rows
-      // list, in the same order, in one build run (see
-      // write_supplement_json's own docstring). cells/text/filters are
-      // Object.assign'd in (not overwritten wholesale) since the shared
-      // blob already has its own non-excluded keys for this row that
-      // must survive the merge.
-      Object.keys(supp).forEach((idx) => {
-        const s = supp[idx];
-        if (s.spans) data[idx].spans = s.spans;
-        if (s.categories) data[idx].categories = s.categories;
-        if (s.cells) Object.assign(data[idx].cells, s.cells);
-        if (s.text) Object.assign(data[idx].text, s.text);
-        if (s.filters) Object.assign(data[idx].filters, s.filters);
-      });
+      const suppDir = dirOf(CATEGORIES_URL);
+      const suppIndex = await fetchJson(CATEGORIES_URL);
+      suppByKey = new Map(suppIndex.map((e) => [e.key, suppDir + e.file]));
+      suppCount = suppIndex.length;
     }
+
+    // A live "Loading volume XI… (45%)" readout, not a raw "12 of
+    // 27 chunks" count — per the user, 2026-09-28: the chunk count means
+    // nothing to a reader, but the percentage and which real unit just
+    // finished both do. `total` counts every fetch this load will make
+    // (each data chunk, plus its own matching supplement chunk when
+    // there is one), bumped as each individually resolves even though
+    // they all run in parallel via Promise.all below.
+    const total = dataIndex.length + suppCount;
+    let done = 0;
+    function noteProgress(label) {
+      done++;
+      const pct = total ? Math.round((done / total) * 100) : 100;
+      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+    }
+
+    // One chunk fetched (data + its own matching supplement, if any) at
+    // a time, in parallel across every chunk — each merge is strictly
+    // LOCAL to its own chunk's array indices, never a global row index
+    // (see write_supplement_json()'s own docstring for why that stopped
+    // being safe once chunking split the data into separate arrays:
+    // index 0 now means "first row of THIS chunk", a different row in
+    // every chunk, not a single corpus-wide position).
+    const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
+      const chunkRows = await fetchJson(dataDir + entry.file);
+      noteProgress(entry.key);
+      const suppUrl = suppByKey && suppByKey.get(entry.key);
+      if (suppUrl) {
+        const supp = await fetchJson(suppUrl);
+        noteProgress(entry.key);
+        // cells/text/filters are Object.assign'd in (not overwritten
+        // wholesale) since the shared chunk already has its own
+        // non-excluded keys for this row that must survive the merge.
+        Object.keys(supp).forEach((localIdx) => {
+          const s = supp[localIdx];
+          const row = chunkRows[localIdx];
+          if (s.spans) row.spans = s.spans;
+          if (s.categories) row.categories = s.categories;
+          if (s.cells) Object.assign(row.cells, s.cells);
+          if (s.text) Object.assign(row.text, s.text);
+          if (s.filters) Object.assign(row.filters, s.filters);
+        });
+      }
+      return chunkRows;
+    }));
+    const data = chunkArrays.flat();
+
     data.forEach((r) => {
       if (!r.spans) r.spans = {};
       if (!r.categories) r.categories = [];
@@ -1341,6 +1402,10 @@ async function loadData() {
     const jumpKey = new URLSearchParams(location.search).get('jump');
     if (jumpKey) jumpToKey(jumpKey);
   } catch (err) {
+    // Any one chunk's fetch failing (a flaky connection, a 404 from a
+    // stale index) throws the same way the old single-file fetch did —
+    // one clear error and a Retry button, never a silently partial
+    // table with some chunks missing.
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
   }
