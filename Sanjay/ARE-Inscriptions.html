@@ -270,11 +270,11 @@
   tbody tr { cursor: pointer; }
   tbody tr:hover { background: var(--surface-2); }
   col.c-id { width: 7%; }
+  col.c-sl_no { width: 5%; }
   col.c-source { width: 5%; }
   col.c-kind { width: 5%; }
   col.c-type { width: 5%; }
   col.c-location { width: 20%; }
-  col.c-sl_no { width: 5%; }
   col.c-place { width: 18%; }
   col.c-dynasty { width: 6%; }
   col.c-king { width: 6%; }
@@ -519,7 +519,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 43 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-09-28 16:29</div>
+<div class="generated">Generated 2026-09-28 16:42</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">34328 records from 4710 table pages (350 index pages excluded) across 43 PDFs. 80923 &quot;Do.&quot; cells resolved, 6433 flagged (unresolved or partial — not auto-filled). 17 merged Serial/Findspot cells split, 11 stray Sl.No prefixes stripped, 4415 location prefixes moved to Location, 4 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -905,8 +905,8 @@ Persian verse (1)</span></label><label class="filter-dd-opt"><input type="checkb
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id" data-key="id"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-sl_no" data-key="sl_no"><col class="c-place" data-key="place"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="source">Year</th><th data-key="kind">Kind</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="sl_no">Sl.No</th><th data-key="place">Place/Source</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th></tr></thead>
+<colgroup><col class="c-id" data-key="id"><col class="c-sl_no" data-key="sl_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-place" data-key="place"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="sl_no">Sl.No</th><th data-key="source">Year</th><th data-key="kind">Kind</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="place">Place/Source</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -955,12 +955,12 @@ Persian verse (1)</span></label><label class="filter-dd-opt"><input type="checkb
 <script>
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'lang', 'year', 'state'];
-const COLUMN_KEYS = ['id', 'source', 'kind', 'type', 'location', 'sl_no', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page'];
+const COLUMN_KEYS = ['id', 'sl_no', 'source', 'kind', 'type', 'location', 'place', 'dynasty', 'king', 'date', 'language', 'remarks', 'page'];
 // key -> column header text, for the row-detail popup's own field
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "source": "Year", "kind": "Kind", "type": "Type", "location": "Location", "sl_no": "Sl.No", "place": "Place/Source", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "remarks": "Remarks", "page": "Page"};
+const COLUMN_HEADERS = {"id": "ID", "sl_no": "Sl.No", "source": "Year", "kind": "Kind", "type": "Type", "location": "Location", "place": "Place/Source", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "remarks": "Remarks", "page": "Page"};
 const HIGHLIGHT_COLS = [6, 7, 8, 9, 10, 11];
 const REMARKS_COL_IDX = 11;
 // Column visibility/width policy — see Column.default_visible's own
@@ -968,8 +968,8 @@ const REMARKS_COL_IDX = 11;
 // (including one with no matching Filter at all) starts hidden via its
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
-const DEFAULT_VISIBLE_KEYS = new Set(["id", "source", "location", "place", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 7, "source": 5, "kind": 5, "type": 5, "location": 20, "sl_no": 5, "place": 18, "dynasty": 6, "king": 6, "date": 10, "language": 6, "remarks": 50, "page": 5};
+const DEFAULT_VISIBLE_KEYS = new Set(["id", "sl_no", "source", "location", "place", "remarks"]);
+const BASE_COL_WIDTHS = {"id": 7, "sl_no": 5, "source": 5, "kind": 5, "type": 5, "location": 20, "place": 18, "dynasty": 6, "king": 6, "date": 10, "language": 6, "remarks": 50, "page": 5};
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
