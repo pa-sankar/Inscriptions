@@ -280,7 +280,7 @@
   col.c-date { width: 6%; }
   col.c-language { width: 5%; }
   col.c-script { width: 6%; }
-  col.c-remarks { width: 50%; }
+  col.c-remarks { width: 57%; }
   col.c-page { width: 4%; }
   col.c-tamil_fields { width: 0%; }
   col.c-inscription_text { width: 0%; }
@@ -504,6 +504,25 @@
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
     background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
   }
+  .row-detail-facts { margin-top: 1.1rem; }
+  /* Column.popup_tab's own tab strip — a long field (a full inscription
+     transcription, a citation list) gets its own tab instead of sitting
+     inline in the quick-facts grid, per the user, 2026-09-30. */
+  .row-detail-tabs { margin-top: 1.1rem; }
+  .row-detail-tab-bar {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
+  }
+  .row-detail-tab-btn {
+    font: inherit; font-size: 0.85rem; padding: 0.35rem 0.8rem;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2);
+    color: var(--text-dim); cursor: pointer;
+  }
+  .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  .row-detail-tab-content {
+    white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
+    background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
+    max-height: 22rem; overflow-y: auto;
+  }
   @media (max-width: 640px) {
     .row-detail-field { grid-template-columns: 1fr; gap: 0.1rem; }
   }
@@ -521,7 +540,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> TaKa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-09-30 07:05</div>
+<div class="generated">Generated 2026-09-30 07:19</div>
 
 <div class="stats">3737 records from 18 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -627,7 +646,9 @@ const REMARKS_COL_IDX = 11;
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "serial_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 8, "serial_no": 7, "source": 10, "kind": 5, "type": 6, "location": 18, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 50, "page": 4, "tamil_fields": 0, "inscription_text": 0};
+const BASE_COL_WIDTHS = {"id": 8, "serial_no": 7, "source": 10, "kind": 5, "type": 6, "location": 18, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 57, "page": 4, "tamil_fields": 0, "inscription_text": 0};
+// Column.popup_tab's own keys — see openRowDetailModal() below.
+const POPUP_TAB_KEYS = ["tamil_fields", "inscription_text"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
@@ -1742,10 +1763,47 @@ function updateRemarksClamp(cell) {
     return clamp ? clamp.innerHTML : tmp.innerHTML;
   }
 
+  function appendNotAvailable(dd) {
+    const na = document.createElement('span');
+    na.className = 'row-detail-na';
+    na.textContent = 'Not available';
+    dd.appendChild(na);
+  }
+
+  // Per the user, 2026-09-30: Remarks moved to the TOP (it used to be
+  // appended last, after every quick fact, which pushed it to the
+  // bottom of a long popup for a record with many fields) — it's the
+  // field of greatest interest, so it's the first thing a reader sees
+  // now, not the last. `popup_tab` columns (Column.popup_tab's own
+  // docstring) are excluded from the quick-facts grid entirely and
+  // rendered as tabs below instead, so a long field (a full inscription
+  // transcription, a citation list) doesn't dominate/scroll past the
+  // short, at-a-glance facts.
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
+
+    if (REMARKS_KEY) {
+      const section = document.createElement('div');
+      section.className = 'row-detail-remarks';
+      const dt = document.createElement('div');
+      dt.className = 'row-detail-label';
+      dt.textContent = fieldLabel(REMARKS_KEY) + ':';
+      const dd = document.createElement('div');
+      dd.className = 'row-detail-remarks-body';
+      if (row.cells[REMARKS_KEY]) {
+        dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      } else {
+        appendNotAvailable(dd);
+      }
+      section.appendChild(dt);
+      section.appendChild(dd);
+      modalBody.appendChild(section);
+    }
+
+    const factsGrid = document.createElement('div');
+    factsGrid.className = 'row-detail-facts';
     COLUMN_KEYS.forEach((key) => {
-      if (key === REMARKS_KEY) return; // shown separately, below, with more room
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
       const html = row.cells[key];
       const field = document.createElement('div');
       field.className = 'row-detail-field';
@@ -1763,10 +1821,7 @@ function updateRemarksClamp(cell) {
       if (html) {
         dd.innerHTML = html;
       } else {
-        const na = document.createElement('span');
-        na.className = 'row-detail-na';
-        na.textContent = 'Not available';
-        dd.appendChild(na);
+        appendNotAvailable(dd);
       }
       // The ID field's own cell is just the tag-glyph copy button (its
       // real text lives only in a title/data-id attribute) -- per the
@@ -1780,28 +1835,46 @@ function updateRemarksClamp(cell) {
       }
       field.appendChild(dt);
       field.appendChild(dd);
-      modalBody.appendChild(field);
+      factsGrid.appendChild(field);
     });
-    if (REMARKS_KEY) {
-      const section = document.createElement('div');
-      section.className = 'row-detail-remarks';
-      const dt = document.createElement('div');
-      dt.className = 'row-detail-label';
-      dt.textContent = fieldLabel(REMARKS_KEY) + ':';
-      const dd = document.createElement('div');
-      dd.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        const na = document.createElement('span');
-        na.className = 'row-detail-na';
-        na.textContent = 'Not available';
-        dd.appendChild(na);
+    modalBody.appendChild(factsGrid);
+
+    if (POPUP_TAB_KEYS.length) {
+      const tabsWrap = document.createElement('div');
+      tabsWrap.className = 'row-detail-tabs';
+      const tabBar = document.createElement('div');
+      tabBar.className = 'row-detail-tab-bar';
+      const tabContent = document.createElement('div');
+      tabContent.className = 'row-detail-tab-content';
+
+      function showTab(key) {
+        Array.from(tabBar.children).forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.key === key);
+        });
+        tabContent.innerHTML = '';
+        const html = row.cells[key];
+        if (html) {
+          tabContent.innerHTML = html;
+        } else {
+          appendNotAvailable(tabContent);
+        }
       }
-      section.appendChild(dt);
-      section.appendChild(dd);
-      modalBody.appendChild(section);
+
+      POPUP_TAB_KEYS.forEach((key, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'row-detail-tab-btn';
+        btn.dataset.key = key;
+        btn.textContent = fieldLabel(key);
+        btn.addEventListener('click', () => showTab(key));
+        tabBar.appendChild(btn);
+        if (i === 0) showTab(key);
+      });
+      tabsWrap.appendChild(tabBar);
+      tabsWrap.appendChild(tabContent);
+      modalBody.appendChild(tabsWrap);
     }
+
     modal.hidden = false;
   }
   function closeRowDetailModal() {
