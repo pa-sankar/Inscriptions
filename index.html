@@ -102,6 +102,22 @@
   .card h3 { margin: 0 0 0.3rem 0; font-size: 1rem; color: var(--text); }
   .card p { margin: 0.4rem 0; font-size: 0.95rem; }
   .card.soon { opacity: 0.75; }
+  /* A card whose whole area navigates to its table (SII's own, so far)
+     -- per the user, 2026-09-30: clickable, but WITHOUT looking like an
+     explicit text link the way "Search the table" below already does;
+     a card wrapped in <a> inherits blue/underline by default, so both
+     are reset here to plain text, with only a subtle hover lift/border
+     tint as the interactivity hint (same accent color the rest of the
+     site's own hover states use, so it still reads as "this does
+     something" without shouting "hyperlink"). */
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  a.card:hover {
+    border-color: var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  a.card:hover h3 { color: var(--accent-strong); }
   .badge {
     display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
     text-transform: uppercase; color: var(--accent-copper-strong); background: var(--surface-2);
@@ -123,12 +139,12 @@
 keyword-searchable database from a major published source on South
 Indian epigraphy, with more sources on the way:</p>
 
-<div class="card">
+<a class="card" href="SII-Inscriptions.html">
   <h3>South Indian Inscriptions (SII)</h3>
   <p>The Archaeological Survey of India's long-running series publishing
   the full text of stone and copper-plate inscriptions across South
   India, volume by volume since 1890.</p>
-</div>
+</a>
 <div class="card soon">
   <h3>Annual Report on [South] Indian Epigraphy (ARE) <span class="badge">Coming soon</span></h3>
   <p>The Archaeological Survey of India's yearly reports listing every
