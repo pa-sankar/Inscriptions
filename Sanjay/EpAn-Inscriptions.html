@@ -534,7 +534,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpAn Articles</h1>
   
 </div>
-<div class="generated">Generated 2026-09-30 07:19</div>
+<div class="generated">Generated 2026-09-30 16:48</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -545,7 +545,7 @@ means nothing currently matches it; it reappears the moment you widen
 another filter back out). <strong>Reset</strong> clears every filter and
 the search box back to their starting state.</div>
 <div class="controls">
-  <div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (3)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="IV"><span>Vol IV — 16 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI"><span>Vol VI — 14 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+  <div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (3)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="IV"><span>IV — 16 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI"><span>VI — 14 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="woman_death_composite">woman_death_composite (3)</option></select>
   <select id="searchScope">
     <option value="all">Search: all columns</option>
@@ -1399,6 +1399,14 @@ async function loadData() {
     loadOverlay.hidden = true;
     document.body.classList.remove('loading');
     setControlsDisabled(false);
+    // Defensive, not currently load-bearing: FILTER_STATE has nothing
+    // pre-checked before data loads today, so the one-time top-level
+    // updateColumnVisibility() call earlier in this script already left
+    // column widths correct. Re-running it here costs nothing and keeps
+    // this render() call self-sufficient if a future change ever makes a
+    // filter pre-select itself (a URL param, a saved view) before this
+    // first paint.
+    updateColumnVisibility();
     recomputeFilterOptions();
     render();
     // A cross-reference click on the OTHER corpus's page (jumpToKey()
