@@ -1,2 +1,4 @@
 User-agent: *
 Disallow: /Sanjay/
+
+Sitemap: https://pa-sankar.github.io/Inscriptions/sitemap.xml
