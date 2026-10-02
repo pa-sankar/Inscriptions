@@ -96,6 +96,14 @@
   .modal-actions button:hover { border-color: var(--accent); }
   .modal-actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .modal-actions .primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  /* Same subscribe button as the SII/ARE table pages' own titlebar --
+     per the user, 2026-10-02, public page only (never --sanjay). */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
@@ -342,6 +350,13 @@ on the Internet Archive.</p>
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !modal.hidden) closeModal();
   });
+  // Public page only -- the --sanjay build never renders this element.
+  const subscribeLink = document.getElementById('subscribeLink');
+  if (subscribeLink) {
+    subscribeLink.addEventListener('click', function() {
+      if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+    });
+  }
 })();
 </script>
 </body>

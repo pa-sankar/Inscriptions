@@ -86,13 +86,24 @@
   .note { color: var(--text-dim); font-size: 0.88rem; }
   .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
   .back:hover { color: var(--accent); }
+  /* Same subscribe button as the SII/ARE table pages' own titlebar --
+     per the user, 2026-10-02, public pages only (this page has no
+     Sanjay variant to begin with). */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <a href="index.html" class="home-link" title="Home">&#8962;</a>
 <div class="brand">Project InscriptionSearch</div>
-<h1>How were the volumes processed?</h1>
+<h1>How were the volumes processed?
+  <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
+</h1>
 
 <h2>Reading the original scans</h2>
 <p>The source is a scanned book, decades old, in a mix of English
@@ -162,5 +173,10 @@ selectively, not for the whole corpus.</p>
 
 <a href="index.html" class="back">&larr; Back</a>
 </div>
+<script>
+  document.getElementById('subscribeLink').addEventListener('click', function() {
+    if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+  });
+</script>
 </body>
 </html>

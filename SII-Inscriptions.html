@@ -87,6 +87,15 @@
   .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
   .home-link:hover { color: var(--accent); }
   .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  /* Public pages only (see render_inscriptions_table's own subscribe_url
+     docstring) -- a solid button, not a plain link, since this is a call
+     to action rather than in-site navigation. */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
   .stats { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; }
   /* Legend block — explains the v-direct/v-derived color convention
      and the Location-vs-Place/Source distinction, per the user,
@@ -543,9 +552,9 @@
 <div class="brand">Project InscriptionSearch</div>
 <div class="titlebar">
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
-  
+  <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
-<div class="generated">Generated 2026-10-02 20:49</div>
+<div class="generated">Generated 2026-10-02 21:03</div>
 
 <div class="stats">15696 records from 44 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (266 of 269, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -1942,6 +1951,18 @@ function updateRemarksClamp(cell) {
     if (idx === undefined) return;
     openRowDetailModal(ROWS[idx]);
   });
+})();
+// Public pages only (subscribe_link_html is empty, so this element
+// doesn't exist, on every Sanjay page) -- fires on click without
+// blocking the default target="_blank" navigation, same convention as
+// index.html's own feedbackLink tracking.
+(function() {
+  const subscribeLink = document.getElementById('subscribeLink');
+  if (subscribeLink) {
+    subscribeLink.addEventListener('click', function() {
+      if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+    });
+  }
 })();
 </script>
 </body>

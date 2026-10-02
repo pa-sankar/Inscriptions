@@ -105,13 +105,21 @@
   .modal-actions button:hover { border-color: var(--accent); }
   .modal-actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .modal-actions .primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  /* Same subscribe button as the SII/ARE table pages' own titlebar --
+     per the user, 2026-10-02, public page only (never --sanjay). */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <a class="back top" href="index.html">&larr; Back</a>
 <div class="brand">Project InscriptionSearch</div>
-<h1>Sources</h1>
+<h1>Sources <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a></h1>
 <p>Every volume/report shown in the searchable tables, linked to the exact
 PDF our own OCR pipeline read it from. A "Page #" cell in the search
 tables is a physical page number in <em>that specific scan</em> — the
@@ -230,6 +238,13 @@ on the Internet Archive.</p>
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !modal.hidden) closeModal();
   });
+  // Public page only -- the --sanjay build never renders this element.
+  const subscribeLink = document.getElementById('subscribeLink');
+  if (subscribeLink) {
+    subscribeLink.addEventListener('click', function() {
+      if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+    });
+  }
 })();
 </script>
 </body>

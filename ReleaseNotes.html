@@ -67,13 +67,19 @@
   ul.changes li { margin: 0.55rem 0; }
   .back { display: inline-block; margin-top: 2rem; color: var(--accent-strong); text-decoration: none; }
   .back:hover { color: var(--accent); }
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <a href="index.html" class="home-link" title="Home">&#8962;</a>
 <div class="brand">Project InscriptionSearch</div>
-<h1>Release Notes</h1>
+<h1>Release Notes <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a></h1>
 <p class="date">2026-09-28</p>
 
 <h2>Finding and narrowing records</h2>
@@ -146,5 +152,10 @@
 
 <a href="index.html" class="back">&larr; Back</a>
 </div>
+<script>
+  document.getElementById('subscribeLink').addEventListener('click', function() {
+    if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+  });
+</script>
 </body>
 </html>

@@ -125,6 +125,12 @@
     vertical-align: middle;
   }
   hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  .subscribe-btn {
+    display: inline-block; font-size: 0.9rem; font-weight: 600;
+    padding: 0.5rem 1.2rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-top: 0.4rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
@@ -172,6 +178,11 @@ scanned page available to view alongside their transcription.</p>
 
 <hr>
 
+<h2>Subscribe</h2>
+<p>Want to hear about new sources and major updates as they go live?
+Subscribe below.</p>
+<p><a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" id="subscribeLink" class="subscribe-btn">Subscribe</a></p>
+
 <h2>Feedback</h2>
 <p>Found something useful, or think a different source should be added?
 Feedback and requests are welcome via <a href="https://forms.gle/qfXGVHuK1emDwzNe8" target="_blank" rel="noopener" id="feedbackLink">this form</a>.</p>
@@ -185,6 +196,9 @@ periodically as the underlying database grows. Not a live database query.</p>
   // loaded) the same way a source PDF link does, and be visible in GA.
   document.getElementById('feedbackLink').addEventListener('click', function() {
     if (typeof gtag === 'function') gtag('event', 'feedback_form_click');
+  });
+  document.getElementById('subscribeLink').addEventListener('click', function() {
+    if (typeof gtag === 'function') gtag('event', 'subscribe_click');
   });
 </script>
 </body>
