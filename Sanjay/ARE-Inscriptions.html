@@ -536,7 +536,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 61 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-10-02 20:24</div>
+<div class="generated">Generated 2026-10-02 20:32</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">47071 records from 6009 table pages (493 index pages excluded) across 61 PDFs. 105217 &quot;Do.&quot; cells resolved, 8191 flagged (unresolved or partial — not auto-filled). 30 merged Serial/Findspot cells split, 12 stray Sl.No prefixes stripped, 6594 location prefixes moved to Location, 6 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -1280,6 +1280,25 @@ function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Strips combining diacritics (macron, dot-below, acute, etc.) so a
+// plain-ASCII search term matches the transliterated text regardless of
+// whether it carries them -- per the user, 2026-10-02: searching
+// "mahavra" found nothing because the actual text reads "mahāvra" (ā,
+// not a), even though searching "vra" alone DID find that same record.
+// NFD decomposition splits every precomposed character this corpus's
+// IAST transliteration uses (ā, ī, ū, ṭ, ḍ, ṇ, ś, ṣ, ṛ, ṁ, ...) into its
+// base letter plus one combining mark (U+0300-036F), which the regex
+// then deletes -- left with exactly the base letters, same length and
+// same character positions as the original string (each of these is a
+// single BMP code point, never a surrogate pair or a multi-character
+// decomposition), so indices computed against the FOLDED string stay
+// valid when applied back to the ORIGINAL string for highlighting.
+// Deliberately does NOT touch case -- callers already .toLowerCase() or
+// pass the 'i' regex flag where that matters.
+function foldDiacritics(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 // Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
 // non-word character to JS regex without unicode-property-escape
 // machinery, same as a space), which is fine for the plain-ASCII search
@@ -1416,7 +1435,10 @@ function buildRow(row, term, whole, scope, catVal) {
       }
     } else if (term && HIGHLIGHT_COLS.includes(i)) {
       const inScope = scope === 'all' || ('col-' + key) === scope;
-      if (inScope) ranges = textRanges(row.text[key] || '', makeMatcher(term, whole));
+      // Both sides folded (see foldDiacritics() docstring) -- the
+      // resulting offsets still line up with the row's own ORIGINAL
+      // text/HTML, which is what markRanges() below actually wraps.
+      if (inScope) ranges = textRanges(foldDiacritics(row.text[key] || ''), makeMatcher(foldDiacritics(term), whole));
     }
     markRanges(td, cellHtml, ranges);
     tr.appendChild(td);
@@ -1431,18 +1453,19 @@ function render() {
   const catVal = categoryFilterEl ? categoryFilterEl.value : '';
 
   // Matching only — plain-object/string work, no DOM, so this stays
-  // cheap regardless of table size.
-  const re = term ? makeMatcher(term, whole) : null;
+  // cheap regardless of table size. Folded (see foldDiacritics()) so a
+  // plain-ASCII term matches the corpus's own diacritic-bearing text.
+  const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
         const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
-        textMatch = re.test(all);
+        textMatch = re.test(foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
-        textMatch = re.test(row.text[key] || '');
+        textMatch = re.test(foldDiacritics(row.text[key] || ''));
       }
     }
     let match = textMatch;
