@@ -503,18 +503,16 @@
      "checked and blank" reads differently from "never shown at all".
      Muted + italic, distinct from a real value's plain color. */
   .row-detail-na { color: var(--text-dim); font-style: italic; }
-  .row-detail-remarks { margin-top: 1.1rem; }
-  .row-detail-remarks .row-detail-label {
-    display: block; margin-bottom: 0.4rem; font-size: 0.85rem;
-  }
   .row-detail-remarks-body {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
-    background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
   }
-  .row-detail-facts { margin-top: 1.1rem; }
-  /* Column.popup_tab's own tab strip — a long field (a full inscription
-     transcription, a citation list) gets its own tab instead of sitting
-     inline in the quick-facts grid, per the user, 2026-09-30. */
+  /* The popup's own tab strip -- "Details" (the quick-facts grid) always
+     first and active by default, "Remarks" and any Column.popup_tab
+     field (a full inscription transcription, a citation list) as
+     further tabs after it, per the user, 2026-10-02: Remarks moved back
+     OFF the always-visible top of the popup (where it pushed every
+     quick fact down to the bottom for a record with many fields) and
+     into its own scrollable tab instead. */
   .row-detail-tabs { margin-top: 1.1rem; }
   .row-detail-tab-bar {
     display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
@@ -547,7 +545,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-01 18:30</div>
+<div class="generated">Generated 2026-10-02 20:23</div>
 
 <div class="stats">15795 records from 44 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (266 of 269, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -557,6 +555,9 @@ actually occur among that Volume's own records (a greyed-out option
 means nothing currently matches it; it reappears the moment you widen
 another filter back out). <strong>Reset</strong> clears every filter and
 the search box back to their starting state.</div>
+<div class="filters-help">Click anywhere on a row to open its full
+details in a popup — including the complete Remarks text, which the
+table itself only shows a few lines of.</div>
 <div class="controls">
   <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (15795)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I (1)"><span>I (1) — 114 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt I (2)"><span>II Pt I (2) — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt II (2)"><span>II Pt II (2) — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I (3)"><span>III Pt I (3) — 40 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II (3)"><span>III Pt II (3) — 24 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt III (3)"><span>III Pt III (3) — 108 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt IV (3)"><span>III Pt IV (3) — 7 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV (4)"><span>IV (4) — 950 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V (5)"><span>V (5) — 1139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI (6)"><span>VI (6) — 646 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII (7)"><span>VII (7) — 813 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII (8)"><span>VIII (8) — 567 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt I (9)"><span>IX Pt I (9) — 339 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt II (9)"><span>IX Pt II (9) — 236 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X (10)"><span>X (10) — 691 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt I (11)"><span>XI Pt I (11) — 107 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt II (11)"><span>XI Pt II (11) — 201 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII Pt I (12)"><span>XII Pt I (12) — 256 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIII (13)"><span>XIII (13) — 336 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV (14)"><span>XIV (14) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV Pt II (15)"><span>XV Pt II (15) — 476 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI (16)"><span>XVI (16) — 270 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVII (17)"><span>XVII (17) — 632 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII (18)"><span>XVIII (18) — 421 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIX (19)"><span>XIX (19) — 453 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XX (20)"><span>XX (20) — 381 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt I (22)"><span>XXII Pt I (22) — 293 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt II (22)"><span>XXII Pt II (22) — 137 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIII (23)"><span>XXIII (23) — 529 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIV (24)"><span>XXIV (24) — 548 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVI (26)"><span>XXVI (26) — 689 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVII (27)"><span>XXVII (27) — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVIII (28)"><span>XXVIII (28) — 308 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXX (30)"><span>XXX (30) — 258 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXI (31)"><span>XXXI (31) — 359 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt I (32)"><span>XXXII Pt I (32) — 99 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIII (33)"><span>XXXIII (33) — 216 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIV (34)"><span>XXXIV (34) — 402 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXV (35)"><span>XXXV (35) — 193 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVI (36)"><span>XXXVI (36) — 229 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVII (37)"><span>XXXVII (37) — 455 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVIII (38)"><span>XXXVIII (38) — 513 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XL (40)"><span>XL (40) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XLI (41)"><span>XLI (41) — 418 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (6531)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (3106)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (2285)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (29)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chhattisgarh"><span>Chhattisgarh (8)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (7)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (3)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (1)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   
@@ -1785,35 +1786,22 @@ function updateRemarksClamp(cell) {
     dd.appendChild(na);
   }
 
-  // Per the user, 2026-09-30: Remarks moved to the TOP (it used to be
-  // appended last, after every quick fact, which pushed it to the
-  // bottom of a long popup for a record with many fields) — it's the
-  // field of greatest interest, so it's the first thing a reader sees
-  // now, not the last. `popup_tab` columns (Column.popup_tab's own
-  // docstring) are excluded from the quick-facts grid entirely and
-  // rendered as tabs below instead, so a long field (a full inscription
-  // transcription, a citation list) doesn't dominate/scroll past the
-  // short, at-a-glance facts.
+  // Per the user, 2026-10-02: the popup is now ALWAYS tabbed, "Details"
+  // first (active by default) and "Remarks" as its own separate tab
+  // right after it — reverting the 2026-09-30 change that put Remarks
+  // unconditionally at the TOP of the popup, which (for a record with
+  // many fields) pushed every quick fact down below a long block of
+  // narration the reader didn't necessarily come to read first. Remarks
+  // can be lengthy enough to need its own scroll, which is exactly what
+  // a tab panel (.row-detail-tab-content's own max-height+overflow-y)
+  // already gives every `popup_tab` column — Remarks is now built the
+  // same way instead of as a special-cased always-visible section, and
+  // any real `popup_tab` columns (a full inscription transcription, a
+  // citation list) still follow it as further tabs.
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
 
-    if (REMARKS_KEY) {
-      const section = document.createElement('div');
-      section.className = 'row-detail-remarks';
-      const dt = document.createElement('div');
-      dt.className = 'row-detail-label';
-      dt.textContent = fieldLabel(REMARKS_KEY) + ':';
-      const dd = document.createElement('div');
-      dd.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(dd);
-      }
-      section.appendChild(dt);
-      section.appendChild(dd);
-      modalBody.appendChild(section);
-    }
+    const tabs = [];
 
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
@@ -1852,43 +1840,59 @@ function updateRemarksClamp(cell) {
       field.appendChild(dd);
       factsGrid.appendChild(field);
     });
-    modalBody.appendChild(factsGrid);
+    tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (POPUP_TAB_KEYS.length) {
-      const tabsWrap = document.createElement('div');
-      tabsWrap.className = 'row-detail-tabs';
-      const tabBar = document.createElement('div');
-      tabBar.className = 'row-detail-tab-bar';
-      const tabContent = document.createElement('div');
-      tabContent.className = 'row-detail-tab-content';
-
-      function showTab(key) {
-        Array.from(tabBar.children).forEach((btn) => {
-          btn.classList.toggle('active', btn.dataset.key === key);
-        });
-        tabContent.innerHTML = '';
-        const html = row.cells[key];
-        if (html) {
-          tabContent.innerHTML = html;
-        } else {
-          appendNotAvailable(tabContent);
-        }
+    if (REMARKS_KEY) {
+      const body = document.createElement('div');
+      body.className = 'row-detail-remarks-body';
+      if (row.cells[REMARKS_KEY]) {
+        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      } else {
+        appendNotAvailable(body);
       }
-
-      POPUP_TAB_KEYS.forEach((key, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'row-detail-tab-btn';
-        btn.dataset.key = key;
-        btn.textContent = fieldLabel(key);
-        btn.addEventListener('click', () => showTab(key));
-        tabBar.appendChild(btn);
-        if (i === 0) showTab(key);
-      });
-      tabsWrap.appendChild(tabBar);
-      tabsWrap.appendChild(tabContent);
-      modalBody.appendChild(tabsWrap);
+      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
+
+    POPUP_TAB_KEYS.forEach((key) => {
+      const body = document.createElement('div');
+      const html = row.cells[key];
+      if (html) {
+        body.innerHTML = html;
+      } else {
+        appendNotAvailable(body);
+      }
+      tabs.push({ key, label: fieldLabel(key), el: body });
+    });
+
+    const tabsWrap = document.createElement('div');
+    tabsWrap.className = 'row-detail-tabs';
+    const tabBar = document.createElement('div');
+    tabBar.className = 'row-detail-tab-bar';
+    const tabContent = document.createElement('div');
+    tabContent.className = 'row-detail-tab-content';
+
+    function showTab(key) {
+      Array.from(tabBar.children).forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.key === key);
+      });
+      tabContent.innerHTML = '';
+      const tab = tabs.find((t) => t.key === key);
+      if (tab) tabContent.appendChild(tab.el);
+    }
+
+    tabs.forEach((tab) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-detail-tab-btn';
+      btn.dataset.key = tab.key;
+      btn.textContent = tab.label;
+      btn.addEventListener('click', () => showTab(tab.key));
+      tabBar.appendChild(btn);
+    });
+    tabsWrap.appendChild(tabBar);
+    tabsWrap.appendChild(tabContent);
+    modalBody.appendChild(tabsWrap);
+    showTab(tabs[0].key);
 
     modal.hidden = false;
   }

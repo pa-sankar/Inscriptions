@@ -494,18 +494,16 @@
      "checked and blank" reads differently from "never shown at all".
      Muted + italic, distinct from a real value's plain color. */
   .row-detail-na { color: var(--text-dim); font-style: italic; }
-  .row-detail-remarks { margin-top: 1.1rem; }
-  .row-detail-remarks .row-detail-label {
-    display: block; margin-bottom: 0.4rem; font-size: 0.85rem;
-  }
   .row-detail-remarks-body {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
-    background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
   }
-  .row-detail-facts { margin-top: 1.1rem; }
-  /* Column.popup_tab's own tab strip — a long field (a full inscription
-     transcription, a citation list) gets its own tab instead of sitting
-     inline in the quick-facts grid, per the user, 2026-09-30. */
+  /* The popup's own tab strip -- "Details" (the quick-facts grid) always
+     first and active by default, "Remarks" and any Column.popup_tab
+     field (a full inscription transcription, a citation list) as
+     further tabs after it, per the user, 2026-10-02: Remarks moved back
+     OFF the always-visible top of the popup (where it pushed every
+     quick fact down to the bottom for a record with many fields) and
+     into its own scrollable tab instead. */
   .row-detail-tabs { margin-top: 1.1rem; }
   .row-detail-tab-bar {
     display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
@@ -538,7 +536,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 61 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-10-01 11:36</div>
+<div class="generated">Generated 2026-10-02 20:24</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">47071 records from 6009 table pages (493 index pages excluded) across 61 PDFs. 105217 &quot;Do.&quot; cells resolved, 8191 flagged (unresolved or partial — not auto-filled). 30 merged Serial/Findspot cells split, 12 stray Sl.No prefixes stripped, 6594 location prefixes moved to Location, 6 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -548,6 +546,9 @@ actually occur among that Volume's own records (a greyed-out option
 means nothing currently matches it; it reappears the moment you widen
 another filter back out). <strong>Reset</strong> clears every filter and
 the search box back to their starting state.</div>
+<div class="filters-help">Click anywhere on a row to open its full
+details in a popup — including the complete Remarks text, which the
+table itself only shows a few lines of.</div>
 <div class="controls">
   <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian"><span>Arabic and Persian (8224)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Copper Plate"><span>Copper Plate (1585)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Pre-1945-46 Collection"><span>Pre-1945-46 Collection (2214)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (33494)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials (Bombay-Karnatak)"><span>Stone and Other Materials (Bombay-Karnatak) (1554)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="language"><button type="button" class="filter-dd-btn" id="languageFilterBtn">All languages</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="languageMode" value="include" checked> Include</label><label><input type="radio" name="languageMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Filter list…"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (13755)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit"><span>Sanskrit (4364)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada"><span>Kannada (3680)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telugu"><span>Telugu (3439)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local dialect"><span>Local dialect (2844)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic"><span>Arabic (2365)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian"><span>Persian (1700)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse"><span>Persian verse (1575)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannaḍa"><span>Kannaḍa (734)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kanarese"><span>Kanarese (649)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit (corrupt)"><span>Sanskrit (corrupt) (391)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prakrit"><span>Prakrit (361)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Nāgarī"><span>Nāgarī (322)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian"><span>Arabic and Persian (314)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prākṛit"><span>Prākṛit (260)</span></label><label class="filter-dd-opt"><input type="checkbox" value="—"><span>— (227)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic &amp; Persian"><span>Arabic &amp; Persian (219)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Grantha and Tamil"><span>Grantha and Tamil (192)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Telugu"><span>Sanskrit and Telugu (181)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Brāhmī"><span>Brāhmī (143)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prākrit"><span>Prākrit (130)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose and Persian verse"><span>Arabic prose and Persian verse (125)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local Dialect"><span>Local Dialect (116)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Vaṭṭeḻuttu"><span>Vaṭṭeḻuttu (103)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil verse"><span>Tamil verse (97)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse &amp; prose"><span>Persian verse &amp; prose (92)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian prose &amp; verse"><span>Persian prose &amp; verse (91)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose &amp; Persian verse"><span>Arabic prose &amp; Persian verse (85)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Grantha"><span>Grantha (82)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū"><span>Urdū (81)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian prose and verse"><span>Persian prose and verse (80)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Local dialect"><span>Sanskrit and Local dialect (72)</span></label><label class="filter-dd-opt"><input type="checkbox" value="English"><span>English (71)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil (verse)"><span>Tamil (verse) (66)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic verse"><span>Arabic verse (66)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit in Nāgarī"><span>Sanskrit in Nāgarī (65)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Kannada"><span>Sanskrit and Kannada (64)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu"><span>Urdu (59)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tribhuvana- chakravartti"><span>Tribhuvana- chakravartti (54)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian verse and prose"><span>Persian verse and prose (51)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdū verse"><span>Urdū verse (51)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian Nasta‘līq"><span>Persian Nasta‘līq (50)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada (archaic)"><span>Kannada (archaic) (48)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu verse"><span>Urdu verse (48)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telugu (archaic)"><span>Telugu (archaic) (47)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit in Grantha"><span>Sanskrit in Grantha (47)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit in Telugu"><span>Sanskrit in Telugu (45)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Mixed dialect"><span>Mixed dialect (45)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do. (archaic)"><span>Do. (archaic) (43)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic and Persian verse"><span>Arabic and Persian verse (42)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic &amp; Persian verse"><span>Arabic &amp; Persian verse (42)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannarese"><span>Kannarese (41)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit (verse)"><span>Sanskrit (verse) (41)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit Nāgarī"><span>Sanskrit Nāgarī (41)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian Nasta&#x27;līq"><span>Persian Nasta&#x27;līq (41)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do"><span>Do (37)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Portuguese"><span>Portuguese (37)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Oriya"><span>Oriya (36)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Do. (verse)"><span>Do. (verse) (35)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil (verse and prose)"><span>Tamil (verse and prose) (35)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prākṛit in Brāhmī"><span>Prākṛit in Brāhmī (34)</span></label><label class="filter-dd-opt"><input type="checkbox" value="-Do"><span>-Do (34)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local Nāgarī"><span>Local Nāgarī (34)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Marāṭhī"><span>Marāṭhī (33)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit in Nāgari"><span>Sanskrit in Nāgari (32)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannaḍa (archaic)"><span>Kannaḍa (archaic) (30)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic prose and verse"><span>Arabic prose and verse (30)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil and Grantha"><span>Tamil and Grantha (28)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Tamil"><span>Sanskrit and Tamil (28)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Arabic Naskh"><span>Arabic Naskh (28)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Pallava-Grantha"><span>Pallava-Grantha (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hindi"><span>Hindi (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hebrew"><span>Hebrew (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian Nasta&#x27;liq"><span>Persian Nasta&#x27;liq (27)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada in Nāgarī"><span>Kannada in Nāgarī (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Marathi"><span>Marathi (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Nāgari"><span>Nāgari (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Vatteluttu"><span>Vatteluttu (25)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Local dialect Nāgarī"><span>Local dialect Nāgarī (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit mixed with local dialect"><span>Sanskrit mixed with local dialect (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D"><span>Incomplete. Seems to refer to some gift by the Pulivana-uṟaiyar of Śēvūr alias Sembiyan-kāṉaḍanallūr in Vaḍaparisāra-nāḍu to the deity Tribhuvanasundaranāyiṉar. In characters of the 13th century A.D (24)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Kanarese"><span>Sanskrit and Kanarese (23)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit and Local
 dialect"><span>Sanskrit and Local
@@ -2204,35 +2205,22 @@ function updateRemarksClamp(cell) {
     dd.appendChild(na);
   }
 
-  // Per the user, 2026-09-30: Remarks moved to the TOP (it used to be
-  // appended last, after every quick fact, which pushed it to the
-  // bottom of a long popup for a record with many fields) — it's the
-  // field of greatest interest, so it's the first thing a reader sees
-  // now, not the last. `popup_tab` columns (Column.popup_tab's own
-  // docstring) are excluded from the quick-facts grid entirely and
-  // rendered as tabs below instead, so a long field (a full inscription
-  // transcription, a citation list) doesn't dominate/scroll past the
-  // short, at-a-glance facts.
+  // Per the user, 2026-10-02: the popup is now ALWAYS tabbed, "Details"
+  // first (active by default) and "Remarks" as its own separate tab
+  // right after it — reverting the 2026-09-30 change that put Remarks
+  // unconditionally at the TOP of the popup, which (for a record with
+  // many fields) pushed every quick fact down below a long block of
+  // narration the reader didn't necessarily come to read first. Remarks
+  // can be lengthy enough to need its own scroll, which is exactly what
+  // a tab panel (.row-detail-tab-content's own max-height+overflow-y)
+  // already gives every `popup_tab` column — Remarks is now built the
+  // same way instead of as a special-cased always-visible section, and
+  // any real `popup_tab` columns (a full inscription transcription, a
+  // citation list) still follow it as further tabs.
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
 
-    if (REMARKS_KEY) {
-      const section = document.createElement('div');
-      section.className = 'row-detail-remarks';
-      const dt = document.createElement('div');
-      dt.className = 'row-detail-label';
-      dt.textContent = fieldLabel(REMARKS_KEY) + ':';
-      const dd = document.createElement('div');
-      dd.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        dd.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(dd);
-      }
-      section.appendChild(dt);
-      section.appendChild(dd);
-      modalBody.appendChild(section);
-    }
+    const tabs = [];
 
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
@@ -2271,43 +2259,59 @@ function updateRemarksClamp(cell) {
       field.appendChild(dd);
       factsGrid.appendChild(field);
     });
-    modalBody.appendChild(factsGrid);
+    tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (POPUP_TAB_KEYS.length) {
-      const tabsWrap = document.createElement('div');
-      tabsWrap.className = 'row-detail-tabs';
-      const tabBar = document.createElement('div');
-      tabBar.className = 'row-detail-tab-bar';
-      const tabContent = document.createElement('div');
-      tabContent.className = 'row-detail-tab-content';
-
-      function showTab(key) {
-        Array.from(tabBar.children).forEach((btn) => {
-          btn.classList.toggle('active', btn.dataset.key === key);
-        });
-        tabContent.innerHTML = '';
-        const html = row.cells[key];
-        if (html) {
-          tabContent.innerHTML = html;
-        } else {
-          appendNotAvailable(tabContent);
-        }
+    if (REMARKS_KEY) {
+      const body = document.createElement('div');
+      body.className = 'row-detail-remarks-body';
+      if (row.cells[REMARKS_KEY]) {
+        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
+      } else {
+        appendNotAvailable(body);
       }
-
-      POPUP_TAB_KEYS.forEach((key, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'row-detail-tab-btn';
-        btn.dataset.key = key;
-        btn.textContent = fieldLabel(key);
-        btn.addEventListener('click', () => showTab(key));
-        tabBar.appendChild(btn);
-        if (i === 0) showTab(key);
-      });
-      tabsWrap.appendChild(tabBar);
-      tabsWrap.appendChild(tabContent);
-      modalBody.appendChild(tabsWrap);
+      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
+
+    POPUP_TAB_KEYS.forEach((key) => {
+      const body = document.createElement('div');
+      const html = row.cells[key];
+      if (html) {
+        body.innerHTML = html;
+      } else {
+        appendNotAvailable(body);
+      }
+      tabs.push({ key, label: fieldLabel(key), el: body });
+    });
+
+    const tabsWrap = document.createElement('div');
+    tabsWrap.className = 'row-detail-tabs';
+    const tabBar = document.createElement('div');
+    tabBar.className = 'row-detail-tab-bar';
+    const tabContent = document.createElement('div');
+    tabContent.className = 'row-detail-tab-content';
+
+    function showTab(key) {
+      Array.from(tabBar.children).forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.key === key);
+      });
+      tabContent.innerHTML = '';
+      const tab = tabs.find((t) => t.key === key);
+      if (tab) tabContent.appendChild(tab.el);
+    }
+
+    tabs.forEach((tab) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-detail-tab-btn';
+      btn.dataset.key = tab.key;
+      btn.textContent = tab.label;
+      btn.addEventListener('click', () => showTab(tab.key));
+      tabBar.appendChild(btn);
+    });
+    tabsWrap.appendChild(tabBar);
+    tabsWrap.appendChild(tabContent);
+    modalBody.appendChild(tabsWrap);
+    showTab(tabs[0].key);
 
     modal.hidden = false;
   }
