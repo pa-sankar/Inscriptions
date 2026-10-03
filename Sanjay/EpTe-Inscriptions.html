@@ -78,6 +78,15 @@
   .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
   .home-link:hover { color: var(--accent); }
   .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  /* Public pages only (see render_inscriptions_table's own subscribe_url
+     docstring) -- a solid button, not a plain link, since this is a call
+     to action rather than in-site navigation. */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
   .stats { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; }
   /* Legend block — explains the v-direct/v-derived color convention
      and the Location-vs-Place/Source distinction, per the user,
@@ -535,7 +544,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpTe Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-02 20:32</div>
+<div class="generated">Generated 2026-10-03 15:19</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -1932,6 +1941,18 @@ function updateRemarksClamp(cell) {
     if (idx === undefined) return;
     openRowDetailModal(ROWS[idx]);
   });
+})();
+// Public pages only (subscribe_link_html is empty, so this element
+// doesn't exist, on every Sanjay page) -- fires on click without
+// blocking the default target="_blank" navigation, same convention as
+// index.html's own feedbackLink tracking.
+(function() {
+  const subscribeLink = document.getElementById('subscribeLink');
+  if (subscribeLink) {
+    subscribeLink.addEventListener('click', function() {
+      if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+    });
+  }
 })();
 </script>
 </body>
