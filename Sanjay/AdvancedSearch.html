@@ -200,7 +200,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-04 17:23
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 05:47
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -333,15 +333,119 @@ async function loadCorpusRows(corpusKey, range) {
   return rows;
 }
 
-function rowMatchesKeyword(row, keyword) {
-  if (!keyword) return true;
-  const needle = keyword.toLowerCase();
-  return Object.values(row.text).some((v) => v && v.toLowerCase().includes(needle));
+// -- Diacritic-folded search, ported from inscriptions_table_html.py's
+// own shared JS (foldDiacritics/makeMatcher/textRanges/markRanges) --
+// same mechanism every per-corpus page already uses, so a plain-ASCII
+// term like "mahavra" matches text that actually reads "mahāvra" here
+// too. Found missing live, 2026-10-05, per the user: searching
+// "mahavra" in Advanced Search showed only EpTe's 2 matches, missing
+// SII's own 5 (confirmed present via SII-Inscriptions.html's own
+// search, which already folds) -- this page's keyword filter was a
+// bare case-folded .includes(), never diacritic-aware at all. A FRESH
+// RegExp is built right before every single .test()/.exec() call,
+// never reused across calls -- the shared 'g' flag makes a reused
+// regex instance stateful (lastIndex), the exact bug class the
+// original per-corpus code already avoids the same way (see buildRow
+// there calling makeMatcher() fresh inside its own per-column loop).
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function foldDiacritics(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function makeMatcher(term) {
+  return new RegExp('(' + escapeRegex(term) + ')', 'ig');
+}
+function textRanges(text, re) {
+  const out = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    out.push([m.index, m.index + m[0].length]);
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out;
+}
+// Same tree-walk as markRanges() in inscriptions_table_html.py -- wraps
+// character ranges (into the cell's own PLAIN text) in <mark>, leaving
+// any markup the cell's own HTML already carries (v-direct/v-derived
+// spans, tooltips) untouched.
+function markRanges(cell, cellHtml, ranges) {
+  cell.innerHTML = cellHtml;
+  if (!ranges || !ranges.length) return;
+  const sorted = ranges.slice().sort((a, b) => a[0] - b[0]);
+  let ri = 0, pos = 0;
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      let i = 0;
+      while (i < text.length) {
+        while (ri < sorted.length && sorted[ri][1] <= pos + i) ri++;
+        if (ri >= sorted.length) { frag.appendChild(document.createTextNode(text.slice(i))); break; }
+        const rs = sorted[ri][0], reEnd = sorted[ri][1];
+        const g = pos + i;
+        if (g < rs) {
+          const take = Math.min(rs - g, text.length - i);
+          frag.appendChild(document.createTextNode(text.slice(i, i + take)));
+          i += take;
+        } else {
+          const take = Math.min(reEnd - g, text.length - i);
+          const m = document.createElement('mark');
+          m.textContent = text.slice(i, i + take);
+          frag.appendChild(m);
+          i += take;
+        }
+      }
+      pos += text.length;
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  Array.from(cell.childNodes).forEach(walk);
 }
 
-function snippet(text, n) {
+// Current search term, kept as plain text (never a live RegExp
+// instance -- see the module-docstring note above on why a fresh
+// matcher is built per use instead of reusing one).
+let currentSearchTerm = '';
+
+function rowMatchesKeyword(row, term) {
+  if (!term) return true;
+  const folded = foldDiacritics(term);
+  return Object.values(row.text).some((v) => v && makeMatcher(folded).test(foldDiacritics(v)));
+}
+
+// A context window around the FIRST match, not just the first N
+// characters -- a match past char 180 used to be truncated out of the
+// snippet entirely (and, before this fix, was never marked anyway).
+// Falls back to a plain head-truncation when there's no active term.
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+}
+function snippetHtml(text, term, windowSize) {
   if (!text) return '';
-  return text.length > n ? text.slice(0, n) + '\u2026' : text;
+  if (!term) {
+    return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
+  }
+  const folded = foldDiacritics(text);
+  const m = makeMatcher(foldDiacritics(term)).exec(folded);
+  if (!m) {
+    return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
+  }
+  const start = Math.max(0, m.index - Math.floor(windowSize / 2));
+  const end = Math.min(text.length, start + windowSize);
+  const windowText = text.slice(start, end);
+  const ranges = textRanges(foldDiacritics(windowText), makeMatcher(foldDiacritics(term)));
+  let html = '', pos = 0;
+  ranges.forEach(([s, e]) => {
+    html += escapeHtml(windowText.slice(pos, s));
+    html += '<mark>' + escapeHtml(windowText.slice(s, e)) + '</mark>';
+    pos = e;
+  });
+  html += escapeHtml(windowText.slice(pos));
+  return (start > 0 ? '\u2026' : '') + html + (end < text.length ? '\u2026' : '');
 }
 
 let currentResults = [];
@@ -358,19 +462,20 @@ async function runSearch() {
   summary.textContent = 'Loading\u2026';
   const range = parseVolumeRange(document.getElementById('volumeInput').value);
   const keyword = document.getElementById('keywordInput').value.trim();
+  currentSearchTerm = keyword;
   try {
     const perCorpus = await Promise.all(corpora.map((c) => loadCorpusRows(c, range)));
     let rows = [].concat(...perCorpus);
     if (keyword) rows = rows.filter((r) => rowMatchesKeyword(r, keyword));
     currentResults = rows;
     summary.textContent = rows.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
-    renderResults(rows);
+    renderResults(rows, keyword);
   } catch (err) {
     summary.textContent = 'Error loading results: ' + err.message;
   }
 }
 
-function renderResults(rows) {
+function renderResults(rows, term) {
   const tbody = document.getElementById('resultsBody');
   const frag = document.createDocumentFragment();
   rows.forEach((row, idx) => {
@@ -387,7 +492,7 @@ function renderResults(rows) {
       '<td>' + (u.king || '') + '</td>' +
       '<td>' + (u.date || '') + '</td>' +
       '<td>' + (u.type || '') + '</td>' +
-      '<td class="remarks-snippet">' + snippet(row.text.remarks || '', 180) + '</td>' +
+      '<td class="remarks-snippet">' + snippetHtml(row.text.remarks || '', term, 180) + '</td>' +
       '<td>' + (u.page || '') + '</td>';
     tr.addEventListener('click', (e) => {
       if (e.target.closest('button.idchip')) return;
@@ -474,6 +579,19 @@ function appendNotAvailable(dd) {
   dd.appendChild(na);
 }
 
+// Sets `el.innerHTML = html`, marking every active-search-term match
+// found in `plainText` (the SAME `row.text[key]` every per-corpus page
+// already carries) -- found missing live, 2026-10-05, per the user:
+// the popup showed matched records but never highlighted WHERE the
+// term actually matched, unlike every per-corpus page's own table/
+// popup. Applies to every field here (not just Remarks), same as
+// buildRow()'s own per-column highlighting in inscriptions_table_html.py.
+function highlightInto(el, html, plainText) {
+  if (!currentSearchTerm) { el.innerHTML = html; return; }
+  const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm)));
+  markRanges(el, html, ranges);
+}
+
 function openRowDetailModal(row) {
   rowDetailBody.innerHTML = '';
   const cfg = CORPUS_CONFIG[row.corpus];
@@ -493,7 +611,7 @@ function openRowDetailModal(row) {
     dt.textContent = (col.key === 'id' ? 'Unique ID' : col.header) + ':';
     const dd = document.createElement('div');
     dd.className = 'row-detail-value';
-    if (html) { dd.innerHTML = html; } else { appendNotAvailable(dd); }
+    if (html) { highlightInto(dd, html, row.text[col.key] || ''); } else { appendNotAvailable(dd); }
     if (col.key === 'id' && row.id) {
       const idText = document.createElement('code');
       idText.className = 'row-detail-id-text';
@@ -513,7 +631,8 @@ function openRowDetailModal(row) {
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
       const clamp = tmp.querySelector('.remarks-clamp');
-      body.innerHTML = clamp ? clamp.innerHTML : tmp.innerHTML;
+      const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
+      highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
     } else {
       appendNotAvailable(body);
     }
@@ -523,7 +642,7 @@ function openRowDetailModal(row) {
   popupTabCols.forEach((col) => {
     const body = document.createElement('div');
     const html = row.cells[col.key];
-    if (html) { body.innerHTML = html; } else { appendNotAvailable(body); }
+    if (html) { highlightInto(body, html, row.text[col.key] || ''); } else { appendNotAvailable(body); }
     tabs.push({key: col.key, label: col.header, el: body});
   });
 
