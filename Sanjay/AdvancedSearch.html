@@ -236,7 +236,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 12:24
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 12:35
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -338,11 +338,27 @@ function checkedCorpora() {
   return Array.from(corpusChecksEl.querySelectorAll('input:checked')).map((cb) => cb.value);
 }
 
-// -- Fetch + merge one corpus's own already-published chunks, filtered
-// by the volume range, tagging each row with its corpus + a union-
-// remapped set of display fields. No supplement fetch -- v1's union
-// columns never need a Sanjay-only extra field (see module docstring). --
-async function loadCorpusRows(corpusKey, range) {
+// Tags one raw chunk row with its corpus + a union-remapped set of
+// display fields. No supplement fetch -- v1's union columns never
+// need a Sanjay-only extra field (see module docstring).
+function buildUnionRow(corpusKey, cfg, row, sourceKey) {
+  const union = {};
+  CANONICAL_FIELDS.forEach((field) => {
+    const srcKey = cfg.unionMap[field];
+    union[field] = srcKey ? (row.cells[srcKey] || '') : '';
+  });
+  return {
+    corpus: corpusKey, corpusLabel: cfg.label, id: row.id,
+    union, cells: row.cells, text: row.text, sourceKey,
+  };
+}
+
+// The wanted (volume-range-filtered) chunk list for one corpus --
+// split out from the per-chunk fetch itself so runSearch() can total
+// every selected corpus's own chunk count BEFORE fetching any of them
+// (needed for an accurate "done" state/progress percentage -- see
+// runSearch()'s own docstring).
+async function wantedChunksForCorpus(corpusKey, range) {
   const cfg = CORPUS_CONFIG[corpusKey];
   const dataDir = dirOf(cfg.dataUrl);
   const index = await fetchJson(cfg.dataUrl);
@@ -351,22 +367,7 @@ async function loadCorpusRows(corpusKey, range) {
     const n = volumeNumberForKey(entry.key, cfg.numbering);
     return n !== null && n >= range.min && n <= range.max;
   });
-  const chunks = await Promise.all(wanted.map((entry) => fetchJson(dataDir + entry.file)));
-  const rows = [];
-  chunks.forEach((chunkRows, i) => {
-    chunkRows.forEach((row) => {
-      const union = {};
-      CANONICAL_FIELDS.forEach((field) => {
-        const srcKey = cfg.unionMap[field];
-        union[field] = srcKey ? (row.cells[srcKey] || '') : '';
-      });
-      rows.push({
-        corpus: corpusKey, corpusLabel: cfg.label, id: row.id,
-        union, cells: row.cells, text: row.text, sourceKey: wanted[i].key,
-      });
-    });
-  });
-  return rows;
+  return { corpus: corpusKey, cfg, dataDir, wanted };
 }
 
 // -- Diacritic-folded search, ported from inscriptions_table_html.py's
@@ -518,18 +519,33 @@ function pageSizeValue() {
   return n > 0 ? n : Infinity; // "All" is 0 -> unlimited
 }
 
+// A later search's `searchGeneration` beats an earlier one's still-
+// in-flight chunk fetches -- every chunk callback checks this before
+// touching currentResults/painting, so stale results from a search
+// the user already replaced (typed a new term, hit Search again)
+// never land after the fact. Per the user, 2026-10-05: a 2,811-match
+// search had to fully finish before the first row ever appeared --
+// now every chunk paints as its own fetch resolves, with a running
+// "N so far -- loading... (P%)" status, same "matching isn't the
+// slow part, painting a few rows is" reasoning the pager above
+// already uses, extended to the FETCH itself. Per the user: result
+// order is whichever chunk's own fetch happens to resolve first, not
+// re-sorted once loading completes -- an explicit decision, not an
+// oversight (true relevance/date sorting would need every chunk in
+// hand first, defeating the point of painting incrementally).
+let searchGeneration = 0;
+
 async function runSearch() {
   const corpora = checkedCorpora();
   const summary = document.getElementById('resultSummary');
-  const tbody = document.getElementById('resultsBody');
-  tbody.innerHTML = '';
+  const myGen = ++searchGeneration;
+  currentResults = [];
+  currentPage = 1;
+  paintPage();
   if (!corpora.length) {
     summary.textContent = 'Select at least one corpus.';
-    currentResults = [];
-    paintPage();
     return;
   }
-  summary.textContent = 'Loading\u2026';
   const range = parseVolumeRange(document.getElementById('volumeInput').value);
   const keyword = document.getElementById('keywordInput').value.trim();
   const mode = document.getElementById('matchModeInput').value;
@@ -537,18 +553,54 @@ async function runSearch() {
   currentSearchMode = mode;
   currentTerm = keyword;
   currentMode = mode;
+  summary.textContent = 'Loading\u2026';
+
   try {
-    const perCorpus = await Promise.all(corpora.map((c) => loadCorpusRows(c, range)));
-    let rows = [].concat(...perCorpus);
-    if (keyword) rows = rows.filter((r) => rowMatchesKeyword(r, keyword, mode));
-    currentResults = rows;
-    currentPage = 1;
-    summary.textContent = rows.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
-    paintPage();
+    // Every selected corpus's own index.json first (small, cheap) --
+    // gives the TOTAL chunk count up front, so progress/done-ness is
+    // known before any chunk itself is fetched, rather than guessed at.
+    const perCorpus = await Promise.all(corpora.map((c) => wantedChunksForCorpus(c, range)));
+    if (myGen !== searchGeneration) return; // superseded by a newer search
+
+    const totalChunks = perCorpus.reduce((sum, p) => sum + p.wanted.length, 0);
+    if (totalChunks === 0) {
+      summary.textContent = '0 result(s) across ' + corpora.length + ' corpus/corpora.';
+      return;
+    }
+    let doneChunks = 0;
+    function noteChunkDone() {
+      doneChunks++;
+      if (myGen !== searchGeneration) return;
+      if (doneChunks < totalChunks) {
+        const pct = Math.round((doneChunks / totalChunks) * 100);
+        summary.textContent = currentResults.length + ' result(s) so far \u2014 loading\u2026 (' + pct + '%)';
+      } else {
+        summary.textContent = currentResults.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
+      }
+    }
+
+    const chunkJobs = [];
+    perCorpus.forEach(({ corpus, cfg, dataDir, wanted }) => {
+      wanted.forEach((entry) => {
+        chunkJobs.push(
+          fetchJson(dataDir + entry.file)
+            .then((chunkRows) => {
+              if (myGen !== searchGeneration) return;
+              const rows = chunkRows.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
+              const matched = keyword ? rows.filter((r) => rowMatchesKeyword(r, keyword, mode)) : rows;
+              if (matched.length) {
+                currentResults = currentResults.concat(matched);
+                paintPage();
+              }
+              noteChunkDone();
+            })
+            .catch(() => { noteChunkDone(); })
+        );
+      });
+    });
+    await Promise.all(chunkJobs);
   } catch (err) {
-    summary.textContent = 'Error loading results: ' + err.message;
-    currentResults = [];
-    paintPage();
+    if (myGen === searchGeneration) summary.textContent = 'Error loading results: ' + err.message;
   }
 }
 
@@ -609,6 +661,7 @@ function renderResults(rows, term, mode) {
 
 document.getElementById('searchBtn').addEventListener('click', runSearch);
 document.getElementById('clearBtn').addEventListener('click', () => {
+  searchGeneration++; // cancel any in-flight incremental search
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
   document.getElementById('matchModeInput').value = 'partial';
