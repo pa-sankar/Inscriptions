@@ -80,74 +80,47 @@
 <a href="index.html" class="home-link" title="Home">&#8962;</a>
 <div class="brand">Project InscriptionSearch</div>
 <h1>Release Notes <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a></h1>
-<p class="date">2026-09-28</p>
+<p class="date">2026-10-06</p>
 
-<h2>Finding and narrowing records</h2>
+<h2>Faster, and easier to keep up with</h2>
 <ul class="changes">
-  <li><strong>Filters now support multiple selections at once</strong>, with
-  an Include/Exclude toggle — pick several volumes, states, or languages
-  together, or exclude a few instead of listing everything else you want.</li>
-  <li><strong>Filters narrow each other as you go.</strong> Pick a volume and
-  every other filter's own list shrinks to only the values that actually
-  occur among that volume's records — no more picking a state that turns
-  out to have zero matches for what you already selected. A short note above
-  the filters explains this, and what <strong>Reset</strong> does.</li>
-  <li><strong>A "Blank / not available" option</strong> now appears in any
-  filter where some records genuinely have nothing recorded for that field —
-  select it to find exactly those records.</li>
-  <li><strong>A plain-language summary of your active filters</strong> now
-  shows just below the filter row (e.g. "Volume = II · State ≠ Tamil Nadu"),
-  since the filter buttons alone don't say which values are selected.</li>
-  <li>The category filter (where available) now narrows and updates its own
-  counts the same way every other filter does.</li>
+  <li>The page now <strong>remembers what it already loaded</strong> and
+  only fetches what's actually changed on a repeat visit, instead of
+  re-downloading everything every time — noticeably faster after your first
+  visit.</li>
+  <li><strong>Subscribe</strong> (button above) to hear about future updates
+  to the site as we make them, instead of having to check back yourself.</li>
 </ul>
 
-<h2>Reading the table</h2>
+<h2>Smarter search</h2>
 <ul class="changes">
-  <li><strong>Click anywhere on a row</strong> to open a popup with every
-  field for that record, clearly labeled ("Unique ID:", "Language:",
-  "Dynasty:", ...) — including fields the table itself doesn't show by
-  default. A field with nothing recorded shows "Not available" rather than
-  being left out, so you can tell "checked, nothing there" from "not shown."
-  Remarks gets the most room in the popup, since it's usually what you're
-  most interested in.</li>
-  <li>Only a curated set of columns is shown by default, with the
-  <strong>Remarks</strong> column given at least half the table's width —
-  any column you filter on is shown automatically. <strong>Sl.No</strong>
-  now shows right next to the ID by default too, since a volume + serial
-  number is usually enough to pinpoint one specific record.</li>
-  <li>The ID column now shows a compact icon instead of the full record ID —
-  hover it (or tap, on a phone) to see the full ID, or click to copy it.
-  Copy-to-clipboard works exactly as before.</li>
-  <li>Alternating row shading and visible column borders make it easier to
-  read across a row without losing your place.</li>
-  <li>Row height now follows the actual content of each row, instead of
-  every row being padded to a uniform height regardless of how much text it
-  actually has.</li>
-  <li>The "Kind" column shows a short label (e.g. "Stone", "Copper") with
-  the full description available on hover.</li>
-  <li>Page headers were trimmed to the essentials — the sources link and the
-  color legend (explaining what the different text colors/styles mean) are
-  still there, just without a long list of every volume number.</li>
+  <li>Search now finds a match <strong>regardless of accent marks</strong> in
+  the transcription — a plain, easy-to-type search term now also finds
+  records whose text carries the full diacritics.</li>
 </ul>
 
-<h2>Fixed</h2>
+<h2>Reading a record</h2>
 <ul class="changes">
-  <li>The "View page" button (for records with a scanned page image
-  available) had stopped appearing for some records — fixed.</li>
-  <li>A number of records in South Indian Inscriptions Vol. I were missing
-  their description and find-spot entirely, even though the information was
-  present in the original scan — fixed for the affected records.</li>
-  <li>A handful of records had been mis-tagged as hero-stone memorials based
-  on a misread index entry (an old word meaning "hero" used as a royal
-  title, not naming an actual memorial) — corrected.</li>
-  <li>Annual Reports on Epigraphy (ARE) records: a "corrections/addenda"
-  table style used in some years was silently dropping its own content —
-  fixed, recovering the missing details for those records.</li>
-  <li>Remarks for a small number of records that run across a page boundary
-  in the original scan had picked up a stray page heading or page number in
-  the middle of the text — cleaned up across the whole South Indian
-  Inscriptions collection.</li>
+  <li>Clicking a row now opens a <strong>tabbed popup</strong> (Details /
+  Remarks) instead of one long block of text — easier to scan.</li>
+  <li><strong>Footnotes are now collected in one place</strong> at the end
+  of a record's own text, instead of interrupting the narration wherever
+  they happened to fall on the printed page.</li>
+  <li>Some records now carry a separate <strong>Commentary</strong> tab —
+  the editor's own historical discussion of a whole cluster of inscriptions
+  (e.g. the Kailāsanātha Temple group in Volume I), previously buried in the
+  scan and invisible anywhere on the site.</li>
+</ul>
+
+<h2>New: Sources</h2>
+<ul class="changes">
+  <li>A new <a href="Sources.html">Sources</a> page shows exactly which scan
+  or edition each volume came from, linked from the main table.</li>
+</ul>
+
+<h2>Coming soon</h2>
+<ul class="changes">
+  <li><strong>Annual Report on Epigraphy (ARE)</strong> volumes.</li>
 </ul>
 
 <a href="index.html" class="back">&larr; Back</a>
