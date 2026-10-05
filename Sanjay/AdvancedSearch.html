@@ -70,6 +70,19 @@
   button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
   .hint { font-size: 11.5px; color: var(--text-dim); max-width: 16rem; }
   .result-summary { font-size: 13px; color: var(--text-dim); margin: 6px 0 10px; }
+  .pager {
+    display: flex; align-items: center; gap: 0.8rem; margin: 10px 0; font-size: 13px;
+  }
+  .pager button {
+    padding: 0.35rem 0.8rem; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer; font: inherit; font-size: 13px;
+  }
+  .pager button:disabled { opacity: 0.4; cursor: default; }
+  .pager select {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+    padding: 0.35rem 0.6rem; color: var(--text); font: inherit; font-size: 13px;
+  }
+  #pagerStatus { color: var(--text-dim); }
   .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
   table { border-collapse: collapse; width: 100%; min-width: 980px; }
   thead th {
@@ -158,10 +171,12 @@
     linked from the public site and stays Sanjay-only until ARE and/or another corpus
     actually launches there too. Union schema/filter design: see <code>PENDING.md</code>'s
     "Advanced Search / Web platform" section. <strong>Not every field is filterable yet</strong>
-    &mdash; Kind, Language, Script, State, and Dynasty/King are shown in results but not
-    offered as filters in this first version (documented gaps: ARE's own Type was never
-    computed, State isn't wired for EpCa/TaKa, Kind means a genuinely different thing per
-    corpus, SII's own Language column is always empty).
+    &mdash; Kind, Language, Script, State, and Dynasty/King aren't offered as filters in this
+    first version (documented gaps: ARE's own Type was never computed, State isn't wired for
+    EpCa/TaKa, Kind means a genuinely different thing per corpus, SII's own Language column is
+    always empty). <strong>Click a row for every field</strong> (Location, Dynasty, King, Date,
+    Type, and any corpus-specific field) &mdash; the results table itself only shows what's
+    needed to identify and skim a row, keeping room for Remarks.
   </div>
 
   <div class="controls">
@@ -182,8 +197,8 @@
     <div class="ctrl-group">
       <label class="group-label" for="matchModeInput">Match</label>
       <select id="matchModeInput">
-        <option value="embedded" selected>Embedded (anywhere)</option>
-        <option value="partial">Partial (word start)</option>
+        <option value="embedded">Embedded (anywhere)</option>
+        <option value="partial" selected>Partial (word start)</option>
         <option value="full">Full word</option>
       </select>
       <div class="hint">Embedded: "mahavra" matches "samahavraja" too. Partial: matches
@@ -203,15 +218,25 @@
     <table>
       <thead>
         <tr>
-          <th>Corpus</th><th>ID</th><th>Sl.No</th><th>Source</th><th>Location</th>
-          <th>Dynasty</th><th>King</th><th>Date</th><th>Type</th><th>Remarks</th><th>Page</th>
+          <th>Corpus</th><th>ID</th><th>Sl.No</th><th>Source</th><th>Remarks</th><th>Page</th>
         </tr>
       </thead>
       <tbody id="resultsBody"></tbody>
     </table>
   </div>
+  <div class="pager" id="pagerBar">
+    <button type="button" id="pagerPrev">&larr; Prev</button>
+    <span id="pagerStatus"></span>
+    <button type="button" id="pagerNext">Next &rarr;</button>
+    <select id="pageSizeInput">
+      <option value="25">25 / page</option>
+      <option value="50" selected>50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="0">All</option>
+    </select>
+  </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 06:44
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 12:24
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -432,7 +457,7 @@ function markRanges(cell, cellHtml, ranges) {
 // instance -- see the module-docstring note above on why a fresh
 // matcher is built per use instead of reusing one).
 let currentSearchTerm = '';
-let currentSearchMode = 'embedded';
+let currentSearchMode = 'partial';
 
 // Checks every text field AND the row's own unique ID -- per the user,
 // 2026-10-05: free-text search must always reach a record's own ID too
@@ -477,7 +502,21 @@ function snippetHtml(text, term, mode, windowSize) {
   return (start > 0 ? '\u2026' : '') + html + (end < text.length ? '\u2026' : '');
 }
 
+// -- Pagination -- per the user, 2026-10-05: 2,000+ results rendered as
+// one giant unpaginated table was unusable. Matching/filtering (above)
+// already runs over the full result set regardless (it has to, to know
+// the true total) -- only PAINTING is paginated, same "matching isn't
+// the slow part, DOM-building is" reasoning inscriptions_table_html.py's
+// own pager already documented.
 let currentResults = [];
+let currentTerm = '';
+let currentMode = 'partial';
+let currentPage = 1;
+
+function pageSizeValue() {
+  const n = parseInt(document.getElementById('pageSizeInput').value, 10);
+  return n > 0 ? n : Infinity; // "All" is 0 -> unlimited
+}
 
 async function runSearch() {
   const corpora = checkedCorpora();
@@ -486,6 +525,8 @@ async function runSearch() {
   tbody.innerHTML = '';
   if (!corpora.length) {
     summary.textContent = 'Select at least one corpus.';
+    currentResults = [];
+    paintPage();
     return;
   }
   summary.textContent = 'Loading\u2026';
@@ -494,17 +535,54 @@ async function runSearch() {
   const mode = document.getElementById('matchModeInput').value;
   currentSearchTerm = keyword;
   currentSearchMode = mode;
+  currentTerm = keyword;
+  currentMode = mode;
   try {
     const perCorpus = await Promise.all(corpora.map((c) => loadCorpusRows(c, range)));
     let rows = [].concat(...perCorpus);
     if (keyword) rows = rows.filter((r) => rowMatchesKeyword(r, keyword, mode));
     currentResults = rows;
+    currentPage = 1;
     summary.textContent = rows.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
-    renderResults(rows, keyword, mode);
+    paintPage();
   } catch (err) {
     summary.textContent = 'Error loading results: ' + err.message;
+    currentResults = [];
+    paintPage();
   }
 }
+
+// Only Corpus/ID/Sl.No/Source/Remarks/Page show in the table -- per the
+// user, 2026-10-05: every other field (Location, Dynasty, King, Date,
+// Type, and any corpus-specific field) was pushing Remarks off-screen
+// with no room left, when all of it is already one click away in the
+// row-detail popup. Table stays a skim/identify view, not a full dump.
+function paintPage() {
+  const pageSize = pageSizeValue();
+  const total = currentResults.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = pageSize === Infinity ? 0 : (currentPage - 1) * pageSize;
+  const end = pageSize === Infinity ? total : Math.min(total, start + pageSize);
+  renderResults(currentResults.slice(start, end), currentTerm, currentMode);
+
+  const status = document.getElementById('pagerStatus');
+  const prevBtn = document.getElementById('pagerPrev');
+  const nextBtn = document.getElementById('pagerNext');
+  if (total === 0) {
+    status.textContent = 'No results';
+  } else {
+    status.textContent = 'Showing ' + (start + 1) + '\u2013' + end + ' of ' + total +
+      ' (page ' + currentPage + ' of ' + totalPages + ')';
+  }
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
+}
+
+document.getElementById('pagerPrev').addEventListener('click', () => { currentPage--; paintPage(); });
+document.getElementById('pagerNext').addEventListener('click', () => { currentPage++; paintPage(); });
+document.getElementById('pageSizeInput').addEventListener('change', () => { currentPage = 1; paintPage(); });
 
 function renderResults(rows, term, mode) {
   const tbody = document.getElementById('resultsBody');
@@ -518,11 +596,6 @@ function renderResults(rows, term, mode) {
       '<td>' + (row.cells.id || '') + '</td>' +
       '<td>' + (u.sl_no || '') + '</td>' +
       '<td>' + (u.source || '') + '</td>' +
-      '<td>' + (u.location || '') + '</td>' +
-      '<td>' + (u.dynasty || '') + '</td>' +
-      '<td>' + (u.king || '') + '</td>' +
-      '<td>' + (u.date || '') + '</td>' +
-      '<td>' + (u.type || '') + '</td>' +
       '<td class="remarks-snippet">' + snippetHtml(row.text.remarks || '', term, mode, 180) + '</td>' +
       '<td>' + (u.page || '') + '</td>';
     tr.addEventListener('click', (e) => {
@@ -538,13 +611,17 @@ document.getElementById('searchBtn').addEventListener('click', runSearch);
 document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
-  document.getElementById('matchModeInput').value = 'embedded';
+  document.getElementById('matchModeInput').value = 'partial';
   corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = true; });
   document.getElementById('resultsBody').innerHTML = '';
   document.getElementById('resultSummary').textContent = '';
+  document.getElementById('pagerStatus').textContent = '';
   currentSearchTerm = '';
-  currentSearchMode = 'embedded';
+  currentSearchMode = 'partial';
+  currentTerm = '';
+  currentMode = 'partial';
   currentResults = [];
+  currentPage = 1;
 });
 document.getElementById('volumeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 document.getElementById('keywordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
