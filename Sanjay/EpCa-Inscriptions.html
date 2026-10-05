@@ -542,7 +542,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpCa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 15:03</div>
+<div class="generated">Generated 2026-10-05 20:08</div>
 
 <div class="stats">2477 records from 4 volume(s). Remarks is the English translation; a row's detail popup also carries the Roman transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place").<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Roman Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the Roman-script transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1042,7 +1042,12 @@ function render() {
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        // Also checks the row's own unique ID (e.g. "sii|vii||721"),
+        // not just COLUMN_KEYS -- per the user, 2026-10-05: free-text
+        // search must find a record by its own ID even with no
+        // dedicated ID filter, same as Advanced Search's own
+        // rowMatchesKeyword() already does.
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
         textMatch = re.test(foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);

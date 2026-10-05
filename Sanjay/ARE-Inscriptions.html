@@ -545,7 +545,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> ARE Inscriptions — 61 PDFs</h1>
   <a href="SII-Inscriptions.html" class="cross-link">SII Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-10-05 16:31</div>
+<div class="generated">Generated 2026-10-05 20:08</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">47071 records from 6009 table pages (493 index pages excluded) across 61 PDFs. 105228 &quot;Do.&quot; cells resolved, 8131 flagged (unresolved or partial — not auto-filled). 30 merged Serial/Findspot cells split, 12 stray Sl.No prefixes stripped, 6594 location prefixes moved to Location, 6 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -1467,7 +1467,12 @@ function render() {
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        // Also checks the row's own unique ID (e.g. "sii|vii||721"),
+        // not just COLUMN_KEYS -- per the user, 2026-10-05: free-text
+        // search must find a record by its own ID even with no
+        // dedicated ID filter, same as Advanced Search's own
+        // rowMatchesKeyword() already does.
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
         textMatch = re.test(foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);

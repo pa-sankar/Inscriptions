@@ -547,7 +547,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> TaKa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 15:16</div>
+<div class="generated">Generated 2026-10-05 20:08</div>
 
 <div class="stats">3737 records from 18 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1047,7 +1047,12 @@ function render() {
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        // Also checks the row's own unique ID (e.g. "sii|vii||721"),
+        // not just COLUMN_KEYS -- per the user, 2026-10-05: free-text
+        // search must find a record by its own ID even with no
+        // dedicated ID filter, same as Advanced Search's own
+        // rowMatchesKeyword() already does.
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
         textMatch = re.test(foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);

@@ -236,7 +236,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 12:35
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 20:09
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -788,25 +788,30 @@ function openRowDetailModal(row) {
   });
   tabs.push({key: '__details__', label: 'Details', el: factsGrid});
 
-  if (remarksCol) {
+  // Remarks and every popup_tab field only become their own tab when
+  // they actually have content -- same rule as inscriptions_table_html.py's
+  // own openRowDetailModal() (2026-10-06: an empty tab a reader clicks
+  // into just to find "Not available" isn't worth a whole tab of its
+  // own, unlike Details' own per-field inline "Not available"). This
+  // page has its own separate copy of the row-detail popup, so it needs
+  // the same fix applied here too -- found missing live, 2026-10-06,
+  // per the user (sii|xi|i|10's Commentary tab showed "Not available"
+  // instead of being omitted).
+  if (remarksCol && row.cells[remarksCol.key]) {
     const body = document.createElement('div');
-    const html = row.cells[remarksCol.key];
-    if (html) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      const clamp = tmp.querySelector('.remarks-clamp');
-      const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
-      highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
-    } else {
-      appendNotAvailable(body);
-    }
+    const tmp = document.createElement('div');
+    tmp.innerHTML = row.cells[remarksCol.key];
+    const clamp = tmp.querySelector('.remarks-clamp');
+    const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
+    highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
     tabs.push({key: remarksCol.key, label: remarksCol.header, el: body});
   }
 
   popupTabCols.forEach((col) => {
-    const body = document.createElement('div');
     const html = row.cells[col.key];
-    if (html) { highlightInto(body, html, row.text[col.key] || ''); } else { appendNotAvailable(body); }
+    if (!html) return;
+    const body = document.createElement('div');
+    highlightInto(body, html, row.text[col.key] || '');
     tabs.push({key: col.key, label: col.header, el: body});
   });
 

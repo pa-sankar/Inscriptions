@@ -544,7 +544,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpTe Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 15:03</div>
+<div class="generated">Generated 2026-10-05 20:08</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -1044,7 +1044,12 @@ function render() {
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ');
+        // Also checks the row's own unique ID (e.g. "sii|vii||721"),
+        // not just COLUMN_KEYS -- per the user, 2026-10-05: free-text
+        // search must find a record by its own ID even with no
+        // dedicated ID filter, same as Advanced Search's own
+        // rowMatchesKeyword() already does.
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
         textMatch = re.test(foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
