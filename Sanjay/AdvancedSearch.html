@@ -177,7 +177,18 @@
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="keywordInput">Keyword</label>
-      <input type="text" id="keywordInput" placeholder="searches Remarks, Location, etc.">
+      <input type="text" id="keywordInput" placeholder="searches Remarks, Location, ID, etc.">
+    </div>
+    <div class="ctrl-group">
+      <label class="group-label" for="matchModeInput">Match</label>
+      <select id="matchModeInput">
+        <option value="embedded" selected>Embedded (anywhere)</option>
+        <option value="partial">Partial (word start)</option>
+        <option value="full">Full word</option>
+      </select>
+      <div class="hint">Embedded: "mahavra" matches "samahavraja" too. Partial: matches
+        "mahavratin" but not "samahavraja". Full: exact word only. Always
+        case-insensitive and diacritic-folded; also matches a record's own unique ID.</div>
     </div>
     <div class="ctrl-group">
       <button type="button" id="searchBtn">Search</button>
@@ -200,7 +211,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 05:47
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-05 06:44
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -353,8 +364,19 @@ function escapeRegex(s) {
 function foldDiacritics(s) {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
-function makeMatcher(term) {
-  return new RegExp('(' + escapeRegex(term) + ')', 'ig');
+// `mode` -- 'embedded' (default, matches anywhere, including mid-word:
+// "mahavra" matches inside "samahavraja"), 'partial' (must start at a
+// word boundary but may be followed by more letters: "mahavra" matches
+// "mahavratin" but not "samahavraja"), 'full' (exact whole word only).
+// Per the user, 2026-10-05: all three are real, distinct needs -- a
+// search feature shouldn't hardcode just "contains" or just "whole
+// word" when a caller may want either boundary behavior, or none.
+function makeMatcher(term, mode) {
+  const body = escapeRegex(term);
+  const pattern = mode === 'full' ? '\\b(' + body + ')\\b'
+                : mode === 'partial' ? '\\b(' + body + ')'
+                : '(' + body + ')';
+  return new RegExp(pattern, 'ig');
 }
 function textRanges(text, re) {
   const out = [];
@@ -410,11 +432,18 @@ function markRanges(cell, cellHtml, ranges) {
 // instance -- see the module-docstring note above on why a fresh
 // matcher is built per use instead of reusing one).
 let currentSearchTerm = '';
+let currentSearchMode = 'embedded';
 
-function rowMatchesKeyword(row, term) {
+// Checks every text field AND the row's own unique ID -- per the user,
+// 2026-10-05: free-text search must always reach a record's own ID too
+// (someone pasting an ID they already have shouldn't need a separate,
+// undiscoverable "search by ID" mode), even though there's no dedicated
+// ID filter control in this UI.
+function rowMatchesKeyword(row, term, mode) {
   if (!term) return true;
   const folded = foldDiacritics(term);
-  return Object.values(row.text).some((v) => v && makeMatcher(folded).test(foldDiacritics(v)));
+  if (row.id && makeMatcher(folded, mode).test(foldDiacritics(row.id))) return true;
+  return Object.values(row.text).some((v) => v && makeMatcher(folded, mode).test(foldDiacritics(v)));
 }
 
 // A context window around the FIRST match, not just the first N
@@ -424,20 +453,20 @@ function rowMatchesKeyword(row, term) {
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 }
-function snippetHtml(text, term, windowSize) {
+function snippetHtml(text, term, mode, windowSize) {
   if (!text) return '';
   if (!term) {
     return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
   }
   const folded = foldDiacritics(text);
-  const m = makeMatcher(foldDiacritics(term)).exec(folded);
+  const m = makeMatcher(foldDiacritics(term), mode).exec(folded);
   if (!m) {
     return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
   }
   const start = Math.max(0, m.index - Math.floor(windowSize / 2));
   const end = Math.min(text.length, start + windowSize);
   const windowText = text.slice(start, end);
-  const ranges = textRanges(foldDiacritics(windowText), makeMatcher(foldDiacritics(term)));
+  const ranges = textRanges(foldDiacritics(windowText), makeMatcher(foldDiacritics(term), mode));
   let html = '', pos = 0;
   ranges.forEach(([s, e]) => {
     html += escapeHtml(windowText.slice(pos, s));
@@ -462,20 +491,22 @@ async function runSearch() {
   summary.textContent = 'Loading\u2026';
   const range = parseVolumeRange(document.getElementById('volumeInput').value);
   const keyword = document.getElementById('keywordInput').value.trim();
+  const mode = document.getElementById('matchModeInput').value;
   currentSearchTerm = keyword;
+  currentSearchMode = mode;
   try {
     const perCorpus = await Promise.all(corpora.map((c) => loadCorpusRows(c, range)));
     let rows = [].concat(...perCorpus);
-    if (keyword) rows = rows.filter((r) => rowMatchesKeyword(r, keyword));
+    if (keyword) rows = rows.filter((r) => rowMatchesKeyword(r, keyword, mode));
     currentResults = rows;
     summary.textContent = rows.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
-    renderResults(rows, keyword);
+    renderResults(rows, keyword, mode);
   } catch (err) {
     summary.textContent = 'Error loading results: ' + err.message;
   }
 }
 
-function renderResults(rows, term) {
+function renderResults(rows, term, mode) {
   const tbody = document.getElementById('resultsBody');
   const frag = document.createDocumentFragment();
   rows.forEach((row, idx) => {
@@ -492,7 +523,7 @@ function renderResults(rows, term) {
       '<td>' + (u.king || '') + '</td>' +
       '<td>' + (u.date || '') + '</td>' +
       '<td>' + (u.type || '') + '</td>' +
-      '<td class="remarks-snippet">' + snippetHtml(row.text.remarks || '', term, 180) + '</td>' +
+      '<td class="remarks-snippet">' + snippetHtml(row.text.remarks || '', term, mode, 180) + '</td>' +
       '<td>' + (u.page || '') + '</td>';
     tr.addEventListener('click', (e) => {
       if (e.target.closest('button.idchip')) return;
@@ -507,9 +538,12 @@ document.getElementById('searchBtn').addEventListener('click', runSearch);
 document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
+  document.getElementById('matchModeInput').value = 'embedded';
   corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = true; });
   document.getElementById('resultsBody').innerHTML = '';
   document.getElementById('resultSummary').textContent = '';
+  currentSearchTerm = '';
+  currentSearchMode = 'embedded';
   currentResults = [];
 });
 document.getElementById('volumeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
@@ -588,7 +622,7 @@ function appendNotAvailable(dd) {
 // buildRow()'s own per-column highlighting in inscriptions_table_html.py.
 function highlightInto(el, html, plainText) {
   if (!currentSearchTerm) { el.innerHTML = html; return; }
-  const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm)));
+  const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode));
   markRanges(el, html, ranges);
 }
 
