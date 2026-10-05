@@ -542,7 +542,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpCa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-03 15:19</div>
+<div class="generated">Generated 2026-10-05 15:03</div>
 
 <div class="stats">2477 records from 4 volume(s). Remarks is the English translation; a row's detail popup also carries the Roman transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place").<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Roman Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the Roman-script transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -678,6 +678,9 @@ const CATEGORIES_URL = "epca/index.json";
 // "chunk 12 of 27", per the user, 2026-09-28: "X of N chunks is ok for
 // a software - not ok for a user."
 const CHUNK_LABEL = "volume";
+// See render_inscriptions_table's own enable_chunk_cache docstring --
+// SII's Sanjay page only, for now.
+const CHUNK_CACHE_ENABLED = false;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1345,6 +1348,87 @@ async function fetchJson(url) {
   return resp.json();
 }
 
+// Chunk cache (IndexedDB) -- see render_inscriptions_table's own
+// enable_chunk_cache docstring for the full design. Every function here
+// degrades silently (resolves to null/undefined, or is a no-op) if
+// IndexedDB is unavailable or any operation fails -- this is a pure
+// optimization, a page must load exactly as before if it can't be used.
+let _chunkDbPromise = null;
+function openChunkDb() {
+  if (!CHUNK_CACHE_ENABLED || typeof indexedDB === 'undefined') return Promise.resolve(null);
+  if (_chunkDbPromise) return _chunkDbPromise;
+  _chunkDbPromise = new Promise((resolve) => {
+    let req;
+    try {
+      req = indexedDB.open('hero-search-chunk-cache', 1);
+    } catch (e) {
+      resolve(null);
+      return;
+    }
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore('chunks', { keyPath: 'url' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+  return _chunkDbPromise;
+}
+
+// Resolves the cached {data} for `url` only if it's still at `modified`
+// -- any mismatch (stale, or never cached) resolves undefined, same as a
+// cache miss, so the caller always falls through to a real fetch.
+function getCachedChunk(url, modified) {
+  return openChunkDb().then((db) => new Promise((resolve) => {
+    if (!db) { resolve(undefined); return; }
+    try {
+      const req = db.transaction('chunks', 'readonly').objectStore('chunks').get(url);
+      req.onsuccess = () => {
+        const rec = req.result;
+        resolve(rec && rec.modified === modified ? rec.data : undefined);
+      };
+      req.onerror = () => resolve(undefined);
+    } catch (e) {
+      resolve(undefined);
+    }
+  }));
+}
+
+// Fire-and-forget -- a failed write just means the next visit re-fetches
+// this one chunk, never worth blocking or retrying for.
+function putCachedChunk(url, modified, data) {
+  openChunkDb().then((db) => {
+    if (!db) return;
+    try {
+      db.transaction('chunks', 'readwrite').objectStore('chunks').put({ url, modified, data });
+    } catch (e) { /* best-effort only */ }
+  });
+}
+
+// Visible purely for manual verification while this is being tested on
+// just SII's own Sanjay page (per the user, 2026-10-03) -- logged once
+// at the end of loadData() below, not used by any real logic.
+const CHUNK_CACHE_STATS = { hits: 0, misses: 0 };
+
+// `modified` is the manifest entry's own value (undefined when the cache
+// is disabled for this page, or for an older index.json predating this
+// field) -- getCachedChunk() already treats "no match" and "never
+// cached" identically, so this reads the same either way.
+async function fetchChunkJson(url, modified) {
+  if (CHUNK_CACHE_ENABLED) {
+    const cached = await getCachedChunk(url, modified);
+    if (cached !== undefined) {
+      CHUNK_CACHE_STATS.hits++;
+      return cached;
+    }
+  }
+  const data = await fetchJson(url);
+  if (CHUNK_CACHE_ENABLED) {
+    CHUNK_CACHE_STATS.misses++;
+    putCachedChunk(url, modified, data);
+  }
+  return data;
+}
+
 // DATA_URL/CATEGORIES_URL are each an index.json manifest now, not a
 // single data file — see write_shared_data_json()'s own docstring for
 // why (one file per SII volume / ARE report year, so no chunk ever
@@ -1368,7 +1452,7 @@ async function loadData() {
     if (CATEGORIES_URL) {
       const suppDir = dirOf(CATEGORIES_URL);
       const suppIndex = await fetchJson(CATEGORIES_URL);
-      suppByKey = new Map(suppIndex.map((e) => [e.key, suppDir + e.file]));
+      suppByKey = new Map(suppIndex.map((e) => [e.key, { url: suppDir + e.file, modified: e.modified }]));
       suppCount = suppIndex.length;
     }
 
@@ -1395,17 +1479,17 @@ async function loadData() {
     // index 0 now means "first row of THIS chunk", a different row in
     // every chunk, not a single corpus-wide position).
     const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
-      const chunkRows = await fetchJson(dataDir + entry.file);
+      const chunkRows = await fetchChunkJson(dataDir + entry.file, entry.modified);
       noteProgress(entry.key);
-      const suppUrl = suppByKey && suppByKey.get(entry.key);
-      if (suppUrl) {
-        const supp = await fetchJson(suppUrl);
+      const supp = suppByKey && suppByKey.get(entry.key);
+      if (supp) {
+        const suppData = await fetchChunkJson(supp.url, supp.modified);
         noteProgress(entry.key);
         // cells/text/filters are Object.assign'd in (not overwritten
         // wholesale) since the shared chunk already has its own
         // non-excluded keys for this row that must survive the merge.
-        Object.keys(supp).forEach((localIdx) => {
-          const s = supp[localIdx];
+        Object.keys(suppData).forEach((localIdx) => {
+          const s = suppData[localIdx];
           const row = chunkRows[localIdx];
           if (s.spans) row.spans = s.spans;
           if (s.categories) row.categories = s.categories;
@@ -1417,6 +1501,10 @@ async function loadData() {
       return chunkRows;
     }));
     const data = chunkArrays.flat();
+    if (CHUNK_CACHE_ENABLED) {
+      console.log('[chunk-cache] ' + CHUNK_CACHE_STATS.hits + ' from cache, ' +
+                  CHUNK_CACHE_STATS.misses + ' fetched over the network');
+    }
 
     data.forEach((r) => {
       if (!r.spans) r.spans = {};
@@ -1862,25 +1950,28 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (REMARKS_KEY) {
+    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // ...) now only become their own tab when they actually have content --
+    // per the user, 2026-10-06: an empty tab a reader clicks into just to
+    // find "Not available" (the Details grid already says that for every
+    // field, inline) wasn't worth a whole tab of its own. Unlike Details'
+    // own per-FIELD "Not available" (still shown there -- "checked, nothing
+    // there" is real information worth keeping inline), a popup TAB is a
+    // bigger ask (a click) for the same non-answer, so it's omitted
+    // entirely here instead. One shared change, both audiences (Sanjay and
+    // public both run this same shell) -- not a per-corpus setting.
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(body);
-      }
+      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
       tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
-      const body = document.createElement('div');
       const html = row.cells[key];
-      if (html) {
-        body.innerHTML = html;
-      } else {
-        appendNotAvailable(body);
-      }
+      if (!html) return;
+      const body = document.createElement('div');
+      body.innerHTML = html;
       tabs.push({ key, label: fieldLabel(key), el: body });
     });
 

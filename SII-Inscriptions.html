@@ -555,7 +555,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
-<div class="generated">Generated 2026-10-05 14:52</div>
+<div class="generated">Generated 2026-10-05 15:02</div>
 
 <div class="stats">15795 records from 44 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (266 of 269, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -1963,25 +1963,28 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (REMARKS_KEY) {
+    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // ...) now only become their own tab when they actually have content --
+    // per the user, 2026-10-06: an empty tab a reader clicks into just to
+    // find "Not available" (the Details grid already says that for every
+    // field, inline) wasn't worth a whole tab of its own. Unlike Details'
+    // own per-FIELD "Not available" (still shown there -- "checked, nothing
+    // there" is real information worth keeping inline), a popup TAB is a
+    // bigger ask (a click) for the same non-answer, so it's omitted
+    // entirely here instead. One shared change, both audiences (Sanjay and
+    // public both run this same shell) -- not a per-corpus setting.
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(body);
-      }
+      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
       tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
-      const body = document.createElement('div');
       const html = row.cells[key];
-      if (html) {
-        body.innerHTML = html;
-      } else {
-        appendNotAvailable(body);
-      }
+      if (!html) return;
+      const body = document.createElement('div');
+      body.innerHTML = html;
       tabs.push({ key, label: fieldLabel(key), el: body });
     });
 

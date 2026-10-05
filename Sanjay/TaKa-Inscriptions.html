@@ -547,7 +547,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> TaKa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 12:47</div>
+<div class="generated">Generated 2026-10-05 15:03</div>
 
 <div class="stats">3737 records from 18 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1955,25 +1955,28 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (REMARKS_KEY) {
+    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // ...) now only become their own tab when they actually have content --
+    // per the user, 2026-10-06: an empty tab a reader clicks into just to
+    // find "Not available" (the Details grid already says that for every
+    // field, inline) wasn't worth a whole tab of its own. Unlike Details'
+    // own per-FIELD "Not available" (still shown there -- "checked, nothing
+    // there" is real information worth keeping inline), a popup TAB is a
+    // bigger ask (a click) for the same non-answer, so it's omitted
+    // entirely here instead. One shared change, both audiences (Sanjay and
+    // public both run this same shell) -- not a per-corpus setting.
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(body);
-      }
+      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
       tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
-      const body = document.createElement('div');
       const html = row.cells[key];
-      if (html) {
-        body.innerHTML = html;
-      } else {
-        appendNotAvailable(body);
-      }
+      if (!html) return;
+      const body = document.createElement('div');
+      body.innerHTML = html;
       tabs.push({ key, label: fieldLabel(key), el: body });
     });
 

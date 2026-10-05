@@ -544,7 +544,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpTe Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 12:51</div>
+<div class="generated">Generated 2026-10-05 15:03</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -1952,25 +1952,28 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
 
-    if (REMARKS_KEY) {
+    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // ...) now only become their own tab when they actually have content --
+    // per the user, 2026-10-06: an empty tab a reader clicks into just to
+    // find "Not available" (the Details grid already says that for every
+    // field, inline) wasn't worth a whole tab of its own. Unlike Details'
+    // own per-FIELD "Not available" (still shown there -- "checked, nothing
+    // there" is real information worth keeping inline), a popup TAB is a
+    // bigger ask (a click) for the same non-answer, so it's omitted
+    // entirely here instead. One shared change, both audiences (Sanjay and
+    // public both run this same shell) -- not a per-corpus setting.
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      if (row.cells[REMARKS_KEY]) {
-        body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      } else {
-        appendNotAvailable(body);
-      }
+      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
       tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
-      const body = document.createElement('div');
       const html = row.cells[key];
-      if (html) {
-        body.innerHTML = html;
-      } else {
-        appendNotAvailable(body);
-      }
+      if (!html) return;
+      const body = document.createElement('div');
+      body.innerHTML = html;
       tabs.push({ key, label: fieldLabel(key), el: body });
     });
 
