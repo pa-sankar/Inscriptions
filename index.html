@@ -131,6 +131,24 @@
     background: var(--accent-copper); color: #fff; margin-top: 0.4rem;
   }
   .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
+  .stats-wrap { overflow-x: auto; margin: 1rem 0 1.75rem 0; }
+  .stats-table {
+    width: 100%; border-collapse: collapse; font-size: 0.92rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  .stats-table th, .stats-table td {
+    text-align: left; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .stats-table th {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-dim); font-weight: 600;
+  }
+  .stats-table tr:last-child td { border-bottom: none; }
+  .stats-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stats-table .total-row td { font-weight: 600; border-top: 2px solid var(--border); }
+  .stats-table .remarks { color: var(--text-dim); font-size: 0.88rem; }
 </style>
 </head>
 <body>
@@ -144,6 +162,47 @@
 <p>Over the past several months, this project has built an easily
 keyword-searchable database from major published sources on South
 Indian epigraphy, with more sources on the way:</p>
+
+<div class="stats-wrap">
+<table class="stats-table">
+  <thead>
+    <tr>
+      <th>Corpus</th>
+      <th>Volumes included</th>
+      <th>Volumes remaining</th>
+      <th>Records</th>
+      <th>Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>South Indian Inscriptions (SII)</strong></td>
+      <td class="num">49</td>
+      <td class="num">7</td>
+      <td class="num">16,031</td>
+      <td class="remarks">Vol I&ndash;XLI, including the separate
+        Bombay&ndash;Karnataka Inscriptions sub-series; several volumes
+        are split into 2&ndash;4 parts each.</td>
+    </tr>
+    <tr>
+      <td><strong>Annual Report on [South] Indian Epigraphy (ARE)</strong></td>
+      <td class="num">62</td>
+      <td class="num">4</td>
+      <td class="num">47,955</td>
+      <td class="remarks">Annual reports spanning 1906&ndash;1996;
+        several published volumes bundle multiple years into one book
+        (e.g. 1935&ndash;38, 1918&ndash;21, 1915&ndash;17).</td>
+    </tr>
+    <tr class="total-row">
+      <td>Total</td>
+      <td class="num">111</td>
+      <td class="num">11</td>
+      <td class="num">63,986</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 <a class="card" href="SII-Inscriptions.html">
   <h3>South Indian Inscriptions (SII)</h3>
