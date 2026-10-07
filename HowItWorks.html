@@ -69,6 +69,7 @@
   }
   h1 { font-size: 1.5rem; font-weight: 700; }
   h2 { font-size: 1.1rem; margin-top: 2.2rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+  h3 { font-size: 1rem; margin-top: 1.6rem; color: var(--text); }
   p { margin: 0.85rem 0; }
   a { color: var(--accent-strong); }
   a:hover { color: var(--accent); }
@@ -156,6 +157,89 @@ corpus. (Some records cite an entirely different publication instead —
 e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX" — there's nothing on
 this site for those to resolve to.) Where resolved, the underlined
 word in Remarks carries the full citation as a hover tooltip.</p>
+
+<h2>Annual Report on [South] Indian Epigraphy (ARE): a different kind of source</h2>
+<p>ARE is structured differently from SII — instead of narrative prose,
+its most useful content is printed as tables: one row per inscription,
+with Place, Dynasty, King, Date, Language and Remarks already broken
+into columns by the original editors. That shape makes a few extra
+processing steps necessary before the table is usable.</p>
+
+<h3>Reading sideways-printed tables</h3>
+<p>Several volumes print their appendix tables rotated 90&deg; across the
+page — a layout choice from the original printing, not a scanning
+artifact. 1992-93's own appendix table runs this way for 86 consecutive
+pages. Reading these requires first detecting which pages are rotated,
+then rotating the page image itself before it's handed to the AI model
+for transcription — read as printed, a rotated page's column headers
+and text come out reversed and out of order. Volumes that aren't
+rotated are read exactly as scanned; this handling applies only where
+the source itself demands it.</p>
+
+<h3>"Do." and "Ditto": filling in what the table leaves to the reader</h3>
+<p>Like most ledger-style tables, ARE's printed convention is: when a
+value repeats from the row above, don't reprint it — just write "Do."
+(ditto). A reader working through the book in order has no trouble
+following this; a searchable table where any row can be the first one
+you see does. The site resolves a "Do." cell to the actual value it
+stands for by tracing back to the nearest row above that states it
+directly — including across a page break, where the run continues from
+the bottom of the previous page.</p>
+
+<div class="example">
+  <div class="label">A real example (ARE 1959-60, Appendix B)</div>
+  <div class="row"><strong>No. 566</strong> — Place/Source: <em>"Gopīsar
+  (Bhakharwāla).—Stone at Gōpāljī kā thān about a mile from Gopīsar."</em></div>
+  <div class="row"><strong>No. 567</strong> — Place/Source: <em>"Do.
+  Another stone"</em> &rarr; <span class="v-derived">"Gopīsar
+  (Bhakharwāla).—Stone at Gōpāljī kā thān about a mile from Gopīsar.
+  Another stone."</span></div>
+</div>
+
+<p class="note">Not every "Do." is resolved automatically. Where a cell
+is a <em>partial</em> ditto — some text repeated, but followed by a new
+detail whose exact split point isn't stated by the cell itself (e.g.
+"Do. No. 2 (Museum Acc. No. 149/64)") — the site leaves it to a human to
+confirm rather than guess at the boundary.</p>
+
+<h3>District and taluk names: printed once, understood everywhere below</h3>
+<p>A page heading like "VIDISHA DISTRICT / BASODA TAHSIL" is printed
+once, above a run of rows, not repeated on every row — exactly the same
+convention SII's own Location column already follows (see above). The
+site carries that heading down through every row beneath it until a new
+heading appears, so even a row with no location information of its own
+(just "Left side. Do.") still shows the correct district and taluk.</p>
+
+<div class="example">
+  <div class="label">A real example</div>
+  <div class="row">Sl. No. 134–138 all show Location
+  <span class="v-derived">"VIDISHA DISTRICT / BASODA TAHSIL"</span> —
+  only 134 and 135 actually name a village in their own Place/Source
+  text; 136–138 inherit the district/taluk from the same heading above
+  them.</div>
+</div>
+
+<h3>"Ibid." citations: chasing a reference back to its full form</h3>
+<p>A record's Remarks sometimes cite an earlier publication only as
+"Ibid." — "same source as the record just discussed" — trusting a
+reader working through the book in sequence to already know what that
+is. The site resolves this by finding, earlier in that same appendix's
+own run, which record first stated the citation in full, and attaching
+that full citation to every "Ibid." that follows it, until a genuinely
+different citation appears.</p>
+
+<div class="example">
+  <div class="label">A real example (ARE 1967-68, Appendix B)</div>
+  <div class="row"><strong>No. 111</strong> — Remarks end
+  <em>"...Ibid., p. 55, No. 97."</em> &rarr; resolved by finding that an
+  earlier record in the same run had already stated the source in full:
+  <span class="v-derived">"Hiralal's List, second edition, p. 55,
+  No. 97."</span></div>
+</div>
+
+<p class="note">As with SII, a citation to an entirely different
+publication this site doesn't hold (e.g. "Ep. Ind., Vol. XIX") has
+nothing to resolve to, and is left as printed.</p>
 
 <h2>Reading a long record</h2>
 <p>A record's remarks can run to many lines for a heavily-discussed
