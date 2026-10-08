@@ -547,7 +547,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> TaKa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-05 20:08</div>
+<div class="generated">Generated 2026-10-08 17:48</div>
 
 <div class="stats">3737 records from 18 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -861,6 +861,16 @@ FILTER_KEYS.forEach((key) => {
 // searched for; `q.value` can differ from it while the user is still
 // typing, which is the whole point.
 let activeTerm = '';
+// Highlightable columns that default to hidden (King, Dynasty, Date,
+// Language, ...) but contain the active search term somewhere in the
+// corpus -- recomputed by updateColumnVisibility() below. Without this,
+// a row can match ONLY via a hidden column's own text (e.g. "hero"
+// inside the King field's "...anointment of heroes...") and show up as
+// a search result with no highlight anywhere on screen to explain why
+// -- found live, 2026-10-09. Same "reappear automatically" precedent
+// default_visible=False columns already get from an active Filter
+// selection, extended to the search term too.
+let TERM_MATCHED_HIDDEN_COLS = new Set();
 
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1126,6 +1136,10 @@ function render() {
 function runSearch() {
   activeTerm = q.value.trim();
   currentPage = 1;
+  // Reveal any hidden column the new term actually matches in, same as
+  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+  // own docstring.
+  updateColumnVisibility();
   render();
 }
 
@@ -1257,6 +1271,22 @@ function updateColumnVisibility() {
   FILTER_KEYS.forEach((k) => {
     if (FILTER_STATE[k] && FILTER_STATE[k].values.size > 0) visible.add(k);
   });
+  // Recomputed fresh every call from the CURRENT activeTerm/scope, so
+  // every call site that already clears/sets activeTerm before calling
+  // this (runSearch, resetBtn, jumpToKey) gets the right answer for
+  // free -- see TERM_MATCHED_HIDDEN_COLS's own docstring above.
+  TERM_MATCHED_HIDDEN_COLS = new Set();
+  if (activeTerm && searchScope.value === 'all') {
+    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value === 'word');
+    HIGHLIGHT_COLS.forEach((idx) => {
+      const key = COLUMN_KEYS[idx];
+      if (DEFAULT_VISIBLE_KEYS.has(key)) return;
+      if (ROWS.some((row) => re.test(foldDiacritics(row.text[key] || '')))) {
+        TERM_MATCHED_HIDDEN_COLS.add(key);
+      }
+    });
+  }
+  TERM_MATCHED_HIDDEN_COLS.forEach((k) => visible.add(k));
   CURRENT_VISIBLE_KEYS = visible;
   let extra = 0;
   Object.keys(BASE_COL_WIDTHS).forEach((key) => {
