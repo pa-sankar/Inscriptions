@@ -236,7 +236,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-12 10:02
+  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-14 12:16
     via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
@@ -656,7 +656,11 @@ function renderResults(rows, term, mode) {
     });
     frag.appendChild(tr);
   });
-  tbody.appendChild(frag);
+  // Replace, never append: a new search (or the next page) must not
+  // leave the previous rows behind. appendChild here kept every earlier
+  // search's rows on screen until Clear, and re-added the page on every
+  // chunk's repaint (found 2026-10-14).
+  tbody.replaceChildren(frag);
 }
 
 document.getElementById('searchBtn').addEventListener('click', runSearch);

@@ -541,7 +541,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpAn Articles</h1>
   
 </div>
-<div class="generated">Generated 2026-10-08 17:48</div>
+<div class="generated">Generated 2026-10-14 12:16</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -894,6 +894,16 @@ function foldDiacritics(s) {
 // machinery, same as a space), which is fine for the plain-ASCII search
 // terms this is meant for ("sati", "hero") — a diacritic-bearing term's
 // word boundaries would be less reliable, not broken outright.
+// makeMatcher() is global ('g'), and .test() on a global regex starts
+// at re.lastIndex and moves it on: reused across rows, a match in
+// one row made the next row's test start part-way into its text and
+// silently skip real matches (found 2026-10-14). Every row test goes
+// through this, from the start.
+function testFrom0(re, text) {
+  re.lastIndex = 0;
+  return re.test(text);
+}
+
 function makeMatcher(term, whole) {
   const body = escapeRegex(term);
   return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
@@ -1057,10 +1067,10 @@ function render() {
         // dedicated ID filter, same as Advanced Search's own
         // rowMatchesKeyword() already does.
         const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
-        textMatch = re.test(foldDiacritics(all));
+        textMatch = testFrom0(re, foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
-        textMatch = re.test(foldDiacritics(row.text[key] || ''));
+        textMatch = testFrom0(re, foldDiacritics(row.text[key] || ''));
       }
     }
     let match = textMatch;
@@ -1275,7 +1285,7 @@ function updateColumnVisibility() {
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
-      if (ROWS.some((row) => re.test(foldDiacritics(row.text[key] || '')))) {
+      if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
         TERM_MATCHED_HIDDEN_COLS.add(key);
       }
     });

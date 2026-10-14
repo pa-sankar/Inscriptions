@@ -547,7 +547,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions (Gen-2 complete volumes)</h1>
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
-<div class="generated">Generated 2026-10-14 11:34</div>
+<div class="generated">Generated 2026-10-14 12:14</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">15867 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -900,6 +900,16 @@ function foldDiacritics(s) {
 // machinery, same as a space), which is fine for the plain-ASCII search
 // terms this is meant for ("sati", "hero") — a diacritic-bearing term's
 // word boundaries would be less reliable, not broken outright.
+// makeMatcher() is global ('g'), and .test() on a global regex starts
+// at re.lastIndex and moves it on: reused across rows, a match in
+// one row made the next row's test start part-way into its text and
+// silently skip real matches (found 2026-10-14). Every row test goes
+// through this, from the start.
+function testFrom0(re, text) {
+  re.lastIndex = 0;
+  return re.test(text);
+}
+
 function makeMatcher(term, whole) {
   const body = escapeRegex(term);
   return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
@@ -1063,10 +1073,10 @@ function render() {
         // dedicated ID filter, same as Advanced Search's own
         // rowMatchesKeyword() already does.
         const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
-        textMatch = re.test(foldDiacritics(all));
+        textMatch = testFrom0(re, foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
-        textMatch = re.test(foldDiacritics(row.text[key] || ''));
+        textMatch = testFrom0(re, foldDiacritics(row.text[key] || ''));
       }
     }
     let match = textMatch;
@@ -1281,7 +1291,7 @@ function updateColumnVisibility() {
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
-      if (ROWS.some((row) => re.test(foldDiacritics(row.text[key] || '')))) {
+      if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
         TERM_MATCHED_HIDDEN_COLS.add(key);
       }
     });
