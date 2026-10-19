@@ -96,6 +96,17 @@
     background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
   }
   .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
+  /* Accordion, per the user 2026-10-18: one section open at a time. */
+  details.acc { border-bottom: 1px solid var(--border); }
+  details.acc > summary { list-style: none; cursor: pointer; display: flex;
+    align-items: center; gap: 0.6rem; padding: 0.2rem 0; }
+  details.acc > summary::-webkit-details-marker { display: none; }
+  details.acc > summary::before { content: "\25B8"; color: var(--accent-copper-strong);
+    transition: transform 0.15s; display: inline-block; }
+  details.acc[open] > summary::before { transform: rotate(90deg); }
+  details.acc > summary h2 { margin: 1rem 0; }
+  details.acc > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .acc-body { padding-bottom: 0.8rem; }
 </style>
 </head>
 <body>
@@ -106,7 +117,9 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </h1>
 
-<h2>Reading the original scans</h2>
+<details class="acc" name="hiw" id="reading-the-original-scans">
+<summary><h2>Reading the original scans</h2></summary>
+<div class="acc-body">
 <p>The source is a scanned book, decades old, in a mix of English
 apparatus and vernacular (Tamil, Kannada, Telugu, Sanskrit) script, often
 with diacritical marks (ā, ṛ, ḻ, ñ, ...) that plain OCR software reads
@@ -114,16 +127,24 @@ unreliably or drops outright. Every page was read using an AI vision
 model instructed to transcribe exactly what's printed, diacritics
 included, rather than a traditional OCR engine — the difference matters
 most on exactly the marks that carry real linguistic information.</p>
+</div>
+</details>
 
-<h2>Turning a page of text into structured records</h2>
+<details class="acc" name="hiw" id="turning-a-page-of-text-into-structured-records">
+<summary><h2>Turning a page of text into structured records</h2></summary>
+<div class="acc-body">
 <p>Once a page is transcribed, each individual inscription record on it
 is identified and its own attributes pulled out separately: a survey/
 serial number, the find-spot as printed, the dynasty and ruler named (if
 any), a date, the language and script, and the descriptive remarks.
 These become the columns of the searchable table — one row per
 inscription record, not one row per page.</p>
+</div>
+</details>
 
-<h2>Location: what's printed vs. what's resolved</h2>
+<details class="acc" name="hiw" id="location-what-s-printed-vs-what-s-resolved">
+<summary><h2>Location: what's printed vs. what's resolved</h2></summary>
+<div class="acc-body">
 <p>A find-spot is often only stated in full the first time it's needed —
 the next several inscriptions from the same place just say <em>"same
 taluk"</em> or similar, trusting the reader to remember. The site follows
@@ -157,8 +178,12 @@ corpus. (Some records cite an entirely different publication instead —
 e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX" — there's nothing on
 this site for those to resolve to.) Where resolved, the underlined
 word in Remarks carries the full citation as a hover tooltip.</p>
+</div>
+</details>
 
-<h2>Annual Report on [South] Indian Epigraphy (ARE): a different kind of source</h2>
+<details class="acc" name="hiw" id="annual-report-on-south-indian-epigraphy-are-a-different-kind-of-source">
+<summary><h2>Annual Report on [South] Indian Epigraphy (ARE): a different kind of source</h2></summary>
+<div class="acc-body">
 <p>ARE is structured differently from SII — instead of narrative prose,
 its most useful content is printed as tables: one row per inscription,
 with Place, Dynasty, King, Date, Language and Remarks already broken
@@ -240,20 +265,63 @@ different citation appears.</p>
 <p class="note">As with SII, a citation to an entirely different
 publication this site doesn't hold (e.g. "Ep. Ind., Vol. XIX") has
 nothing to resolve to, and is left as printed.</p>
+</div>
+</details>
 
-<h2>Reading a long record</h2>
+<details class="acc" name="hiw" id="dynasty-king-and-date-read-from-the-remarks">
+<summary><h2>Dynasty, king and date read from the Remarks</h2></summary>
+<div class="acc-body">
+<p>Many records leave the Dynasty, King or Date column empty even though
+the Remarks text names them: <em>"This is an inscription of the reign of
+Rājarāja I"</em>, or <em>"dated in the twenty-sixth year"</em>. Each such
+record's own Remarks were given to an AI model, which was asked for the
+dynasty, king and date (and the village and district) only where the text
+states them, together with the exact words it took each value from.</p>
+<p>Every answer is checked before it reaches the site. The quoted words
+must really be in that record's Remarks; values in native script,
+placeholders such as "year not given", dates with no number or calendar
+word in them, and anything that looks garbled are set aside for review
+rather than shown. A value is only ever added to an empty column: a
+printed value is never replaced.</p>
+<p>On the table these values appear as <span class="v-derived">derived</span>,
+and hovering one shows that it was read from the record's own Remarks
+rather than printed in its column.</p>
+
+<div class="example">
+  <div class="label">A real example (South Indian Inscriptions, Vol. I)</div>
+  <div class="row"><strong>No. 121</strong> &mdash; Remarks: <em>"King: ...
+  Krishṇadeva-mahârâya (of Vijaya-nagara). Date: Śaka 1435 expired and the
+  Śrīmukha year current."</em></div>
+  <div class="row">&rarr; Dynasty: <span class="v-derived">Krishṇadeva-mahârâya
+  &middot; Vijayanagara</span>; Date: <span class="v-derived">Śaka 1435 expired
+  and the Śrīmukha year current</span> <span class="label">(this volume prints
+  the king and date inside the record's text, not in columns of their
+  own)</span></div>
+</div>
+</div>
+</details>
+
+<details class="acc" name="hiw" id="reading-a-long-record">
+<summary><h2>Reading a long record</h2></summary>
+<div class="acc-body">
 <p>A record's remarks can run to many lines for a heavily-discussed
 inscription. Long remarks are visually clipped in the table with a
 <strong>"Read more"</strong> link that opens the full text in a popup —
 this only affects how it's displayed, the full text is always there.</p>
+</div>
+</details>
 
-<h2>Viewing the original page</h2>
+<details class="acc" name="hiw" id="viewing-the-original-page">
+<summary><h2>Viewing the original page</h2></summary>
+<div class="acc-body">
 <p>Some records have a button to view the actual scanned page image
 alongside the transcription. This isn't available for every record —
 each page image adds real file size to what's published, and hosting a
 scan for every page of the whole corpus would grow well beyond what's
 practical for this site's own repository. Page images are included
 selectively, not for the whole corpus.</p>
+</div>
+</details>
 
 <a href="index.html" class="back">&larr; Back</a>
 </div>
@@ -261,6 +329,25 @@ selectively, not for the whole corpus.</p>
   document.getElementById('subscribeLink').addEventListener('click', function() {
     if (typeof gtag === 'function') gtag('event', 'subscribe_click');
   });
+  // Accordion: opening one section closes the others (the name attribute
+  // does this natively in newer browsers; this covers the rest), and each
+  // open is sent to Google Analytics named by section, so section use can
+  // be tracked. Per the user, 2026-10-18.
+  var sections = document.querySelectorAll('details.acc');
+  sections.forEach(function(d) {
+    d.addEventListener('toggle', function() {
+      if (!d.open) return;
+      sections.forEach(function(o) { if (o !== d) o.open = false; });
+      if (typeof gtag === 'function') {
+        gtag('event', 'howitworks_section_open', {section: d.id});
+      }
+    });
+  });
+  // a link to #section opens that section
+  if (location.hash) {
+    var t = document.getElementById(location.hash.slice(1));
+    if (t && t.tagName === 'DETAILS') t.open = true;
+  }
 </script>
 </body>
 </html>

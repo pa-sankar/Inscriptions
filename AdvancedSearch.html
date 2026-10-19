@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced Search — Project InscriptionSearch</title>
+<meta name="description" content="Search South Indian Inscriptions and the Annual Reports on Indian Epigraphy together.">
+<meta property="og:title" content="Advanced Search — Project InscriptionSearch">
+<meta property="og:url" content="https://pa-sankar.github.io/Inscriptions/AdvancedSearch.html">
+<meta property="og:image" content="https://pa-sankar.github.io/Inscriptions/images/inscription-search-image.jpg">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'public'});
+</script>
+<style>
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c;
+    --accent-copper: #a6612f; --accent-copper-strong: #7d431c;
+    --shadow: 0 1px 2px rgba(43,42,36,0.06), 0 8px 24px rgba(43,42,36,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; margin: 0;
+    background: var(--bg); color: var(--text); font-size: 14.5px; line-height: 1.5;
+  }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 26px 22px 60px; }
+  h1 { font-size: 21px; margin: 0 0 6px; }
+  .sub-head { color: var(--text-dim); font-size: 13px; margin-bottom: 4px; }
+  .scope-note {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 12.8px; color: var(--text-dim); margin: 14px 0 20px;
+  }
+  .scope-note strong { color: var(--accent-copper-strong); }
+  .home-link { font-size: 13px; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: flex-end;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-group label.group-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim);
+    font-weight: 600;
+  }
+  .corpus-checks { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+  .corpus-checks label {
+    display: flex; align-items: center; gap: 0.35rem; font-size: 13.5px; cursor: pointer;
+  }
+  input[type=text] {
+    background: var(--surface); border: 1px solid var(--border); padding: 7px 10px;
+    border-radius: 7px; color: var(--text); font-family: inherit; font-size: 13.5px;
+  }
+  #volumeInput { width: 11rem; }
+  #keywordInput { width: 16rem; }
+  button#searchBtn, button#clearBtn {
+    padding: 0.5rem 1.1rem; border-radius: 7px; border: 1px solid var(--accent);
+    background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 13.5px;
+  }
+  button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
+  .hint { font-size: 11.5px; color: var(--text-dim); max-width: 16rem; }
+  .result-summary { font-size: 13px; color: var(--text-dim); margin: 6px 0 10px; }
+  .pager {
+    display: flex; align-items: center; gap: 0.8rem; margin: 10px 0; font-size: 13px;
+  }
+  .pager button {
+    padding: 0.35rem 0.8rem; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer; font: inherit; font-size: 13px;
+  }
+  .pager button:disabled { opacity: 0.4; cursor: default; }
+  .pager select {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+    padding: 0.35rem 0.6rem; color: var(--text); font: inherit; font-size: 13px;
+  }
+  #pagerStatus { color: var(--text-dim); }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 980px; }
+  thead th {
+    text-align: left; font-size: 11.2px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-dim); background: var(--surface-2); padding: 9px 10px;
+    border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0;
+  }
+  tbody td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--surface-2); }
+  .corpus-tag {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 6px;
+    border-radius: 5px; background: var(--surface-2); color: var(--accent-strong);
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+  .remarks-snippet { max-width: 30rem; }
+  .v-direct { color: inherit; }
+  .v-derived { color: var(--accent-copper-strong); font-style: italic; }
+  button.idchip {
+    font-size: 15px; line-height: 1; cursor: pointer;
+    padding: 4px 7px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; color: var(--accent-strong); font-family: 'Consolas', monospace;
+  }
+  button.idchip:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+  button.idchip.copied {
+    color: #fff; background: var(--accent-strong); border-color: var(--accent-strong);
+    font-size: 12px; white-space: nowrap;
+  }
+  .row-detail-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem;
+  }
+  .row-detail-overlay[hidden] { display: none; }
+  .row-detail-box {
+    background: var(--surface); color: var(--text); border-radius: 10px;
+    max-width: 56rem; width: 100%; max-height: 85vh; overflow-y: auto; padding: 1.5rem;
+    position: relative; box-shadow: var(--shadow);
+  }
+  .row-detail-close {
+    position: absolute; top: 0.5rem; right: 0.7rem; font-size: 1.3rem; line-height: 1;
+    background: none; border: none; cursor: pointer; color: var(--text-dim);
+  }
+  .row-detail-close:hover { color: var(--text); }
+  .row-detail-field {
+    display: grid; grid-template-columns: 9rem 1fr; gap: 0.4rem 0.75rem;
+    padding: 0.3rem 0; border-bottom: 1px solid var(--border); align-items: baseline;
+  }
+  .row-detail-field:last-child { border-bottom: none; }
+  .row-detail-label {
+    color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.03em; font-weight: 600;
+  }
+  .row-detail-value { line-height: 1.5; overflow-wrap: break-word; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .row-detail-id-text { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; color: var(--text); }
+  .row-detail-na { color: var(--text-dim); font-style: italic; }
+  .row-detail-tabs { margin-top: 1.1rem; }
+  .row-detail-tab-bar { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
+  .row-detail-tab-btn {
+    font: inherit; font-size: 0.85rem; padding: 0.35rem 0.8rem; border: 1px solid var(--border);
+    border-radius: 999px; background: var(--surface-2); color: var(--text-dim); cursor: pointer;
+  }
+  .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  .row-detail-tab-content {
+    white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; background: var(--surface-2);
+    border-radius: 6px; padding: 0.8rem 1rem; max-height: 22rem; overflow-y: auto;
+  }
+  .loading-note { font-size: 13px; color: var(--text-dim); padding: 14px; }
+  footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
+  @media (max-width: 640px) {
+    .wrap { padding: 14px 12px 40px; }
+    .controls { gap: 0.7rem; }
+    #volumeInput, #keywordInput { width: 100%; }
+    .row-detail-field { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="home-link"><a href="index.html">&larr; Home</a></div>
+  <h1>Advanced Search</h1>
+  <div class="sub-head">Cross-corpus search across SII / ARE.</div>
+  <div class="scope-note">
+    One search across every corpus on this site: South Indian Inscriptions and the Annual Reports on Indian Epigraphy. Narrow by corpus and volume (an SII volume such as IV or 4-10, or an ARE report year such as 1928-29), then search the text. <strong>Click a row for every field</strong> (Location, Dynasty, King, Date and the rest); the table itself keeps to what identifies a record, leaving room for Remarks. Filters by dynasty, language and state are not offered yet.
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label class="group-label">Corpora</label>
+      <div class="corpus-checks" id="corpusChecks"></div>
+    </div>
+    <div class="ctrl-group">
+      <label class="group-label" for="volumeInput">Volume / range</label>
+      <input type="text" id="volumeInput" placeholder="e.g. IV or 4-10 or 1928-29">
+      <div class="hint">Roman numeral or plain number for a numbered series (SII); a year or
+        year-range for ARE. Blank = every volume.</div>
+    </div>
+    <div class="ctrl-group">
+      <label class="group-label" for="keywordInput">Keyword</label>
+      <input type="text" id="keywordInput" placeholder="searches Remarks, Location, ID, etc.">
+    </div>
+    <div class="ctrl-group">
+      <label class="group-label" for="matchModeInput">Match</label>
+      <select id="matchModeInput">
+        <option value="embedded">Embedded (anywhere)</option>
+        <option value="partial" selected>Partial (word start)</option>
+        <option value="full">Full word</option>
+      </select>
+      <div class="hint">Embedded: "mahavra" matches "samahavraja" too. Partial: matches
+        "mahavratin" but not "samahavraja". Full: exact word only. Always
+        case-insensitive and diacritic-folded; also matches a record's own unique ID.</div>
+    </div>
+    <div class="ctrl-group">
+      <button type="button" id="searchBtn">Search</button>
+    </div>
+    <div class="ctrl-group">
+      <button type="button" id="clearBtn">Clear</button>
+    </div>
+  </div>
+
+  <div class="result-summary" id="resultSummary"></div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Corpus</th><th>ID</th><th>Sl.No</th><th>Source</th><th>Remarks</th><th>Page</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+  <div class="pager" id="pagerBar">
+    <button type="button" id="pagerPrev">&larr; Prev</button>
+    <span id="pagerStatus"></span>
+    <button type="button" id="pagerNext">Next &rarr;</button>
+    <select id="pageSizeInput">
+      <option value="25">25 / page</option>
+      <option value="50" selected>50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="0">All</option>
+    </select>
+  </div>
+
+  <footer>Project InscriptionSearch. Generated 2026-10-19 18:50.</footer>
+</div>
+
+<div class="row-detail-overlay" id="rowDetailModal" hidden>
+  <div class="row-detail-box">
+    <button type="button" class="row-detail-close" id="rowDetailClose" aria-label="Close">&times;</button>
+    <div id="rowDetailBody"></div>
+  </div>
+</div>
+
+<script>
+const CORPUS_CONFIG = {"sii": {"label": "SII", "dataUrl": "data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "dataUrl": "data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}};
+const CANONICAL_FIELDS = ["sl_no", "source", "kind", "type", "location", "dynasty", "king", "date", "remarks", "page"];
+
+// -- Roman numeral <-> int, and the free-text volume/range parser --
+function romanToInt(s) {
+  const map = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};
+  let total = 0, prev = 0;
+  const chars = s.toUpperCase().split('').reverse();
+  for (const ch of chars) {
+    const v = map[ch];
+    if (v === undefined) return 0;
+    total += v < prev ? -v : v;
+    prev = Math.max(prev, v);
+  }
+  return total;
+}
+
+// Returns the comparable volume number for one chunk key, per the
+// corpus's own numbering scheme -- null if this key doesn't carry a
+// comparable number at all (e.g. TaKa's own "IPS" key), which means it
+// never matches a numeric range filter but is still included when the
+// range field is blank.
+function volumeNumberForKey(key, numbering) {
+  if (numbering === 'year') {
+    const m = key.match(/\d{4}/);
+    return m ? parseInt(m[0], 10) : null;
+  }
+  const primary = key.split('_')[0];
+  const n = romanToInt(primary);
+  if (n > 0) return n;
+  const asInt = parseInt(primary, 10);
+  return Number.isFinite(asInt) && String(asInt) === primary ? asInt : null;
+}
+
+// null return = no filter, every volume matches. A single academic-year
+// token ("1928-29") is detected and treated as ONE value (its own first
+// 4-digit year), not a FROM-TO range -- see this script's own module
+// docstring / PENDING.md for why a generic dash-split would misread it.
+function parseVolumeRange(text) {
+  const trimmed = (text || '').trim();
+  if (!trimmed) return null;
+  if (/^\d{4}-\d{2}$/.test(trimmed)) {
+    const year = parseInt(trimmed.slice(0, 4), 10);
+    return {min: year, max: year};
+  }
+  function toNum(tok) {
+    tok = tok.trim();
+    if (/^\d+$/.test(tok)) return parseInt(tok, 10);
+    const r = romanToInt(tok);
+    return r > 0 ? r : null;
+  }
+  const parts = trimmed.split('-').map((s) => s.trim()).filter(Boolean);
+  if (parts.length === 1) {
+    const n = toNum(parts[0]);
+    return n === null ? null : {min: n, max: n};
+  }
+  if (parts.length === 2) {
+    const a = toNum(parts[0]), b = toNum(parts[1]);
+    if (a === null || b === null) return null;
+    return {min: Math.min(a, b), max: Math.max(a, b)};
+  }
+  return null;
+}
+
+function dirOf(url) { return url.slice(0, url.lastIndexOf('/') + 1); }
+async function fetchJson(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
+  return resp.json();
+}
+
+// -- Corpus checkboxes, built from CORPUS_CONFIG so the page never
+// drifts from what main() actually wired up --
+const corpusChecksEl = document.getElementById('corpusChecks');
+Object.keys(CORPUS_CONFIG).forEach((key) => {
+  const label = document.createElement('label');
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.value = key;
+  cb.checked = true;
+  cb.id = 'corpus-' + key;
+  label.appendChild(cb);
+  label.appendChild(document.createTextNode(CORPUS_CONFIG[key].label));
+  corpusChecksEl.appendChild(label);
+});
+
+function checkedCorpora() {
+  return Array.from(corpusChecksEl.querySelectorAll('input:checked')).map((cb) => cb.value);
+}
+
+// Tags one raw chunk row with its corpus + a union-remapped set of
+// display fields. No supplement fetch -- v1's union columns never
+// need a Sanjay-only extra field (see module docstring).
+function buildUnionRow(corpusKey, cfg, row, sourceKey) {
+  const union = {};
+  CANONICAL_FIELDS.forEach((field) => {
+    const srcKey = cfg.unionMap[field];
+    union[field] = srcKey ? (row.cells[srcKey] || '') : '';
+  });
+  return {
+    corpus: corpusKey, corpusLabel: cfg.label, id: row.id,
+    union, cells: row.cells, text: row.text, sourceKey,
+  };
+}
+
+// The wanted (volume-range-filtered) chunk list for one corpus --
+// split out from the per-chunk fetch itself so runSearch() can total
+// every selected corpus's own chunk count BEFORE fetching any of them
+// (needed for an accurate "done" state/progress percentage -- see
+// runSearch()'s own docstring).
+async function wantedChunksForCorpus(corpusKey, range) {
+  const cfg = CORPUS_CONFIG[corpusKey];
+  const dataDir = dirOf(cfg.dataUrl);
+  const index = await fetchJson(cfg.dataUrl);
+  const wanted = index.filter((entry) => {
+    if (!range) return true;
+    const n = volumeNumberForKey(entry.key, cfg.numbering);
+    return n !== null && n >= range.min && n <= range.max;
+  });
+  return { corpus: corpusKey, cfg, dataDir, wanted };
+}
+
+// -- Diacritic-folded search, ported from inscriptions_table_html.py's
+// own shared JS (foldDiacritics/makeMatcher/textRanges/markRanges) --
+// same mechanism every per-corpus page already uses, so a plain-ASCII
+// term like "mahavra" matches text that actually reads "mahāvra" here
+// too. Found missing live, 2026-10-05, per the user: searching
+// "mahavra" in Advanced Search showed only EpTe's 2 matches, missing
+// SII's own 5 (confirmed present via SII-Inscriptions.html's own
+// search, which already folds) -- this page's keyword filter was a
+// bare case-folded .includes(), never diacritic-aware at all. A FRESH
+// RegExp is built right before every single .test()/.exec() call,
+// never reused across calls -- the shared 'g' flag makes a reused
+// regex instance stateful (lastIndex), the exact bug class the
+// original per-corpus code already avoids the same way (see buildRow
+// there calling makeMatcher() fresh inside its own per-column loop).
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function foldDiacritics(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+// `mode` -- 'embedded' (default, matches anywhere, including mid-word:
+// "mahavra" matches inside "samahavraja"), 'partial' (must start at a
+// word boundary but may be followed by more letters: "mahavra" matches
+// "mahavratin" but not "samahavraja"), 'full' (exact whole word only).
+// Per the user, 2026-10-05: all three are real, distinct needs -- a
+// search feature shouldn't hardcode just "contains" or just "whole
+// word" when a caller may want either boundary behavior, or none.
+function makeMatcher(term, mode) {
+  const body = escapeRegex(term);
+  const pattern = mode === 'full' ? '\\b(' + body + ')\\b'
+                : mode === 'partial' ? '\\b(' + body + ')'
+                : '(' + body + ')';
+  return new RegExp(pattern, 'ig');
+}
+function textRanges(text, re) {
+  const out = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    out.push([m.index, m.index + m[0].length]);
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out;
+}
+// Same tree-walk as markRanges() in inscriptions_table_html.py -- wraps
+// character ranges (into the cell's own PLAIN text) in <mark>, leaving
+// any markup the cell's own HTML already carries (v-direct/v-derived
+// spans, tooltips) untouched.
+function markRanges(cell, cellHtml, ranges) {
+  cell.innerHTML = cellHtml;
+  if (!ranges || !ranges.length) return;
+  const sorted = ranges.slice().sort((a, b) => a[0] - b[0]);
+  let ri = 0, pos = 0;
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      let i = 0;
+      while (i < text.length) {
+        while (ri < sorted.length && sorted[ri][1] <= pos + i) ri++;
+        if (ri >= sorted.length) { frag.appendChild(document.createTextNode(text.slice(i))); break; }
+        const rs = sorted[ri][0], reEnd = sorted[ri][1];
+        const g = pos + i;
+        if (g < rs) {
+          const take = Math.min(rs - g, text.length - i);
+          frag.appendChild(document.createTextNode(text.slice(i, i + take)));
+          i += take;
+        } else {
+          const take = Math.min(reEnd - g, text.length - i);
+          const m = document.createElement('mark');
+          m.textContent = text.slice(i, i + take);
+          frag.appendChild(m);
+          i += take;
+        }
+      }
+      pos += text.length;
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  Array.from(cell.childNodes).forEach(walk);
+}
+
+// Current search term, kept as plain text (never a live RegExp
+// instance -- see the module-docstring note above on why a fresh
+// matcher is built per use instead of reusing one).
+let currentSearchTerm = '';
+let currentSearchMode = 'partial';
+
+// Checks every text field AND the row's own unique ID -- per the user,
+// 2026-10-05: free-text search must always reach a record's own ID too
+// (someone pasting an ID they already have shouldn't need a separate,
+// undiscoverable "search by ID" mode), even though there's no dedicated
+// ID filter control in this UI.
+function rowMatchesKeyword(row, term, mode) {
+  if (!term) return true;
+  const folded = foldDiacritics(term);
+  if (row.id && makeMatcher(folded, mode).test(foldDiacritics(row.id))) return true;
+  return Object.values(row.text).some((v) => v && makeMatcher(folded, mode).test(foldDiacritics(v)));
+}
+
+// A context window around the FIRST match, not just the first N
+// characters -- a match past char 180 used to be truncated out of the
+// snippet entirely (and, before this fix, was never marked anyway).
+// Falls back to a plain head-truncation when there's no active term.
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+}
+function snippetHtml(text, term, mode, windowSize) {
+  if (!text) return '';
+  if (!term) {
+    return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
+  }
+  const folded = foldDiacritics(text);
+  const m = makeMatcher(foldDiacritics(term), mode).exec(folded);
+  if (!m) {
+    return escapeHtml(text.length > windowSize ? text.slice(0, windowSize) + '\u2026' : text);
+  }
+  const start = Math.max(0, m.index - Math.floor(windowSize / 2));
+  const end = Math.min(text.length, start + windowSize);
+  const windowText = text.slice(start, end);
+  const ranges = textRanges(foldDiacritics(windowText), makeMatcher(foldDiacritics(term), mode));
+  let html = '', pos = 0;
+  ranges.forEach(([s, e]) => {
+    html += escapeHtml(windowText.slice(pos, s));
+    html += '<mark>' + escapeHtml(windowText.slice(s, e)) + '</mark>';
+    pos = e;
+  });
+  html += escapeHtml(windowText.slice(pos));
+  return (start > 0 ? '\u2026' : '') + html + (end < text.length ? '\u2026' : '');
+}
+
+// -- Pagination -- per the user, 2026-10-05: 2,000+ results rendered as
+// one giant unpaginated table was unusable. Matching/filtering (above)
+// already runs over the full result set regardless (it has to, to know
+// the true total) -- only PAINTING is paginated, same "matching isn't
+// the slow part, DOM-building is" reasoning inscriptions_table_html.py's
+// own pager already documented.
+let currentResults = [];
+let currentTerm = '';
+let currentMode = 'partial';
+let currentPage = 1;
+
+function pageSizeValue() {
+  const n = parseInt(document.getElementById('pageSizeInput').value, 10);
+  return n > 0 ? n : Infinity; // "All" is 0 -> unlimited
+}
+
+// A later search's `searchGeneration` beats an earlier one's still-
+// in-flight chunk fetches -- every chunk callback checks this before
+// touching currentResults/painting, so stale results from a search
+// the user already replaced (typed a new term, hit Search again)
+// never land after the fact. Per the user, 2026-10-05: a 2,811-match
+// search had to fully finish before the first row ever appeared --
+// now every chunk paints as its own fetch resolves, with a running
+// "N so far -- loading... (P%)" status, same "matching isn't the
+// slow part, painting a few rows is" reasoning the pager above
+// already uses, extended to the FETCH itself. Per the user: result
+// order is whichever chunk's own fetch happens to resolve first, not
+// re-sorted once loading completes -- an explicit decision, not an
+// oversight (true relevance/date sorting would need every chunk in
+// hand first, defeating the point of painting incrementally).
+let searchGeneration = 0;
+
+async function runSearch() {
+  const corpora = checkedCorpora();
+  const summary = document.getElementById('resultSummary');
+  const myGen = ++searchGeneration;
+  currentResults = [];
+  currentPage = 1;
+  paintPage();
+  if (!corpora.length) {
+    summary.textContent = 'Select at least one corpus.';
+    return;
+  }
+  const range = parseVolumeRange(document.getElementById('volumeInput').value);
+  const keyword = document.getElementById('keywordInput').value.trim();
+  const mode = document.getElementById('matchModeInput').value;
+  currentSearchTerm = keyword;
+  currentSearchMode = mode;
+  currentTerm = keyword;
+  currentMode = mode;
+  summary.textContent = 'Loading\u2026';
+
+  try {
+    // Every selected corpus's own index.json first (small, cheap) --
+    // gives the TOTAL chunk count up front, so progress/done-ness is
+    // known before any chunk itself is fetched, rather than guessed at.
+    const perCorpus = await Promise.all(corpora.map((c) => wantedChunksForCorpus(c, range)));
+    if (myGen !== searchGeneration) return; // superseded by a newer search
+
+    const totalChunks = perCorpus.reduce((sum, p) => sum + p.wanted.length, 0);
+    if (totalChunks === 0) {
+      summary.textContent = '0 result(s) across ' + corpora.length + ' corpus/corpora.';
+      return;
+    }
+    let doneChunks = 0;
+    function noteChunkDone() {
+      doneChunks++;
+      if (myGen !== searchGeneration) return;
+      if (doneChunks < totalChunks) {
+        const pct = Math.round((doneChunks / totalChunks) * 100);
+        summary.textContent = currentResults.length + ' result(s) so far \u2014 loading\u2026 (' + pct + '%)';
+      } else {
+        summary.textContent = currentResults.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';
+      }
+    }
+
+    const chunkJobs = [];
+    perCorpus.forEach(({ corpus, cfg, dataDir, wanted }) => {
+      wanted.forEach((entry) => {
+        chunkJobs.push(
+          fetchJson(dataDir + entry.file)
+            .then((chunkRows) => {
+              if (myGen !== searchGeneration) return;
+              const rows = chunkRows.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
+              const matched = keyword ? rows.filter((r) => rowMatchesKeyword(r, keyword, mode)) : rows;
+              if (matched.length) {
+                currentResults = currentResults.concat(matched);
+                paintPage();
+              }
+              noteChunkDone();
+            })
+            .catch(() => { noteChunkDone(); })
+        );
+      });
+    });
+    await Promise.all(chunkJobs);
+  } catch (err) {
+    if (myGen === searchGeneration) summary.textContent = 'Error loading results: ' + err.message;
+  }
+}
+
+// Only Corpus/ID/Sl.No/Source/Remarks/Page show in the table -- per the
+// user, 2026-10-05: every other field (Location, Dynasty, King, Date,
+// Type, and any corpus-specific field) was pushing Remarks off-screen
+// with no room left, when all of it is already one click away in the
+// row-detail popup. Table stays a skim/identify view, not a full dump.
+function paintPage() {
+  const pageSize = pageSizeValue();
+  const total = currentResults.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = pageSize === Infinity ? 0 : (currentPage - 1) * pageSize;
+  const end = pageSize === Infinity ? total : Math.min(total, start + pageSize);
+  renderResults(currentResults.slice(start, end), currentTerm, currentMode);
+
+  const status = document.getElementById('pagerStatus');
+  const prevBtn = document.getElementById('pagerPrev');
+  const nextBtn = document.getElementById('pagerNext');
+  if (total === 0) {
+    status.textContent = 'No results';
+  } else {
+    status.textContent = 'Showing ' + (start + 1) + '\u2013' + end + ' of ' + total +
+      ' (page ' + currentPage + ' of ' + totalPages + ')';
+  }
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
+}
+
+document.getElementById('pagerPrev').addEventListener('click', () => { currentPage--; paintPage(); });
+document.getElementById('pagerNext').addEventListener('click', () => { currentPage++; paintPage(); });
+document.getElementById('pageSizeInput').addEventListener('change', () => { currentPage = 1; paintPage(); });
+
+function renderResults(rows, term, mode) {
+  const tbody = document.getElementById('resultsBody');
+  const frag = document.createDocumentFragment();
+  rows.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.dataset.idx = idx;
+    const u = row.union;
+    tr.innerHTML =
+      '<td><span class="corpus-tag">' + row.corpusLabel + '</span></td>' +
+      '<td>' + (row.cells.id || '') + '</td>' +
+      '<td>' + (u.sl_no || '') + '</td>' +
+      '<td>' + (u.source || '') + '</td>' +
+      '<td class="remarks-snippet">' + snippetHtml(row.text.remarks || '', term, mode, 180) + '</td>' +
+      '<td>' + (u.page || '') + '</td>';
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('button.idchip')) return;
+      openRowDetailModal(row);
+    });
+    frag.appendChild(tr);
+  });
+  // Replace, never append: a new search (or the next page) must not
+  // leave the previous rows behind. appendChild here kept every earlier
+  // search's rows on screen until Clear, and re-added the page on every
+  // chunk's repaint (found 2026-10-14).
+  tbody.replaceChildren(frag);
+}
+
+document.getElementById('searchBtn').addEventListener('click', runSearch);
+document.getElementById('clearBtn').addEventListener('click', () => {
+  searchGeneration++; // cancel any in-flight incremental search
+  document.getElementById('volumeInput').value = '';
+  document.getElementById('keywordInput').value = '';
+  document.getElementById('matchModeInput').value = 'partial';
+  corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = true; });
+  document.getElementById('resultsBody').innerHTML = '';
+  document.getElementById('resultSummary').textContent = '';
+  document.getElementById('pagerStatus').textContent = '';
+  currentSearchTerm = '';
+  currentSearchMode = 'partial';
+  currentTerm = '';
+  currentMode = 'partial';
+  currentResults = [];
+  currentPage = 1;
+});
+document.getElementById('volumeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+document.getElementById('keywordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+
+// -- ID chip click-to-copy -- same mechanism every per-corpus page
+// already uses (inscriptions_table_html.py's own copyIdChip), ported
+// here rather than shared, since this page has no other dependency on
+// that module. --
+(function () {
+  function flash(b, msg) {
+    const was = b.dataset.label || b.textContent;
+    b.dataset.label = was;
+    b.classList.add('copied');
+    b.textContent = msg;
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1800);
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectOnly(b) {
+    const r = document.createRange();
+    r.selectNodeContents(b);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.idchip');
+    if (!b) return;
+    e.preventDefault();
+    const id = b.dataset.id;
+    if (legacyCopy(id)) { flash(b, id); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(() => flash(b, id), () => { selectOnly(b); flash(b, 'press Ctrl+C'); });
+        return;
+      }
+    } catch (err) { /* fall through */ }
+    selectOnly(b);
+    flash(b, 'press Ctrl+C');
+  });
+})();
+
+// -- Row-detail popup -- reuses each row's OWN corpus's real COLUMNS
+// list (never the union schema), so nothing corpus-specific is ever
+// hidden here, exactly like every per-corpus page's own popup. --
+const rowDetailModal = document.getElementById('rowDetailModal');
+const rowDetailBody = document.getElementById('rowDetailBody');
+document.getElementById('rowDetailClose').addEventListener('click', closeRowDetailModal);
+rowDetailModal.addEventListener('click', (e) => { if (e.target === rowDetailModal) closeRowDetailModal(); });
+
+function appendNotAvailable(dd) {
+  const na = document.createElement('span');
+  na.className = 'row-detail-na';
+  na.textContent = 'Not available';
+  dd.appendChild(na);
+}
+
+// Sets `el.innerHTML = html`, marking every active-search-term match
+// found in `plainText` (the SAME `row.text[key]` every per-corpus page
+// already carries) -- found missing live, 2026-10-05, per the user:
+// the popup showed matched records but never highlighted WHERE the
+// term actually matched, unlike every per-corpus page's own table/
+// popup. Applies to every field here (not just Remarks), same as
+// buildRow()'s own per-column highlighting in inscriptions_table_html.py.
+function highlightInto(el, html, plainText) {
+  if (!currentSearchTerm) { el.innerHTML = html; return; }
+  const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode));
+  markRanges(el, html, ranges);
+}
+
+function openRowDetailModal(row) {
+  rowDetailBody.innerHTML = '';
+  const cfg = CORPUS_CONFIG[row.corpus];
+  const remarksCol = cfg.columns.find((c) => c.key === 'remarks');
+  const popupTabCols = cfg.columns.filter((c) => c.popup_tab);
+  const tabs = [];
+
+  const factsGrid = document.createElement('div');
+  cfg.columns.forEach((col) => {
+    if (remarksCol && col.key === remarksCol.key) return;
+    if (col.popup_tab) return;
+    const html = row.cells[col.key];
+    const field = document.createElement('div');
+    field.className = 'row-detail-field';
+    const dt = document.createElement('div');
+    dt.className = 'row-detail-label';
+    dt.textContent = (col.key === 'id' ? 'Unique ID' : col.header) + ':';
+    const dd = document.createElement('div');
+    dd.className = 'row-detail-value';
+    if (html) { highlightInto(dd, html, row.text[col.key] || ''); } else { appendNotAvailable(dd); }
+    if (col.key === 'id' && row.id) {
+      const idText = document.createElement('code');
+      idText.className = 'row-detail-id-text';
+      idText.textContent = row.id;
+      dd.appendChild(idText);
+    }
+    field.appendChild(dt);
+    field.appendChild(dd);
+    factsGrid.appendChild(field);
+  });
+  tabs.push({key: '__details__', label: 'Details', el: factsGrid});
+
+  // Remarks and every popup_tab field only become their own tab when
+  // they actually have content -- same rule as inscriptions_table_html.py's
+  // own openRowDetailModal() (2026-10-06: an empty tab a reader clicks
+  // into just to find "Not available" isn't worth a whole tab of its
+  // own, unlike Details' own per-field inline "Not available"). This
+  // page has its own separate copy of the row-detail popup, so it needs
+  // the same fix applied here too -- found missing live, 2026-10-06,
+  // per the user (sii|xi|i|10's Commentary tab showed "Not available"
+  // instead of being omitted).
+  if (remarksCol && row.cells[remarksCol.key]) {
+    const body = document.createElement('div');
+    const tmp = document.createElement('div');
+    tmp.innerHTML = row.cells[remarksCol.key];
+    const clamp = tmp.querySelector('.remarks-clamp');
+    const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
+    highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
+    tabs.push({key: remarksCol.key, label: remarksCol.header, el: body});
+  }
+
+  popupTabCols.forEach((col) => {
+    const html = row.cells[col.key];
+    if (!html) return;
+    const body = document.createElement('div');
+    highlightInto(body, html, row.text[col.key] || '');
+    tabs.push({key: col.key, label: col.header, el: body});
+  });
+
+  const tabsWrap = document.createElement('div');
+  tabsWrap.className = 'row-detail-tabs';
+  const tabBar = document.createElement('div');
+  tabBar.className = 'row-detail-tab-bar';
+  const tabContent = document.createElement('div');
+  tabContent.className = 'row-detail-tab-content';
+
+  function showTab(key) {
+    Array.from(tabBar.children).forEach((btn) => btn.classList.toggle('active', btn.dataset.key === key));
+    tabContent.innerHTML = '';
+    const tab = tabs.find((t) => t.key === key);
+    if (tab) tabContent.appendChild(tab.el);
+  }
+  tabs.forEach((tab) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'row-detail-tab-btn';
+    btn.dataset.key = tab.key;
+    btn.textContent = tab.label;
+    btn.addEventListener('click', () => showTab(tab.key));
+    tabBar.appendChild(btn);
+  });
+  tabsWrap.appendChild(tabBar);
+  tabsWrap.appendChild(tabContent);
+  rowDetailBody.appendChild(tabsWrap);
+  showTab(tabs[0].key);
+  rowDetailModal.hidden = false;
+}
+function closeRowDetailModal() {
+  rowDetailModal.hidden = true;
+  rowDetailBody.innerHTML = '';
+}
+</script>
+</body>
+</html>

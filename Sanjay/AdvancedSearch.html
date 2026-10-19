@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Advanced Search (Sanjay)</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'sanjay'});
+</script>
 <style>
   :root {
     --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
@@ -166,17 +174,14 @@
   <h1>Advanced Search</h1>
   <div class="sub-head">Cross-corpus search across SII / ARE / EpCa / TaKa / EpTe.</div>
   <div class="scope-note">
-    <strong>Sanjay-only.</strong> The public site has one corpus live (SII) today, so a
-    cross-corpus tool has nothing to offer a public reader yet &mdash; this page is not
-    linked from the public site and stays Sanjay-only until ARE and/or another corpus
-    actually launches there too. Union schema/filter design: see <code>PENDING.md</code>'s
-    "Advanced Search / Web platform" section. <strong>Not every field is filterable yet</strong>
+    <strong>Sanjay view:</strong> every loaded corpus (SII / ARE / EpCa / TaKa / EpTe); the public page searches only the corpora live there. Union schema/filter design: see <code>PENDING.md</code>'s "Advanced Search / Web platform" section. <strong>Not every field is filterable yet</strong>
     &mdash; Kind, Language, Script, State, and Dynasty/King aren't offered as filters in this
     first version (documented gaps: ARE's own Type was never computed, State isn't wired for
     EpCa/TaKa, Kind means a genuinely different thing per corpus, SII's own Language column is
     always empty). <strong>Click a row for every field</strong> (Location, Dynasty, King, Date,
     Type, and any corpus-specific field) &mdash; the results table itself only shows what's
     needed to identify and skim a row, keeping room for Remarks.
+
   </div>
 
   <div class="controls">
@@ -187,7 +192,7 @@
     <div class="ctrl-group">
       <label class="group-label" for="volumeInput">Volume / range</label>
       <input type="text" id="volumeInput" placeholder="e.g. IV or 4-10 or 1928-29">
-      <div class="hint">Roman numeral or plain number for SII/EpCa/TaKa/EpTe; a year or
+      <div class="hint">Roman numeral or plain number for a numbered series (SII); a year or
         year-range for ARE. Blank = every volume.</div>
     </div>
     <div class="ctrl-group">
@@ -236,8 +241,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area &mdash; not linked from the public site. Generated 2026-10-19 18:10
-    via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-19 18:50 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
