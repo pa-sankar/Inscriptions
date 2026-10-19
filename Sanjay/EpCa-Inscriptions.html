@@ -283,6 +283,8 @@
   col.c-source { width: 10%; }
   col.c-type { width: 6%; }
   col.c-location { width: 20%; }
+  col.c-dynasty { width: 8%; }
+  col.c-king { width: 8%; }
   col.c-date { width: 8%; }
   col.c-remarks { width: 56%; }
   col.c-page { width: 4%; }
@@ -542,7 +544,7 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> EpCa Inscriptions</h1>
   
 </div>
-<div class="generated">Generated 2026-10-18 07:21</div>
+<div class="generated">Generated 2026-10-19 19:05</div>
 
 <div class="stats">8618 records from 11 volume(s). Remarks is the English translation; a row's detail popup also carries the Roman transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place").<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Roman Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the Roman-script transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -587,8 +589,8 @@ table itself only shows a few lines of.</div>
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id" data-key="id"><col class="c-inscription_no" data-key="inscription_no"><col class="c-source" data-key="source"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-date" data-key="date"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-text_roman" data-key="text_roman"><col class="c-text_original" data-key="text_original"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="inscription_no">Inscr. #</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="date">Date</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="text_roman">Roman Transliteration</th><th data-key="text_original">Kannada Original</th></tr></thead>
+<colgroup><col class="c-id" data-key="id"><col class="c-inscription_no" data-key="inscription_no"><col class="c-source" data-key="source"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-text_roman" data-key="text_roman"><col class="c-text_original" data-key="text_original"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="inscription_no">Inscr. #</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="text_roman">Roman Transliteration</th><th data-key="text_original">Kannada Original</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -637,21 +639,21 @@ table itself only shows a few lines of.</div>
 <script>
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['type', 'volume'];
-const COLUMN_KEYS = ['id', 'inscription_no', 'source', 'type', 'location', 'date', 'remarks', 'page', 'text_roman', 'text_original'];
+const COLUMN_KEYS = ['id', 'inscription_no', 'source', 'type', 'location', 'dynasty', 'king', 'date', 'remarks', 'page', 'text_roman', 'text_original'];
 // key -> column header text, for the row-detail popup's own field
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "inscription_no": "Inscr. #", "source": "Volume", "type": "Type", "location": "Location", "date": "Date", "remarks": "Remarks", "page": "Page", "text_roman": "Roman Transliteration", "text_original": "Kannada Original"};
-const HIGHLIGHT_COLS = [4, 6, 8, 9];
-const REMARKS_COL_IDX = 6;
+const COLUMN_HEADERS = {"id": "ID", "inscription_no": "Inscr. #", "source": "Volume", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "remarks": "Remarks", "page": "Page", "text_roman": "Roman Transliteration", "text_original": "Kannada Original"};
+const HIGHLIGHT_COLS = [4, 8, 10, 11];
+const REMARKS_COL_IDX = 8;
 // Column visibility/width policy — see Column.default_visible's own
 // docstring. DEFAULT_VISIBLE_KEYS ship visible; any other column
 // (including one with no matching Filter at all) starts hidden via its
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "inscription_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 8, "inscription_no": 6, "source": 10, "type": 6, "location": 20, "date": 8, "remarks": 56, "page": 4, "text_roman": 0, "text_original": 0};
+const BASE_COL_WIDTHS = {"id": 8, "inscription_no": 6, "source": 10, "type": 6, "location": 20, "dynasty": 8, "king": 8, "date": 8, "remarks": 56, "page": 4, "text_roman": 0, "text_original": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["text_roman", "text_original"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
