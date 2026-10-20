@@ -561,7 +561,7 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-10-20 07:26</div>
+<div class="generated">Generated 2026-10-20 08:00</div>
 
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -581,8 +581,9 @@ table itself only shows a few lines of.</div>
     <option value="all">Search: all columns</option>
     <option value="col-place">Search: Place/Source only</option><option value="col-remarks">Search: Remarks only</option>
   </select>
-  <select id="matchMode" title="Whole word: 'sati' won't match inside 'utilisation'">
-    <option value="contains">Contains</option>
+  <select id="matchMode" title="Embedded: anywhere, even inside a word. Word start: 'mahavra' finds 'mahavratin' but not 'samahavraja'. Whole word: the exact word only.">
+    <option value="contains">Embedded (anywhere)</option>
+    <option value="partial">Word start</option>
     <option value="word">Whole word</option>
   </select>
   <input type="search" id="q" placeholder="type to search…">
@@ -924,9 +925,15 @@ function testFrom0(re, text) {
   return re.test(text);
 }
 
-function makeMatcher(term, whole) {
+// mode: 'contains' (embedded, anywhere), 'partial' (starts at a word
+// boundary) or 'word' (whole word): the three widths every search offers
+// (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
+function makeMatcher(term, mode) {
   const body = escapeRegex(term);
-  return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
+  const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
+                : mode === 'partial' ? '\\b(' + body + ')'
+                : '(' + body + ')';
+  return new RegExp(pattern, 'ig');
 }
 
 // Every [start, end) span of `re` within `text`, in order — the
@@ -1068,7 +1075,7 @@ function buildRow(row, term, whole, scope, catVal) {
 
 function render() {
   const term = activeTerm;
-  const whole = matchMode.value === 'word';
+  const whole = matchMode.value;   // match mode, see makeMatcher()
   const scope = searchScope.value;
   const catVal = categoryFilterEl ? categoryFilterEl.value : '';
 
@@ -1301,7 +1308,7 @@ function updateColumnVisibility() {
   // free -- see TERM_MATCHED_HIDDEN_COLS's own docstring above.
   TERM_MATCHED_HIDDEN_COLS = new Set();
   if (activeTerm && searchScope.value === 'all') {
-    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value === 'word');
+    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value);
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;

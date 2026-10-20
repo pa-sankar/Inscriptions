@@ -550,7 +550,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-19 20:37</div>
+<div class="generated">Generated 2026-10-20 08:03</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -570,8 +570,9 @@ table itself only shows a few lines of.</div>
     <option value="all">Search: all columns</option>
     <option value="col-location">Search: Location only</option><option value="col-remarks">Search: Remarks only</option>
   </select>
-  <select id="matchMode" title="Whole word: 'sati' won't match inside 'utilisation'">
-    <option value="contains">Contains</option>
+  <select id="matchMode" title="Embedded: anywhere, even inside a word. Word start: 'mahavra' finds 'mahavratin' but not 'samahavraja'. Whole word: the exact word only.">
+    <option value="contains">Embedded (anywhere)</option>
+    <option value="partial">Word start</option>
     <option value="word">Whole word</option>
   </select>
   <input type="search" id="q" placeholder="type to search…">
@@ -913,9 +914,15 @@ function testFrom0(re, text) {
   return re.test(text);
 }
 
-function makeMatcher(term, whole) {
+// mode: 'contains' (embedded, anywhere), 'partial' (starts at a word
+// boundary) or 'word' (whole word): the three widths every search offers
+// (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
+function makeMatcher(term, mode) {
   const body = escapeRegex(term);
-  return new RegExp(whole ? '\\b(' + body + ')\\b' : '(' + body + ')', 'ig');
+  const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
+                : mode === 'partial' ? '\\b(' + body + ')'
+                : '(' + body + ')';
+  return new RegExp(pattern, 'ig');
 }
 
 // Every [start, end) span of `re` within `text`, in order — the
@@ -1057,7 +1064,7 @@ function buildRow(row, term, whole, scope, catVal) {
 
 function render() {
   const term = activeTerm;
-  const whole = matchMode.value === 'word';
+  const whole = matchMode.value;   // match mode, see makeMatcher()
   const scope = searchScope.value;
   const catVal = categoryFilterEl ? categoryFilterEl.value : '';
 
@@ -1290,7 +1297,7 @@ function updateColumnVisibility() {
   // free -- see TERM_MATCHED_HIDDEN_COLS's own docstring above.
   TERM_MATCHED_HIDDEN_COLS = new Set();
   if (activeTerm && searchScope.value === 'all') {
-    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value === 'word');
+    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value);
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
