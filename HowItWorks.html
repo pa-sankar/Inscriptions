@@ -107,6 +107,10 @@
   details.acc > summary h2 { margin: 1rem 0; }
   details.acc > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .acc-body { padding-bottom: 0.8rem; }
+  .ai-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+    padding: 0.05rem 0.45rem; border-radius: 999px; vertical-align: middle;
+    background: var(--accent-copper); color: #fff; text-transform: none; }
+  .ai-intro { background: var(--surface-2); border-radius: 6px; padding: 0.7rem 1rem; }
 </style>
 </head>
 <body>
@@ -117,8 +121,43 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </h1>
 
+<p class="ai-intro">This site is built with the help of AI. Sections marked
+<span class="ai-badge">AI</span> describe work an AI model did; everything
+else is rules written for these books. Wherever AI was used, its output is
+checked before it reaches you, and values it derived are shown as
+<span class="v-derived">derived</span>, never as printed.</p>
+
+<details class="acc" name="hiw" id="where-ai-is-used">
+<summary><h2>Where AI is used, and why <span class="ai-badge">AI</span></h2></summary>
+<div class="acc-body">
+<p><strong>Reading the scans.</strong> Every page was transcribed by an AI
+vision model. Conventional OCR software is trained mostly on modern print:
+on these century-old pages it drops or garbles the diacritics (ā, ṛ, ḻ, ñ)
+that carry the real meaning of a name, loses its place in tables printed
+sideways, and can't tell a footnote from the text above it. A vision model
+reads the page much as a person does: it keeps the diacritics, follows the
+table's columns, and marks footnotes and untranscribed native-script
+passages instead of guessing at them.</p>
+<p><strong>Reading dynasty, king and date from the Remarks.</strong> Where a
+record's own columns are empty but its prose says "an inscription of the
+reign of Rājarāja I", an AI model reads that prose. A keyword search can't
+do this: the same fact is phrased a hundred ways, and a name in the text
+is not always the ruler of the record. The model must quote the exact words
+it relied on; a value whose quote isn't in that record's text is thrown
+away, so the site never shows a guess. See
+<a href="#dynasty-king-and-date-read-from-the-remarks">that section</a>.</p>
+<p><strong>Checking the hard cases.</strong> "Same taluk", "Do." and
+"Ibid." are resolved by rules. Where the rules can't decide, or a reader
+reports a problem, the printed page is read again by an AI model looking at
+the scan itself, and the correction is recorded with the page it came
+from.</p>
+<p><strong>What AI is not used for:</strong> no value is invented to fill
+a gap. If the book doesn't state it, the field stays empty.</p>
+</div>
+</details>
+
 <details class="acc" name="hiw" id="reading-the-original-scans">
-<summary><h2>Reading the original scans</h2></summary>
+<summary><h2>Reading the original scans <span class="ai-badge">AI</span></h2></summary>
 <div class="acc-body">
 <p>The source is a scanned book, decades old, in a mix of English
 apparatus and vernacular (Tamil, Kannada, Telugu, Sanskrit) script, often
@@ -269,7 +308,7 @@ nothing to resolve to, and is left as printed.</p>
 </details>
 
 <details class="acc" name="hiw" id="dynasty-king-and-date-read-from-the-remarks">
-<summary><h2>Dynasty, king and date read from the Remarks</h2></summary>
+<summary><h2>Dynasty, king and date read from the Remarks <span class="ai-badge">AI</span></h2></summary>
 <div class="acc-body">
 <p>Many records leave the Dynasty, King or Date column empty even though
 the Remarks text names them: <em>"This is an inscription of the reign of
@@ -344,10 +383,13 @@ selectively, not for the whole corpus.</p>
     });
   });
   // a link to #section opens that section
-  if (location.hash) {
-    var t = document.getElementById(location.hash.slice(1));
-    if (t && t.tagName === 'DETAILS') t.open = true;
+  function openFromHash() {
+    var t = location.hash && document.getElementById(location.hash.slice(1));
+    if (t && t.tagName === 'DETAILS') { t.open = true; t.scrollIntoView(); }
   }
+  openFromHash();
+  // in-page links between sections ("see that section")
+  window.addEventListener('hashchange', openFromHash);
 </script>
 </body>
 </html>
