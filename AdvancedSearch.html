@@ -80,6 +80,17 @@
   }
   button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
   .hint { font-size: 11.5px; color: var(--text-dim); max-width: 16rem; }
+  .facet-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; margin: 0 0 8px; }
+  .facet-chips[hidden] { display: none; }
+  .facet-chip {
+    border: 1px solid var(--accent); background: var(--surface); color: var(--accent-strong);
+    border-radius: 999px; padding: 2px 10px; cursor: pointer; font: inherit; font-size: 12.5px;
+  }
+  .facet-chip:hover { background: var(--accent); color: #fff; }
+  select#languageInput {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 8px; color: var(--text); font: inherit; font-size: 13.5px;
+  }
   .result-summary { font-size: 13px; color: var(--text-dim); margin: 6px 0 10px; }
   .pager {
     display: flex; align-items: center; gap: 0.8rem; margin: 10px 0; font-size: 13px;
@@ -177,7 +188,7 @@
   <h1>Advanced Search</h1>
   <div class="sub-head">Cross-corpus search across SII / ARE.</div>
   <div class="scope-note">
-    One search across every corpus on this site: South Indian Inscriptions and the Annual Reports on Indian Epigraphy. Narrow by corpus and volume (an SII volume such as IV or 4-10, or an ARE report year such as 1928-29), then search the text. <strong>Click a row for every field</strong> (Location, Dynasty, King, Date and the rest); the table itself keeps to what identifies a record, leaving room for Remarks. Filters by dynasty, language and state are not offered yet.
+    One search across every corpus on this site: South Indian Inscriptions and the Annual Reports on Indian Epigraphy. Narrow by corpus, volume (an SII volume such as IV or 4-10, or an ARE report year such as 1928-29) and language, then search the text. <strong>Click a row for every field</strong> (Location, Dynasty, King, Date and the rest); the table itself keeps to what identifies a record, leaving room for Remarks.
   </div>
 
   <div class="controls">
@@ -207,6 +218,11 @@
         case-insensitive and diacritic-folded; also matches a record's own unique ID.</div>
     </div>
     <div class="ctrl-group">
+      <label class="group-label" for="languageInput">Language</label>
+      <select id="languageInput"><option value="">Any language</option></select>
+      <div class="hint">The first language the record names.</div>
+    </div>
+    <div class="ctrl-group">
       <button type="button" id="searchBtn">Search</button>
     </div>
     <div class="ctrl-group">
@@ -214,6 +230,7 @@
     </div>
   </div>
 
+  <div class="facet-chips" id="facetChips" hidden></div>
   <div class="result-summary" id="resultSummary"></div>
   <div class="table-scroll">
     <table>
@@ -237,7 +254,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-10-20 12:55.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-10-21 09:06.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -248,7 +265,11 @@
 </div>
 
 <script>
-const CORPUS_CONFIG = {"sii": {"label": "SII", "dataUrl": "data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "dataUrl": "data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}};
+const CORPUS_CONFIG = {"sii": {"label": "SII", "dataUrl": "data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}, "facetLabels": ["SII"]}, "are": {"label": "ARE", "dataUrl": "data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}, "facetLabels": ["ARE"]}};
+// Shared facet files, one set per corpus (only the searched corpora are
+// fetched); the Sanjay page adds a "type"-only overlay of its own.
+const FACETS_BASE = "data/facets/";
+const FACETS_OVERLAY = null;
 const CANONICAL_FIELDS = ["sl_no", "source", "kind", "type", "location", "dynasty", "king", "date", "remarks", "page"];
 
 // -- Roman numeral <-> int, and the free-text volume/range parser --
@@ -535,6 +556,110 @@ function pageSizeValue() {
 // hand first, defeating the point of painting incrementally).
 let searchGeneration = 0;
 
+// -- Facet filters: the per-record buckets At a Glance counts (century,
+// state, district, dynasty, language, material, type), from the facet
+// files its build writes next to each data chunk (same row order), so a
+// clicked bar's count is exactly what comes back here. A chart click
+// arrives as ?corpus=SII,ARE&century=11; Language is also a dropdown.
+// Corpus labels are At a Glance's (TaKa/DiKa/IPS are three series inside
+// the one TaKa data set). --
+const FACET_NAMES = {corpus: 'Corpus', century: 'Century', state: 'State', district: 'District',
+  dynasty: 'Dynasty', language: 'Language', material: 'Material', type: 'Type'};
+const FACET_DIMS = Object.keys(FACET_NAMES);
+let urlFacets = {}; // dim -> value (corpus -> array of labels), from the link
+function facetValueLabel(dim, v) {
+  if (dim === 'corpus') return v.join(', ');
+  if (dim === 'century') {
+    if (v === 'undated') return 'Undated';
+    const n = +v, s = (n % 100 >= 10 && n % 100 <= 20) ? 'th' : ({1:'st',2:'nd',3:'rd'}[n % 10] || 'th');
+    return n + s + ' century';
+  }
+  return ({unknown: 'Not recorded', other: 'Other', 'not classified': 'Not classified yet',
+           unclassified: 'Other records'})[v] || v;
+}
+function activeFacets() {
+  const out = Object.assign({}, urlFacets);
+  const lang = document.getElementById('languageInput').value;
+  if (lang) out.language = lang; else delete out.language;
+  return out;
+}
+function paintFacetChips() {
+  const box = document.getElementById('facetChips');
+  const f = Object.assign({}, urlFacets); delete f.language; // the dropdown shows that one
+  const dims = Object.keys(f);
+  box.hidden = !dims.length;
+  box.innerHTML = dims.length ? '<span class="hint">From At a Glance:</span>' + dims.map((d) =>
+    '<button type="button" class="facet-chip" data-dim="' + d + '" title="Remove this filter">' +
+    escapeHtml(FACET_NAMES[d] + ': ' + facetValueLabel(d, f[d])) + ' ×</button>').join('') : '';
+}
+document.getElementById('facetChips').addEventListener('click', (e) => {
+  const b = e.target.closest('.facet-chip'); if (!b) return;
+  delete urlFacets[b.dataset.dim]; paintFacetChips(); runSearch();
+});
+document.getElementById('languageInput').addEventListener('change', () => {
+  delete urlFacets.language; runSearch();
+});
+// Keeps only the rows whose buckets match every active facet; a chunk
+// with no facet file (or lacking a dim) matches nothing rather than all.
+function filterByFacets(rows, facetFile, facets) {
+  if (!facetFile) return [];
+  if (Object.keys(facets).some((d) => !facetFile.dims.includes(d))) return [];
+  const want = facetFile.dims.map((d, i) => {
+    if (!(d in facets)) return null;
+    const vals = d === 'corpus' ? facets[d] : [facets[d]];
+    return new Set(vals.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0));
+  });
+  return rows.filter((_, ri) => {
+    const fr = facetFile.rows[ri];
+    return fr && want.every((s, i) => s === null || s.has(fr[i]));
+  });
+}
+// One chunk's facets: the shared file, plus the overlay's dims (Sanjay)
+// joined on as extra columns. null when the shared file is missing.
+async function loadFacetFile(corpus, file) {
+  const shared = await fetchJson(FACETS_BASE + corpus + '/' + file).catch(() => null);
+  if (!shared || !FACETS_OVERLAY) return shared;
+  const extra = await fetchJson(FACETS_OVERLAY + corpus + '/' + file).catch(() => null);
+  if (!extra || extra.rows.length !== shared.rows.length) return shared;
+  return {dims: shared.dims.concat(extra.dims), vocab: shared.vocab.concat(extra.vocab),
+          rows: shared.rows.map((r, i) => r.concat(extra.rows[i]))};
+}
+// Language dropdown: every language in this page's own corpora, by count.
+async function loadFacetIndex() {
+  const counts = {};
+  await Promise.all(Object.keys(CORPUS_CONFIG).map((c) =>
+    fetchJson(FACETS_BASE + c + '/index.json').then((idx) => {
+      Object.entries((idx.counts || {}).language || {}).forEach(([k, n]) => { counts[k] = (counts[k] || 0) + n; });
+    }).catch(() => {})));
+  const sel = document.getElementById('languageInput');
+  Object.keys(counts).filter((v) => v !== 'unknown' && v !== 'Other')
+    .sort((a, b) => counts[b] - counts[a])
+    .forEach((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+}
+function applyUrl() {
+  const p = new URLSearchParams(location.search);
+  if (![...p.keys()].length) return false;
+  if (p.get('corpus')) {
+    const labels = p.get('corpus').split(',').filter(Boolean);
+    corpusChecksEl.querySelectorAll('input').forEach((cb) => {
+      cb.checked = CORPUS_CONFIG[cb.value].facetLabels.some((l) => labels.includes(l));
+    });
+    // Only needed as a facet when it narrows inside a data set (DiKa alone).
+    const partial = Object.values(CORPUS_CONFIG).some((c) =>
+      c.facetLabels.some((l) => labels.includes(l)) && !c.facetLabels.every((l) => labels.includes(l)));
+    if (partial) urlFacets.corpus = labels;
+  }
+  FACET_DIMS.forEach((d) => { if (d !== 'corpus' && p.get(d) !== null) urlFacets[d] = p.get(d); });
+  if (urlFacets.language) {
+    const sel = document.getElementById('languageInput');
+    sel.value = urlFacets.language;
+    if (sel.value === urlFacets.language) delete urlFacets.language; // else keep it as a chip ("Not recorded")
+  }
+  if (p.get('q')) document.getElementById('keywordInput').value = p.get('q');
+  paintFacetChips();
+  return true;
+}
+
 async function runSearch() {
   const corpora = checkedCorpora();
   const summary = document.getElementById('resultSummary');
@@ -549,6 +674,8 @@ async function runSearch() {
   const range = parseVolumeRange(document.getElementById('volumeInput').value);
   const keyword = document.getElementById('keywordInput').value.trim();
   const mode = document.getElementById('matchModeInput').value;
+  const facets = activeFacets();
+  const useFacets = Object.keys(facets).length > 0;
   currentSearchTerm = keyword;
   currentSearchMode = mode;
   currentTerm = keyword;
@@ -582,11 +709,13 @@ async function runSearch() {
     const chunkJobs = [];
     perCorpus.forEach(({ corpus, cfg, dataDir, wanted }) => {
       wanted.forEach((entry) => {
+        const facetJob = useFacets ? loadFacetFile(corpus, entry.file) : Promise.resolve(null);
         chunkJobs.push(
-          fetchJson(dataDir + entry.file)
-            .then((chunkRows) => {
+          Promise.all([fetchJson(dataDir + entry.file), facetJob])
+            .then(([chunkRows, facetFile]) => {
               if (myGen !== searchGeneration) return;
-              const rows = chunkRows.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
+              const kept = useFacets ? filterByFacets(chunkRows, facetFile, facets) : chunkRows;
+              const rows = kept.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
               const matched = keyword ? rows.filter((r) => rowMatchesKeyword(r, keyword, mode)) : rows;
               if (matched.length) {
                 currentResults = currentResults.concat(matched);
@@ -669,6 +798,10 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
   document.getElementById('matchModeInput').value = 'partial';
+  document.getElementById('languageInput').value = '';
+  urlFacets = {};
+  paintFacetChips();
+  history.replaceState(null, '', location.pathname);
   corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = true; });
   document.getElementById('resultsBody').innerHTML = '';
   document.getElementById('resultSummary').textContent = '';
@@ -851,6 +984,8 @@ function closeRowDetailModal() {
   rowDetailModal.hidden = true;
   rowDetailBody.innerHTML = '';
 }
+
+loadFacetIndex().then(() => { if (applyUrl()) runSearch(); });
 </script>
 </body>
 </html>

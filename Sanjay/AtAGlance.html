@@ -65,6 +65,7 @@
   .bar-track { fill: var(--track); }
   rect.bar { fill: var(--bar); } rect.bar.muted { fill: var(--bar-muted); }
   g.hit:hover rect.bar { fill: var(--accent-strong); }
+  [data-href] { cursor: pointer; } table.heat td[data-href]:hover { outline: 2px solid var(--accent-strong); }
   table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; }
   table.data td, table.data th { border-bottom: 1px solid var(--border); padding: 3px 6px; text-align: left; }
   table.data td.n { text-align: right; font-variant-numeric: tabular-nums; }
@@ -97,7 +98,7 @@
     <li><b>Copper plate:</b> ARE's Copper Plate section, or "copper plate" in the place or the start of Remarks. <b>Hero-stone / Sati-stone:</b> the hero-stone word-list classification shown in each corpus page's Type column (Sanjay pages for SII and ARE).</li>
     <li>These are counts of what survives and was published, not of what was carved: a district looks dense where a survey was thorough.</li>
   </ul>
-  <footer>Sanjay review area. Generated 2026-10-21 08:59 via <code>scripts/build_at_a_glance.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-21 09:05 via <code>scripts/build_at_a_glance.py</code>.</footer>
 </div>
 <div id="tip" role="tooltip"></div>
 <script>
@@ -120,7 +121,7 @@ const CHARTS = [
   {id: 'century', title: 'By century', wide: true,
    note: () => `Records with a convertible date. ${fmt(sum('century').get('undated') || 0)} undated records are not drawn (they are in the table). Before the 7th century, read a record before citing it: some years are misreads.`,
    rows: () => { const m = sum('century'); const keys = [...m.keys()].filter(k => k !== 'undated').sort((a, b) => a - b);
-     const r = keys.map(k => ({label: ord(k), value: m.get(k)})); if (m.get('undated')) r.push({label: 'Undated', value: m.get('undated'), muted: true, tableOnly: true}); return r; }},
+     const r = keys.map(k => ({key: k, label: ord(k), value: m.get(k)})); if (m.get('undated')) r.push({key: 'undated', label: 'Undated', value: m.get('undated'), muted: true, tableOnly: true}); return r; }},
   {id: 'state', title: 'By state', note: 'Modern state; Unknown where the page does not give one.',
    rows: () => topRows(sum('state'), 14, {unknown: 'Unknown'})},
   {id: 'district', title: 'Top 20 districts', note: 'District as printed; records without one are not shown.',
@@ -138,12 +139,20 @@ function topRows(m, n, rename, drop) {
   drop = drop || [];
   const muted = new Set(['unknown', 'not classified', 'unclassified']);
   const rows = [...m.entries()].filter(([k]) => !drop.includes(k))
-    .map(([k, v]) => ({label: rename[k] || k, value: v, muted: muted.has(k)}));
+    .map(([k, v]) => ({key: k, label: rename[k] || k, value: v, muted: muted.has(k)}));
   const main = rows.filter(r => !r.muted).sort((a, b) => b.value - a.value).slice(0, n);
   return main.concat(rows.filter(r => r.muted));
 }
 
-function barChart(rows, title, wide) {
+// A bar or heat cell -> Advanced Search, filtered to exactly the records it
+// counts (same buckets, read from the facet files this page's build writes).
+function searchUrl(dim, key, corpora) {
+  const p = new URLSearchParams();
+  p.set('corpus', (corpora || [...on]).join(','));
+  if (dim) p.set(dim, key);
+  return 'AdvancedSearch.html?' + p.toString();
+}
+function barChart(rows, title, wide, dim) {
   rows = rows.filter(r => r.value > 0 && !r.tableOnly);
   if (!rows.length) return '<p class="note">Nothing in the selected corpora.</p>';
   const W = wide ? 1280 : 560, lh = 24, lw = wide ? 90 : 150, H = rows.length * lh + 4, track = W - lw - 70;
@@ -151,17 +160,17 @@ function barChart(rows, title, wide) {
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">` + rows.map((r, i) => {
     const y = i * lh + 2, bw = Math.max(2, track * r.value / max);
     const tip = `${r.label}: ${fmt(r.value)} (${(100 * r.value / all).toFixed(1)}%)`;
-    return `<g class="hit" data-tip="${esc(tip)}"><rect x="0" y="${y}" width="${W}" height="${lh}" fill="transparent"/>` +
+    return `<g class="hit" data-href="${esc(searchUrl(dim, r.key))}" data-tip="${esc(tip + ' — click to list them')}"><rect x="0" y="${y}" width="${W}" height="${lh}" fill="transparent"/>` +
       `<text class="bar-label" x="${lw - 8}" y="${y + 15}" text-anchor="end">${esc(r.label.length > 22 ? r.label.slice(0, 21) + '…' : r.label)}</text>` +
       `<rect class="bar-track" x="${lw}" y="${y + 5}" width="${track}" height="12" rx="4"/>` +
       `<rect class="bar${r.muted ? ' muted' : ''}" x="${lw}" y="${y + 5}" width="${bw.toFixed(1)}" height="12" rx="4"/>` +
       `<text class="bar-val" x="${(lw + bw + 6).toFixed(1)}" y="${y + 15}">${fmt(r.value)}</text></g>`;
   }).join('') + '</svg>';
 }
-function table(rows) {
+function table(rows, dim) {
   const all = rows.reduce((a, r) => a + r.value, 0);
   return '<table class="data"><tr><th>Value</th><th>Records</th><th>%</th></tr>' + rows.map(r =>
-    `<tr><td>${esc(r.label)}</td><td class="n">${fmt(r.value)}</td><td class="n">${(100 * r.value / all).toFixed(1)}</td></tr>`).join('') + '</table>';
+    `<tr><td><a href="${esc(searchUrl(dim, r.key))}">${esc(r.label)}</a></td><td class="n">${fmt(r.value)}</td><td class="n">${(100 * r.value / all).toFixed(1)}</td></tr>`).join('') + '</table>';
 }
 const asTable = new Set();
 function heatGrid() {
@@ -174,8 +183,8 @@ function heatGrid() {
     const d = DATA.dims.century[c] || {};
     h += `<tr style="opacity:${on.has(c) ? 1 : .35}"><th style="text-align:right">${esc(c)}</th>` + cents.map(k => {
       const v = d[k] || 0, dark = v && Math.sqrt(v / max) > .72;
-      return `<td data-tip="${esc(c)}, ${ord(k)}: ${fmt(v)}" style="background:${mix(v)};color:${dark ? 'var(--bg)' : 'var(--text-dim)'}">${v ? fmt(v) : ''}</td>`;
-    }).join('') + `<td data-tip="${esc(c)}, undated: ${fmt(d.undated || 0)}" style="color:var(--text-dim)">${fmt(d.undated || 0)}</td></tr>`;
+      return `<td${v ? ` data-href="${esc(searchUrl('century', String(k), [c]))}"` : ''} data-tip="${esc(c)}, ${ord(k)}: ${fmt(v)}" style="background:${mix(v)};color:${dark ? 'var(--bg)' : 'var(--text-dim)'}">${v ? fmt(v) : ''}</td>`;
+    }).join('') + `<td data-href="${esc(searchUrl('century', 'undated', [c]))}" data-tip="${esc(c)}, undated: ${fmt(d.undated || 0)}" style="color:var(--text-dim)">${fmt(d.undated || 0)}</td></tr>`;
   }
   return h + '</table></div>';
 }
@@ -194,7 +203,7 @@ function render() {
     const rows = c.rows();
     return `<figure class="chart${c.wide ? ' wide' : ''}"><div class="fhead"><h3>${esc(c.title)}</h3>` +
       `<button class="tbtn" data-t="${c.id}">${asTable.has(c.id) ? 'Chart' : 'Table'}</button></div>` +
-      `<p class="note">${esc(typeof c.note === 'function' ? c.note() : c.note)}</p>${asTable.has(c.id) ? table(rows) : barChart(rows, c.title, c.wide && innerWidth > 900)}</figure>`;
+      `<p class="note">${esc(typeof c.note === 'function' ? c.note() : c.note)}</p>${asTable.has(c.id) ? table(rows, c.id) : barChart(rows, c.title, c.wide && innerWidth > 900, c.id)}</figure>`;
   }).join('') + `<figure class="chart wide"><div class="fhead"><h3>Corpus × century</h3></div>` +
     `<p class="note">Which centuries each corpus covers (all corpora shown; switched-off ones are faded).</p>${heatGrid()}</figure>`;
 }
@@ -211,6 +220,8 @@ chips.addEventListener('click', e => {
   render();
 });
 document.getElementById('charts').addEventListener('click', e => {
+  const h = e.target.closest('[data-href]');
+  if (h && !e.target.closest('a')) { location.href = h.dataset.href; return; }
   const b = e.target.closest('.tbtn'); if (!b) return;
   asTable.has(b.dataset.t) ? asTable.delete(b.dataset.t) : asTable.add(b.dataset.t); render();
 });
