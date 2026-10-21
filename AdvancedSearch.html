@@ -186,7 +186,7 @@
 <div class="wrap">
   <div class="home-link"><a href="index.html">&larr; Home</a></div>
   <h1>Advanced Search</h1>
-  <div class="sub-head">Cross-corpus search across SII / ARE.</div>
+  <div class="sub-head">Cross-corpus search across South Indian Inscriptions, Annual Reports on Indian Epigraphy.</div>
   <div class="scope-note">
     One search across every corpus on this site: South Indian Inscriptions and the Annual Reports on Indian Epigraphy. Narrow by corpus, volume (an SII volume such as IV or 4-10, or an ARE report year such as 1928-29) and language, then search the text. <strong>Click a row for every field</strong> (Location, Dynasty, King, Date and the rest); the table itself keeps to what identifies a record, leaving room for Remarks.
   </div>
@@ -254,7 +254,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-10-21 09:06.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-10-21 09:23.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -265,7 +265,7 @@
 </div>
 
 <script>
-const CORPUS_CONFIG = {"sii": {"label": "SII", "dataUrl": "data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}, "facetLabels": ["SII"]}, "are": {"label": "ARE", "dataUrl": "data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}, "facetLabels": ["ARE"]}};
+const CORPUS_CONFIG = {"sii": {"label": "SII", "fullName": "South Indian Inscriptions", "dataUrl": "data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "fullName": "Annual Reports on Indian Epigraphy", "dataUrl": "data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}};
 // Shared facet files, one set per corpus (only the searched corpora are
 // fetched); the Sanjay page adds a "type"-only overlay of its own.
 const FACETS_BASE = "data/facets/";
@@ -351,7 +351,7 @@ Object.keys(CORPUS_CONFIG).forEach((key) => {
   cb.checked = true;
   cb.id = 'corpus-' + key;
   label.appendChild(cb);
-  label.appendChild(document.createTextNode(CORPUS_CONFIG[key].label));
+  label.appendChild(document.createTextNode(CORPUS_CONFIG[key].fullName));
   corpusChecksEl.appendChild(label);
 });
 
@@ -560,15 +560,12 @@ let searchGeneration = 0;
 // state, district, dynasty, language, material, type), from the facet
 // files its build writes next to each data chunk (same row order), so a
 // clicked bar's count is exactly what comes back here. A chart click
-// arrives as ?corpus=SII,ARE&century=11; Language is also a dropdown.
-// Corpus labels are At a Glance's (TaKa/DiKa/IPS are three series inside
-// the one TaKa data set). --
-const FACET_NAMES = {corpus: 'Corpus', century: 'Century', state: 'State', district: 'District',
+// arrives as ?corpus=sii,are&century=11; Language is also a dropdown. --
+const FACET_NAMES = {century: 'Century', state: 'State', district: 'District',
   dynasty: 'Dynasty', language: 'Language', material: 'Material', type: 'Type'};
 const FACET_DIMS = Object.keys(FACET_NAMES);
-let urlFacets = {}; // dim -> value (corpus -> array of labels), from the link
+let urlFacets = {}; // dim -> value, from the link
 function facetValueLabel(dim, v) {
-  if (dim === 'corpus') return v.join(', ');
   if (dim === 'century') {
     if (v === 'undated') return 'Undated';
     const n = +v, s = (n % 100 >= 10 && n % 100 <= 20) ? 'th' : ({1:'st',2:'nd',3:'rd'}[n % 10] || 'th');
@@ -606,8 +603,7 @@ function filterByFacets(rows, facetFile, facets) {
   if (Object.keys(facets).some((d) => !facetFile.dims.includes(d))) return [];
   const want = facetFile.dims.map((d, i) => {
     if (!(d in facets)) return null;
-    const vals = d === 'corpus' ? facets[d] : [facets[d]];
-    return new Set(vals.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0));
+    return new Set([facetFile.vocab[i].indexOf(facets[d])].filter((j) => j >= 0));
   });
   return rows.filter((_, ri) => {
     const fr = facetFile.rows[ri];
@@ -639,17 +635,11 @@ async function loadFacetIndex() {
 function applyUrl() {
   const p = new URLSearchParams(location.search);
   if (![...p.keys()].length) return false;
-  if (p.get('corpus')) {
-    const labels = p.get('corpus').split(',').filter(Boolean);
-    corpusChecksEl.querySelectorAll('input').forEach((cb) => {
-      cb.checked = CORPUS_CONFIG[cb.value].facetLabels.some((l) => labels.includes(l));
-    });
-    // Only needed as a facet when it narrows inside a data set (DiKa alone).
-    const partial = Object.values(CORPUS_CONFIG).some((c) =>
-      c.facetLabels.some((l) => labels.includes(l)) && !c.facetLabels.every((l) => labels.includes(l)));
-    if (partial) urlFacets.corpus = labels;
+  if (p.get('corpus')) {  // data keys (sii,epca,taka ...), stable whatever the display names
+    const keys = p.get('corpus').split(',').filter(Boolean);
+    corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = keys.includes(cb.value); });
   }
-  FACET_DIMS.forEach((d) => { if (d !== 'corpus' && p.get(d) !== null) urlFacets[d] = p.get(d); });
+  FACET_DIMS.forEach((d) => { if (p.get(d) !== null) urlFacets[d] = p.get(d); });
   if (urlFacets.language) {
     const sel = document.getElementById('languageInput');
     sel.value = urlFacets.language;
@@ -773,7 +763,7 @@ function renderResults(rows, term, mode) {
     tr.dataset.idx = idx;
     const u = row.union;
     tr.innerHTML =
-      '<td><span class="corpus-tag">' + row.corpusLabel + '</span></td>' +
+      '<td><span class="corpus-tag" title="' + escapeHtml(CORPUS_CONFIG[row.corpus].fullName) + '">' + row.corpusLabel + '</span></td>' +
       '<td>' + (row.cells.id || '') + '</td>' +
       '<td>' + (u.sl_no || '') + '</td>' +
       '<td>' + (u.source || '') + '</td>' +
