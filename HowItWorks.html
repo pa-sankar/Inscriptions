@@ -149,6 +149,13 @@ is not always the ruler of the record. The model must quote the exact words
 it relied on; a value whose quote isn't in that record's text is thrown
 away, so the site never shows a guess. See
 <a href="#dynasty-king-and-date-read-from-the-remarks">that section</a>.</p>
+<p><strong>Naming the language of a record.</strong> Where the book
+doesn't say what language an inscription is in, an AI model reads the
+record's own original text and names its language(s), quoting the passage
+it relied on. A word list can't do this: Kannada, Telugu and Tamil records
+are full of Sanskrit words and names, and only a whole Sanskrit verse makes
+a record partly Sanskrit. See
+<a href="#language-read-from-the-original-text">that section</a>.</p>
 <p><strong>Writing the programs.</strong> The rules that resolve "same
 taluk", "Do." and "Ibid.", follow district headings down a table and
 check every record were written with an AI coding assistant. That let one
@@ -345,6 +352,48 @@ rather than printed in its column.</p>
   and the Śrīmukha year current</span> <span class="label">(this volume prints
   the king and date inside the record's text, not in columns of their
   own)</span></div>
+</div>
+</div>
+</details>
+
+<details class="acc" name="hiw" id="language-read-from-the-original-text">
+<summary><h2>Language read from the original text <span class="ai-badge">AI</span></h2></summary>
+<div class="acc-body">
+<p>Some volumes state each record's language; most don't. Where the book
+says it (<em>"in Kannada"</em>, <em>"Sanskrit and Tamil"</em>), that is what
+the site shows. Where it doesn't, each record's own original text, in its
+native script or the editor's transliteration, was given to an AI model,
+one record at a time. The model names every language that makes up a real
+part of the text, the main one first, and quotes the passage it relied on.
+For South Indian Inscriptions, whose stored text leaves out native-script
+passages, the model reads them from the scanned page image instead.</p>
+<p>Every answer is checked before it reaches the site:</p>
+<ul>
+<li>The quoted passage must really be in that record's text. If it isn't,
+the answer is thrown away and the column stays empty.</li>
+<li>Sanskrit counts only for a whole verse or sentence in Sanskrit, such as
+an invocation, a eulogy (<em>praśasti</em>) or the curse on anyone who
+takes back the gift. Sanskrit words, names and titles inside a Kannada,
+Telugu or Tamil record don't count.</li>
+<li>The AI still tags some records as partly Sanskrit just because they
+open with a standard formula: <em>svasti śrī</em>, <em>śubham astu</em>, a
+Śaka-era date. A fixed rule, not AI, removes that Sanskrit tag again. The rule
+keeps well-known verses that often follow such an opening.</li>
+<li>Before a corpus's language column goes public, a sample of its
+"Sanskrit" answers is read by hand against the full text. If too many
+are wrong, the instructions are tightened and the corpus is run again.</li>
+</ul>
+<p>On the table these values appear as <span class="v-derived">derived</span>,
+and hovering one shows the passage the language was read from. A record
+with too little surviving text to judge is left empty.</p>
+
+<div class="example">
+  <div class="label">A real example (Epigraphia Carnatica, Vol. III)</div>
+  <div class="row"><strong>No. 358</strong> &mdash; a Kannada record that ends
+  with the Sanskrit curse verse: <em>"svadattaṃ paradattaṃ vā yo harēti
+  vasundharām&hellip;"</em></div>
+  <div class="row">&rarr; Language: <span class="v-derived">Kannada and
+  Sanskrit</span> <span class="label">(evidence: the quoted verse)</span></div>
 </div>
 </div>
 </details>
