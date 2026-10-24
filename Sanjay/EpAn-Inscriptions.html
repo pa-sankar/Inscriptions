@@ -548,7 +548,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-21 09:22</div>
+<div class="generated">Generated 2026-10-24 07:17</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -1299,6 +1299,10 @@ function updateColumnVisibility() {
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
+      // A popup_tab field is never a table column (Column.popup_tab's
+      // own docstring) -- revealing it squeezed a zero-width column of
+      // Kannada text onto the page, headers stacked, 2026-10-24.
+      if (POPUP_TAB_KEYS.includes(key)) return;
       if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
         TERM_MATCHED_HIDDEN_COLS.add(key);
       }

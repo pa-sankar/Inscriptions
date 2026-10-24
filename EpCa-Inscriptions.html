@@ -561,7 +561,7 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
 
-<div class="generated">Generated 2026-10-23 17:33</div>
+<div class="generated">Generated 2026-10-24 07:17</div>
 
 <div class="stats">11423 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the Roman transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Roman Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the Roman-script transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1312,6 +1312,10 @@ function updateColumnVisibility() {
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
+      // A popup_tab field is never a table column (Column.popup_tab's
+      // own docstring) -- revealing it squeezed a zero-width column of
+      // Kannada text onto the page, headers stacked, 2026-10-24.
+      if (POPUP_TAB_KEYS.includes(key)) return;
       if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
         TERM_MATCHED_HIDDEN_COLS.add(key);
       }

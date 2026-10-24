@@ -552,7 +552,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-21 12:26</div>
+<div class="generated">Generated 2026-10-24 07:17</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -1303,6 +1303,10 @@ function updateColumnVisibility() {
     HIGHLIGHT_COLS.forEach((idx) => {
       const key = COLUMN_KEYS[idx];
       if (DEFAULT_VISIBLE_KEYS.has(key)) return;
+      // A popup_tab field is never a table column (Column.popup_tab's
+      // own docstring) -- revealing it squeezed a zero-width column of
+      // Kannada text onto the page, headers stacked, 2026-10-24.
+      if (POPUP_TAB_KEYS.includes(key)) return;
       if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
         TERM_MATCHED_HIDDEN_COLS.add(key);
       }
