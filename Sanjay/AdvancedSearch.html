@@ -253,7 +253,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-24 11:18 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-24 11:49 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -619,7 +619,8 @@ async function loadFacetFile(corpus, file) {
   return {dims: shared.dims.concat(extra.dims), vocab: shared.vocab.concat(extra.vocab),
           rows: shared.rows.map((r, i) => r.concat(extra.rows[i]))};
 }
-// Language dropdown: every language in this page's own corpora, by count.
+// Language dropdown: every language in this page's own corpora,
+// alphabetical like every other dropdown (2026-10-24, per the user).
 async function loadFacetIndex() {
   const counts = {};
   await Promise.all(Object.keys(CORPUS_CONFIG).map((c) =>
@@ -628,7 +629,7 @@ async function loadFacetIndex() {
     }).catch(() => {})));
   const sel = document.getElementById('languageInput');
   Object.keys(counts).filter((v) => v !== 'unknown' && v !== 'Other')
-    .sort((a, b) => counts[b] - counts[a])
+    .sort((a, b) => a.localeCompare(b))
     .forEach((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
 }
 function applyUrl() {
