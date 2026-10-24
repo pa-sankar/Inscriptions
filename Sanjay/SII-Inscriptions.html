@@ -179,6 +179,10 @@
     font-size: 0.85rem; cursor: pointer;
   }
   .filter-dd-opt:hover { background: var(--surface-2); }
+  /* The list's own "Filter list..." box hides options via [hidden], which
+     display:flex above would otherwise override -- the filter ran but
+     nothing disappeared (found 2026-10-24, per the user). */
+  .filter-dd-opt[hidden] { display: none; }
   .filter-dd-opt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* Cascading filters — see recomputeFilterOptions(). A greyed, disabled
      look for an option that would currently match zero rows given every
@@ -555,7 +559,7 @@
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
 
-<div class="generated">Generated 2026-10-24 10:59</div>
+<div class="generated">Generated 2026-10-24 11:18</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -827,16 +831,36 @@ document.addEventListener('keydown', (e) => {
   });
 });
 
+// Strict uppercase Roman numeral -> int, else 0 (so ordinary words,
+// lowercase text and malformed runs like "IIII" never count).
+function romanToInt(tok) {
+  if (!tok || !/^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/.test(tok)) return 0;
+  const v = {I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000};
+  let n = 0;
+  for (let i = 0; i < tok.length; i++) {
+    const c = v[tok[i]], nx = v[tok[i + 1]] || 0;
+    n += c < nx ? -c : c;
+  }
+  return n;
+}
+
 FILTER_KEYS.forEach((key) => {
   const panel = filterPanels[key];
   if (!panel) return;
   const search = panel.querySelector('.filter-dd-search');
   const optionEls = Array.from(panel.querySelectorAll('.filter-dd-opt'));
+  // Each option's searchable text also carries the decimal value of
+  // every Roman numeral in its label, so typing "2" finds Vol II, XII,
+  // XX, XXI, XXXII ... -- per the user, 2026-10-24.
+  const optionTexts = optionEls.map((opt) => {
+    const label = opt.querySelector('span').textContent;
+    const nums = label.split(/[^A-Za-z]+/).map(romanToInt).filter((n) => n > 0);
+    return foldDiacritics((label + ' ' + nums.join(' ')).toLowerCase());
+  });
   search.addEventListener('input', () => {
-    const term = search.value.trim().toLowerCase();
-    optionEls.forEach((opt) => {
-      const text = opt.querySelector('span').textContent.toLowerCase();
-      opt.hidden = term.length > 0 && !text.includes(term);
+    const term = foldDiacritics(search.value.trim().toLowerCase());
+    optionEls.forEach((opt, i) => {
+      opt.hidden = term.length > 0 && !optionTexts[i].includes(term);
     });
   });
   optionEls.forEach((opt) => {
