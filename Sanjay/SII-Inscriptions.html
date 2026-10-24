@@ -530,6 +530,8 @@
     color: var(--text-dim); cursor: pointer;
   }
   .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  /* Tab holding a search match: same fixed yellow as <mark>. */
+  .row-detail-tab-btn.has-match { background: #fff3a0; color: #000; }
   .row-detail-tab-content {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
     background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
@@ -553,7 +555,7 @@
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
 
-<div class="generated">Generated 2026-10-24 07:18</div>
+<div class="generated">Generated 2026-10-24 09:39</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -1973,10 +1975,35 @@ function updateRemarksClamp(cell) {
   // same way instead of as a special-cased always-visible section, and
   // any real `popup_tab` columns (a full inscription transcription, a
   // citation list) still follow it as further tabs.
+  // The popup marks the active search term (or the selected category's
+  // spans) in EVERY field, not just the table's highlightable columns --
+  // the search itself checks every column, and a match that only lives
+  // in a popup_tab field (Commentary, Roman Transliteration...) had
+  // nothing on screen to explain it. Per the user, 2026-10-24 (was
+  // inserting raw cell HTML, never highlighted). Returns whether
+  // anything got marked, so the tab holding it can be flagged.
+  function popupRanges(row, key) {
+    const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+    if (catVal) {
+      const spans = row.spans[key];
+      return spans ? spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]) : null;
+    }
+    if (!activeTerm) return null;
+    const scope = searchScope.value;
+    if (scope !== 'all' && ('col-' + key) !== scope) return null;
+    return textRanges(foldDiacritics(row.text[key] || ''), makeMatcher(foldDiacritics(activeTerm), matchMode.value));
+  }
+  function fillHighlighted(el, row, key, html) {
+    const ranges = popupRanges(row, key);
+    markRanges(el, html, ranges);
+    return !!(ranges && ranges.length);
+  }
+
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
 
     const tabs = [];
+    let detailsMatch = false;
 
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
@@ -1997,7 +2024,7 @@ function updateRemarksClamp(cell) {
       // Muted/italic, not the same color as a real value, so the two are
       // never mistaken for each other at a glance.
       if (html) {
-        dd.innerHTML = html;
+        if (fillHighlighted(dd, row, key, html)) detailsMatch = true;
       } else {
         appendNotAvailable(dd);
       }
@@ -2015,7 +2042,7 @@ function updateRemarksClamp(cell) {
       field.appendChild(dd);
       factsGrid.appendChild(field);
     });
-    tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
+    tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
 
     // Remarks and every popup_tab field (Commentary, Roman Transliteration,
     // ...) now only become their own tab when they actually have content --
@@ -2030,16 +2057,18 @@ function updateRemarksClamp(cell) {
     if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
+      // row.text's offsets start with the clamped text, so they line up
+      // with the unclamped inner HTML too (the button text comes after).
+      const hit = fillHighlighted(body, row, REMARKS_KEY, fullRemarksHtml(row.cells[REMARKS_KEY]));
+      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body, hit });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
       const html = row.cells[key];
       if (!html) return;
       const body = document.createElement('div');
-      body.innerHTML = html;
-      tabs.push({ key, label: fieldLabel(key), el: body });
+      const hit = fillHighlighted(body, row, key, html);
+      tabs.push({ key, label: fieldLabel(key), el: body, hit });
     });
 
     const tabsWrap = document.createElement('div');
@@ -2064,13 +2093,21 @@ function updateRemarksClamp(cell) {
       btn.className = 'row-detail-tab-btn';
       btn.dataset.key = tab.key;
       btn.textContent = tab.label;
+      // Flag every tab holding a match (per the user, 2026-10-24), so a
+      // hit in a tab other than the open one isn't missed.
+      if (tab.hit) {
+        btn.classList.add('has-match');
+        btn.title = 'Contains the search match';
+      }
       btn.addEventListener('click', () => showTab(tab.key));
       tabBar.appendChild(btn);
     });
     tabsWrap.appendChild(tabBar);
     tabsWrap.appendChild(tabContent);
     modalBody.appendChild(tabsWrap);
-    showTab(tabs[0].key);
+    // Details stays first unless it has no match and another tab does.
+    const firstHit = tabs[0].hit ? tabs[0] : tabs.find((t) => t.hit);
+    showTab((firstHit || tabs[0]).key);
 
     modal.hidden = false;
   }

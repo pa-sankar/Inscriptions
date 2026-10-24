@@ -165,6 +165,8 @@
     border-radius: 999px; background: var(--surface-2); color: var(--text-dim); cursor: pointer;
   }
   .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  /* Tab holding a search match: same fixed yellow as <mark>. */
+  .row-detail-tab-btn.has-match { background: #fff3a0; color: #000; }
   .row-detail-tab-content {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; background: var(--surface-2);
     border-radius: 6px; padding: 0.8rem 1rem; max-height: 22rem; overflow-y: auto;
@@ -251,7 +253,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-24 07:18 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-24 09:39 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -874,10 +876,13 @@ function appendNotAvailable(dd) {
 // term actually matched, unlike every per-corpus page's own table/
 // popup. Applies to every field here (not just Remarks), same as
 // buildRow()'s own per-column highlighting in inscriptions_table_html.py.
+// Returns whether anything got marked, so the popup can flag the tab
+// holding the match (per the user, 2026-10-24).
 function highlightInto(el, html, plainText) {
-  if (!currentSearchTerm) { el.innerHTML = html; return; }
+  if (!currentSearchTerm) { el.innerHTML = html; return false; }
   const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode));
   markRanges(el, html, ranges);
+  return ranges.length > 0;
 }
 
 function openRowDetailModal(row) {
@@ -886,6 +891,7 @@ function openRowDetailModal(row) {
   const remarksCol = cfg.columns.find((c) => c.key === 'remarks');
   const popupTabCols = cfg.columns.filter((c) => c.popup_tab);
   const tabs = [];
+  let detailsMatch = false;
 
   const factsGrid = document.createElement('div');
   cfg.columns.forEach((col) => {
@@ -899,7 +905,7 @@ function openRowDetailModal(row) {
     dt.textContent = (col.key === 'id' ? 'Unique ID' : col.header) + ':';
     const dd = document.createElement('div');
     dd.className = 'row-detail-value';
-    if (html) { highlightInto(dd, html, row.text[col.key] || ''); } else { appendNotAvailable(dd); }
+    if (html) { if (highlightInto(dd, html, row.text[col.key] || '')) detailsMatch = true; } else { appendNotAvailable(dd); }
     if (col.key === 'id' && row.id) {
       const idText = document.createElement('code');
       idText.className = 'row-detail-id-text';
@@ -910,7 +916,7 @@ function openRowDetailModal(row) {
     field.appendChild(dd);
     factsGrid.appendChild(field);
   });
-  tabs.push({key: '__details__', label: 'Details', el: factsGrid});
+  tabs.push({key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch});
 
   // Remarks and every popup_tab field only become their own tab when
   // they actually have content -- same rule as inscriptions_table_html.py's
@@ -927,16 +933,16 @@ function openRowDetailModal(row) {
     tmp.innerHTML = row.cells[remarksCol.key];
     const clamp = tmp.querySelector('.remarks-clamp');
     const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
-    highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
-    tabs.push({key: remarksCol.key, label: remarksCol.header, el: body});
+    const hit = highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
+    tabs.push({key: remarksCol.key, label: remarksCol.header, el: body, hit});
   }
 
   popupTabCols.forEach((col) => {
     const html = row.cells[col.key];
     if (!html) return;
     const body = document.createElement('div');
-    highlightInto(body, html, row.text[col.key] || '');
-    tabs.push({key: col.key, label: col.header, el: body});
+    const hit = highlightInto(body, html, row.text[col.key] || '');
+    tabs.push({key: col.key, label: col.header, el: body, hit});
   });
 
   const tabsWrap = document.createElement('div');
@@ -958,13 +964,16 @@ function openRowDetailModal(row) {
     btn.className = 'row-detail-tab-btn';
     btn.dataset.key = tab.key;
     btn.textContent = tab.label;
+    if (tab.hit) { btn.classList.add('has-match'); btn.title = 'Contains the search match'; }
     btn.addEventListener('click', () => showTab(tab.key));
     tabBar.appendChild(btn);
   });
   tabsWrap.appendChild(tabBar);
   tabsWrap.appendChild(tabContent);
   rowDetailBody.appendChild(tabsWrap);
-  showTab(tabs[0].key);
+  // Details stays first unless it has no match and another tab does.
+  const firstHit = tabs[0].hit ? tabs[0] : tabs.find((t) => t.hit);
+  showTab((firstHit || tabs[0]).key);
   rowDetailModal.hidden = false;
 }
 function closeRowDetailModal() {

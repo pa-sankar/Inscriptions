@@ -527,6 +527,8 @@
     color: var(--text-dim); cursor: pointer;
   }
   .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  /* Tab holding a search match: same fixed yellow as <mark>. */
+  .row-detail-tab-btn.has-match { background: #fff3a0; color: #000; }
   .row-detail-tab-content {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
     background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
@@ -550,7 +552,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-24 07:17</div>
+<div class="generated">Generated 2026-10-24 09:38</div>
 
 <div class="stats">127 records from 3 volume(s). Remarks is the English commentary printed alongside each inscription; a row's detail popup also carries the original-script text.</div>
 <div class="legend"><strong>Citation</strong>: the book's own "No. N of YYYY-YY." cross-reference to the Annual Report on [South] Indian Epigraphy.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Original Text</strong>: click any row for its full detail popup -- the original-script (or, for some records, Roman-transliterated) verse text, not shown as its own table column to keep the table itself readable.</div>
@@ -1970,10 +1972,35 @@ function updateRemarksClamp(cell) {
   // same way instead of as a special-cased always-visible section, and
   // any real `popup_tab` columns (a full inscription transcription, a
   // citation list) still follow it as further tabs.
+  // The popup marks the active search term (or the selected category's
+  // spans) in EVERY field, not just the table's highlightable columns --
+  // the search itself checks every column, and a match that only lives
+  // in a popup_tab field (Commentary, Roman Transliteration...) had
+  // nothing on screen to explain it. Per the user, 2026-10-24 (was
+  // inserting raw cell HTML, never highlighted). Returns whether
+  // anything got marked, so the tab holding it can be flagged.
+  function popupRanges(row, key) {
+    const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+    if (catVal) {
+      const spans = row.spans[key];
+      return spans ? spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]) : null;
+    }
+    if (!activeTerm) return null;
+    const scope = searchScope.value;
+    if (scope !== 'all' && ('col-' + key) !== scope) return null;
+    return textRanges(foldDiacritics(row.text[key] || ''), makeMatcher(foldDiacritics(activeTerm), matchMode.value));
+  }
+  function fillHighlighted(el, row, key, html) {
+    const ranges = popupRanges(row, key);
+    markRanges(el, html, ranges);
+    return !!(ranges && ranges.length);
+  }
+
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
 
     const tabs = [];
+    let detailsMatch = false;
 
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
@@ -1994,7 +2021,7 @@ function updateRemarksClamp(cell) {
       // Muted/italic, not the same color as a real value, so the two are
       // never mistaken for each other at a glance.
       if (html) {
-        dd.innerHTML = html;
+        if (fillHighlighted(dd, row, key, html)) detailsMatch = true;
       } else {
         appendNotAvailable(dd);
       }
@@ -2012,7 +2039,7 @@ function updateRemarksClamp(cell) {
       field.appendChild(dd);
       factsGrid.appendChild(field);
     });
-    tabs.push({ key: '__details__', label: 'Details', el: factsGrid });
+    tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
 
     // Remarks and every popup_tab field (Commentary, Roman Transliteration,
     // ...) now only become their own tab when they actually have content --
@@ -2027,16 +2054,18 @@ function updateRemarksClamp(cell) {
     if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
-      body.innerHTML = fullRemarksHtml(row.cells[REMARKS_KEY]);
-      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body });
+      // row.text's offsets start with the clamped text, so they line up
+      // with the unclamped inner HTML too (the button text comes after).
+      const hit = fillHighlighted(body, row, REMARKS_KEY, fullRemarksHtml(row.cells[REMARKS_KEY]));
+      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body, hit });
     }
 
     POPUP_TAB_KEYS.forEach((key) => {
       const html = row.cells[key];
       if (!html) return;
       const body = document.createElement('div');
-      body.innerHTML = html;
-      tabs.push({ key, label: fieldLabel(key), el: body });
+      const hit = fillHighlighted(body, row, key, html);
+      tabs.push({ key, label: fieldLabel(key), el: body, hit });
     });
 
     const tabsWrap = document.createElement('div');
@@ -2061,13 +2090,21 @@ function updateRemarksClamp(cell) {
       btn.className = 'row-detail-tab-btn';
       btn.dataset.key = tab.key;
       btn.textContent = tab.label;
+      // Flag every tab holding a match (per the user, 2026-10-24), so a
+      // hit in a tab other than the open one isn't missed.
+      if (tab.hit) {
+        btn.classList.add('has-match');
+        btn.title = 'Contains the search match';
+      }
       btn.addEventListener('click', () => showTab(tab.key));
       tabBar.appendChild(btn);
     });
     tabsWrap.appendChild(tabBar);
     tabsWrap.appendChild(tabContent);
     modalBody.appendChild(tabsWrap);
-    showTab(tabs[0].key);
+    // Details stays first unless it has no match and another tab does.
+    const firstHit = tabs[0].hit ? tabs[0] : tabs.find((t) => t.hit);
+    showTab((firstHit || tabs[0]).key);
 
     modal.hidden = false;
   }
