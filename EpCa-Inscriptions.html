@@ -563,10 +563,10 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
 
-<div class="generated">Generated 2026-10-24 09:39</div>
+<div class="generated">Generated 2026-10-24 10:59</div>
 
-<div class="stats">11430 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the Roman transliteration and the original Kannada text, when the volume printed them.</div>
-<div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Roman Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the Roman-script transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
+<div class="stats">11430 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the English transliteration and the original Kannada text, when the volume printed them.</div>
+<div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>English Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the English transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
 <div class="filters-help">Filters narrow each other as you go — pick a
 Volume and every other filter's list shrinks to only the values that
 actually occur among that Volume's own records (a greyed-out option
@@ -581,7 +581,7 @@ table itself only shows a few lines of.</div>
   <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (900)</option><option value="woman_death_composite">woman_death_composite (63)</option><option value="sati_stone_direct">sati_stone_direct (45)</option><option value="memorial_nisidhi">memorial_nisidhi (25)</option><option value="memorial_samadhi">memorial_samadhi (24)</option><option value="incidental_sati_mention">incidental_sati_mention (17)</option><option value="incidental_hero_death_mention">incidental_hero_death_mention (4)</option></select>
   <select id="searchScope">
     <option value="all">Search: all columns</option>
-    <option value="col-location">Search: Location only</option><option value="col-remarks">Search: Remarks only</option><option value="col-text_roman">Search: Roman Transliteration only</option><option value="col-text_original">Search: Kannada Original only</option>
+    <option value="col-location">Search: Location only</option><option value="col-remarks">Search: Remarks only</option><option value="col-text_roman">Search: English Transliteration only</option><option value="col-text_original">Search: Kannada Original only</option>
   </select>
   <select id="matchMode" title="Embedded: anywhere, even inside a word. Word start: 'mahavra' finds 'mahavratin' but not 'samahavraja'. Whole word: the exact word only.">
     <option value="contains">Embedded (anywhere)</option>
@@ -610,7 +610,7 @@ table itself only shows a few lines of.</div>
 <div class="table-scroll">
 <table id="t">
 <colgroup><col class="c-id" data-key="id"><col class="c-inscription_no" data-key="inscription_no"><col class="c-source" data-key="source"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-text_roman" data-key="text_roman"><col class="c-text_original" data-key="text_original"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="inscription_no">Inscr. #</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="text_roman">Roman Transliteration</th><th data-key="text_original">Kannada Original</th></tr></thead>
+<thead><tr><th data-key="id">ID</th><th data-key="inscription_no">Inscr. #</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="text_roman">English Transliteration</th><th data-key="text_original">Kannada Original</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -664,7 +664,7 @@ const COLUMN_KEYS = ['id', 'inscription_no', 'source', 'type', 'location', 'dyna
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "inscription_no": "Inscr. #", "source": "Volume", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "remarks": "Remarks", "page": "Page", "text_roman": "Roman Transliteration", "text_original": "Kannada Original"};
+const COLUMN_HEADERS = {"id": "ID", "inscription_no": "Inscr. #", "source": "Volume", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "remarks": "Remarks", "page": "Page", "text_roman": "English Transliteration", "text_original": "Kannada Original"};
 const HIGHLIGHT_COLS = [4, 9, 11, 12];
 const REMARKS_COL_IDX = 9;
 // Column visibility/width policy — see Column.default_visible's own
@@ -1986,7 +1986,7 @@ function updateRemarksClamp(cell) {
   // The popup marks the active search term (or the selected category's
   // spans) in EVERY field, not just the table's highlightable columns --
   // the search itself checks every column, and a match that only lives
-  // in a popup_tab field (Commentary, Roman Transliteration...) had
+  // in a popup_tab field (Commentary, English Transliteration...) had
   // nothing on screen to explain it. Per the user, 2026-10-24 (was
   // inserting raw cell HTML, never highlighted). Returns whether
   // anything got marked, so the tab holding it can be flagged.
@@ -2052,7 +2052,7 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
 
-    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // Remarks and every popup_tab field (Commentary, English Transliteration,
     // ...) now only become their own tab when they actually have content --
     // per the user, 2026-10-06: an empty tab a reader clicks into just to
     // find "Not available" (the Details grid already says that for every

@@ -555,7 +555,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-24 09:38</div>
+<div class="generated">Generated 2026-10-24 10:59</div>
 
 <div class="stats">8066 records from 36 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1978,7 +1978,7 @@ function updateRemarksClamp(cell) {
   // The popup marks the active search term (or the selected category's
   // spans) in EVERY field, not just the table's highlightable columns --
   // the search itself checks every column, and a match that only lives
-  // in a popup_tab field (Commentary, Roman Transliteration...) had
+  // in a popup_tab field (Commentary, English Transliteration...) had
   // nothing on screen to explain it. Per the user, 2026-10-24 (was
   // inserting raw cell HTML, never highlighted). Returns whether
   // anything got marked, so the tab holding it can be flagged.
@@ -2044,7 +2044,7 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
 
-    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // Remarks and every popup_tab field (Commentary, English Transliteration,
     // ...) now only become their own tab when they actually have content --
     // per the user, 2026-10-06: an empty tab a reader clicks into just to
     // find "Not available" (the Details grid already says that for every

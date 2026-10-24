@@ -554,7 +554,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-24 09:38</div>
+<div class="generated">Generated 2026-10-24 10:59</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -1977,7 +1977,7 @@ function updateRemarksClamp(cell) {
   // The popup marks the active search term (or the selected category's
   // spans) in EVERY field, not just the table's highlightable columns --
   // the search itself checks every column, and a match that only lives
-  // in a popup_tab field (Commentary, Roman Transliteration...) had
+  // in a popup_tab field (Commentary, English Transliteration...) had
   // nothing on screen to explain it. Per the user, 2026-10-24 (was
   // inserting raw cell HTML, never highlighted). Returns whether
   // anything got marked, so the tab holding it can be flagged.
@@ -2043,7 +2043,7 @@ function updateRemarksClamp(cell) {
     });
     tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
 
-    // Remarks and every popup_tab field (Commentary, Roman Transliteration,
+    // Remarks and every popup_tab field (Commentary, English Transliteration,
     // ...) now only become their own tab when they actually have content --
     // per the user, 2026-10-06: an empty tab a reader clicks into just to
     // find "Not available" (the Details grid already says that for every
