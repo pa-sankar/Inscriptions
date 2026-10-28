@@ -1,0 +1,2185 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travancore Archaeological Series</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2213%22>📜</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'sanjay'});
+</script>
+<style>
+  /* Same token system as every other corpus's own review page (EpCa's
+     own template, TaKa/EpTe/EpAn's copies of it) -- per the user,
+     2026-09-20: one consistent look-and-feel across the whole site.
+     Every existing feature below (page-image lightbox, GA, xref links,
+     idchip copy) is unchanged -- only the color/spacing source moved
+     from hardcoded hex values to these variables. */
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c;
+    --accent-copper: #a6612f; --accent-copper-strong: #7d431c;
+    --mark-bg: #f6d989; --mark-text: #3a2a05;
+    --shadow: 0 1px 2px rgba(43,42,36,0.06), 0 8px 24px rgba(43,42,36,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1;
+      --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+      --mark-bg: #6b5417; --mark-text: #ffe9b0;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1;
+    --accent-copper: #d18a52; --accent-copper-strong: #e2a06c;
+    --mark-bg: #6b5417; --mark-text: #ffe9b0;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; margin: 0;
+    background: var(--bg); color: var(--text); font-size: 14.5px; line-height: 1.5;
+  }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 26px 22px 60px; }
+  /* Project brand mark -- per the user, 2026-09-24: "Project
+     InscriptionSearch" in a distinct display face (Cinzel, an
+     inscriptional/lapidary-style serif -- fits a stone-inscriptions
+     project on purpose, not a generic display font pick), everywhere
+     a page's own title appears. Real fallback stack in case the
+     Google Fonts request itself fails. */
+  .brand {
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif; font-weight: 600;
+    font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent-copper-strong); margin: 0 0 4px;
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; }
+  /* Titlebar: h1 (with an optional Home icon prefix) on the left,
+     an optional same-corpus-size cross-link (Sanjay pages only, to
+     the sibling corpus's page) on the right — per the user,
+     2026-08-29. */
+  .titlebar {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px 18px; padding-bottom: 16px; margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
+  .home-link:hover { color: var(--accent); }
+  .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  /* Public pages only (see render_inscriptions_table's own subscribe_url
+     docstring) -- a solid button, not a plain link, since this is a call
+     to action rather than in-site navigation. */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
+  .adv-search-note {
+    margin: 0.2rem 0 0.6rem; padding: 0.45rem 0.8rem; border-radius: 6px;
+    background: var(--surface-2); color: var(--text-dim); font-size: 0.9rem;
+  }
+  .adv-search-note a { color: var(--accent-strong); font-weight: 600; }
+  .stats { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; }
+  /* Legend block — explains the v-direct/v-derived color convention
+     and the Location-vs-Place/Source distinction, per the user,
+     2026-08-29: hovering a span for its own tooltip only works if a
+     reader already knows to hover, so this states it upfront too. */
+  .legend {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-size: 0.85rem;
+    color: var(--text-dim); line-height: 1.5;
+  }
+  .legend strong { color: var(--text); }
+  /* One-time-look "you're on a new version" notice — Sanjay pages only
+     (build scripts never pass whats_new_html for the public page), per
+     the user, 2026-09-28: functional changes only, no mention of visual
+     ones. Deliberately louder than .legend/.filters-help (an accent-
+     tinted border, not just the neutral surface) since it's meant to be
+     noticed once, not settle into background info the way those do. */
+  .whats-new {
+    background: var(--surface); border: 1px solid var(--accent); border-radius: 6px;
+    padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-size: 0.85rem;
+    color: var(--text-dim); line-height: 1.5;
+  }
+  .whats-new strong { color: var(--text); }
+  /* Explains the cascading-filter behavior and what Reset does — per the
+     user, 2026-09-28: "add additional text in the header to indicate
+     this for the user." Kept to the same quiet, secondary-text styling
+     as the legend/stats line rather than a loud banner, since it's
+     background info a returning reader won't need to re-read every time. */
+  .filters-help {
+    color: var(--text-dim); font-size: 0.82rem; line-height: 1.5;
+    margin-bottom: 0.75rem; max-width: 62rem;
+  }
+  .filters-help strong { color: var(--text); }
+  /* Plain-language readout of what's actually selected right now — per
+     the user, 2026-09-28: a filter button only ever says "Include 2
+     selected", which doesn't say WHICH 2. This spells it out ("State =
+     Tamil Nadu, Karnataka") for every active filter at once, hidden
+     entirely (see updateActiveFiltersSummary() in the script below)
+     when nothing is filtered. */
+  .active-filters-summary {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.5rem 0.9rem; margin-bottom: 0.75rem; font-size: 0.85rem;
+    color: var(--text); line-height: 1.6;
+  }
+  .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  input[type=search] {
+    padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; color: var(--text); font-family: inherit; font-size: 14px;
+  }
+  select {
+    padding: 8px 10px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; color: var(--text); font-family: inherit; font-size: 14px;
+  }
+  input[type=search]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  /* Checkbox-list filter dropdown — one shared mechanism for every
+     filter (Kind, Volume, Language, ...), per the user 2026-09-28:
+     "ensure all filter dropdown use the same font and mechanism".
+     A plain <button> that toggles a floating panel, not a native
+     <select>/<input list> — neither supports multi-select with an
+     include/exclude mode, which is the whole point of this widget. */
+  .filter-dd { position: relative; display: inline-block; }
+  .filter-dd-btn {
+    padding: 8px 14px; cursor: pointer; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; color: var(--text); font-family: inherit; font-size: 14px; text-align: left;
+    min-width: 8rem; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .filter-dd-btn:hover { border-color: var(--accent); }
+  .filter-dd.active .filter-dd-btn { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  .filter-dd-panel {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 50; width: 16rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: var(--shadow); padding: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .filter-dd-panel[hidden] { display: none; }
+  .filter-dd-mode { display: flex; gap: 0.9rem; font-size: 0.82rem; color: var(--text-dim); }
+  .filter-dd-mode label { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+  .filter-dd-search {
+    padding: 5px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-family: inherit; font-size: 13px; width: 100%;
+  }
+  .filter-dd-hint { font-size: 11px; color: var(--text-dim); margin: -2px 2px 2px; }
+  .filter-dd-options { max-height: 14rem; overflow-y: auto; display: flex; flex-direction: column; }
+  .filter-dd-opt {
+    display: flex; align-items: center; gap: 0.5rem; padding: 3px 4px; border-radius: 4px;
+    font-size: 0.85rem; cursor: pointer;
+  }
+  .filter-dd-opt:hover { background: var(--surface-2); }
+  /* The list's own "Filter list..." box hides options via [hidden], which
+     display:flex above would otherwise override -- the filter ran but
+     nothing disappeared (found 2026-10-24, per the user). */
+  .filter-dd-opt[hidden] { display: none; }
+  .filter-dd-opt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Cascading filters — see recomputeFilterOptions(). A greyed, disabled
+     look for an option that would currently match zero rows given every
+     OTHER active filter, so a reader sees at a glance what's genuinely
+     available rather than discovering it only after picking a dead end. */
+  .filter-dd-opt-unavailable { opacity: 0.4; cursor: not-allowed; }
+  .filter-dd-opt-unavailable:hover { background: none; }
+  /* "Blank / not available" pseudo-option — see BLANK_FILTER_VALUE. Set
+     off from the real values above it with a divider and a slightly
+     dimmed, italic label, so it reads as the deliberate catch-all it is
+     rather than one more ordinary value in the list. */
+  .filter-dd-opt-blank {
+    border-top: 1px solid var(--border); margin-top: 0.25rem; padding-top: 0.4rem;
+    font-style: italic; color: var(--text-dim);
+  }
+  .filter-dd-actions { display: flex; justify-content: flex-end; }
+  .filter-dd-clear {
+    padding: 4px 10px; cursor: pointer; background: none; border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-dim); font-family: inherit; font-size: 12.5px;
+  }
+  .filter-dd-clear:hover { color: var(--text); border-color: var(--accent); }
+  #searchBtn, #resetBtn {
+    padding: 8px 18px; cursor: pointer; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 7px; color: var(--text); font-family: inherit; font-size: 14px;
+  }
+  #searchBtn:hover, #resetBtn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  /* Fixed yellow/black in every theme -- a highlight's whole job is to
+     stand out regardless of theme, so it doesn't follow the theme. */
+  mark { background: #fff3a0; color: #000; padding: 0 1px; border-radius: 2px; }
+  /* Mobile: the table itself keeps a sane minimum width (table-layout:
+     fixed columns squeeze to unreadable slivers otherwise) and scrolls
+     horizontally inside this wrapper instead of forcing the whole page
+     to zoom out — added 2026-08-25, per the user. */
+  /* max-height + overflow-y makes this div its own vertical scroll
+     container, not just a horizontal one -- position:sticky on `th`
+     below only sticks within its *nearest scrolling ancestor*, and
+     without a bounded height here that ancestor was the whole page
+     (which never actually scrolls this div, so the header just
+     scrolled away with everything else) -- found live 2026-09-13,
+     per the user. */
+  .table-scroll {
+    overflow-x: auto; overflow-y: auto; max-height: 75vh; -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow);
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 62rem; font-size: 0.85rem; table-layout: fixed; }
+  th, td {
+    border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+    padding: 10px 12px; text-align: left; vertical-align: top;
+    overflow-wrap: break-word;
+  }
+  /* Cell/column boundaries within a row — per the user, 2026-09-28:
+     "it is not visually clear where one column ends and other begins".
+     No trailing border after the last column (nothing to divide it
+     from). */
+  th:last-child, td:last-child { border-right: none; }
+  /* Alternating row shading — per the user, 2026-09-28. Kept subtle
+     (surface-2, the same token already used for hover/header) so it
+     works in both themes without a new color. tr:hover still overrides
+     it (declared later in source order), same as before. */
+  tbody tr:nth-child(even) { background: var(--surface-2); }
+  /* Hidden by default (see Column.default_visible / updateColumnVisibility()
+     in the script below) — a column starts out of the way and reappears
+     automatically the moment its own filter has an active selection. */
+  /* `display: none` on a <col> is NOT reliably honored by browsers --
+     it can affect the column-width distribution but does nothing to
+     suppress the actual <td>/<th> cells at that column position, since
+     those are independent boxes a <col> only lends styling hints to.
+     Found live 2026-09-28, per the user ("remarks is using very less
+     [space]"): every "hidden" column (Kind, Type, Sl.No, Survey Ref,
+     Dynasty, Date, Language, Page, Image) was still rendering its full
+     content and width in Chrome, pushing the table's real total width
+     to ~159% of the declared 100% and leaving Remarks' nominal 50%
+     looking like a sliver of the visible viewport. `visibility: collapse`
+     is the actual standards mechanism for this -- applied to a <col>,
+     it removes that column's cells from rendering entirely (well
+     supported in Chrome/Firefox), which `display: none` was never
+     specified to do. */
+  col.col-optional-hidden { visibility: collapse; }
+  @media (max-width: 640px) {
+    .wrap { padding: 14px 12px 40px; }
+    input[type=search] { width: 100%; }
+    .controls { gap: 0.5rem; }
+    /* Touch targets grow on a small screen — the desktop sizes above
+       are fine for a mouse pointer but cramped for a fingertip. */
+    button.idchip, button.page-img-btn, #searchBtn, #resetBtn,
+    .pager button { padding: 0.5rem 0.8rem; }
+  }
+  th {
+    background: var(--surface-2); color: var(--text-dim); position: sticky; top: 0; z-index: 1;
+    text-transform: uppercase; letter-spacing: 0.04em; font-size: 11.5px;
+    /* A narrow column (Sl.No, Language, Image) was wrapping its own
+       header into a vertical stack of single letters -- per the user,
+       2026-09-24: give it room instead, since the table already
+       scrolls horizontally (.table-scroll) rather than trying to fit
+       every column into one screen width. Body cells (td) keep
+       wrapping as before -- this is header-only. */
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  /* Signals the row itself is clickable (opens the full-detail popup —
+     see the row-detail IIFE in the script below), same as the darker
+     hover shade. */
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--surface-2); }
+  col.c-id { width: 8%; }
+  col.c-number { width: 5%; }
+  col.c-source { width: 8%; }
+  col.c-heading { width: 22%; }
+  col.c-group { width: 14%; }
+  col.c-type { width: 6%; }
+  col.c-register { width: 7%; }
+  col.c-are_ref { width: 7%; }
+  col.c-language { width: 8%; }
+  col.c-script { width: 6%; }
+  col.c-remarks { width: 45%; }
+  col.c-page { width: 4%; }
+  col.c-introduction { width: 0%; }
+  col.c-text_original { width: 0%; }
+  col.c-footnotes { width: 0%; }
+  col.c-original_script { width: 0%; }
+  col.c-ai_translation { width: 0%; }
+  /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
+     text (see id_chip_html()'s own docstring), so a compact fixed-size
+     icon button replaces what used to size itself to a 15+ character
+     monospace string. font-size here sizes the emoji glyph itself, not
+     body text. */
+  button.idchip {
+    font-size: 15px; line-height: 1; cursor: pointer;
+    padding: 4px 7px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; color: var(--accent-strong);
+    font-family: 'Consolas', monospace; /* only used for the flashed id-text/"copied" state below */
+  }
+  button.idchip:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+  /* The flashed state (copyIdChip() below) briefly shows real text (the
+     stable_id itself, or "press Ctrl+C") instead of the glyph, so it
+     needs to fit more than one character -- back to a normal small font
+     and no forced centering, only while .copied is applied. */
+  button.idchip.copied {
+    color: #fff; background: var(--accent-strong); border-color: var(--accent-strong);
+    font-size: 12px; white-space: nowrap;
+  }
+  /* "As printed" vs "derived" two-color convention — see dual_span_cell(). */
+  .v-direct { color: inherit; }
+  .v-derived { color: var(--accent-copper-strong); font-style: italic; }
+  .count { color: var(--text-dim); font-size: 0.85rem; margin: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .pager button {
+    padding: 5px 12px; cursor: pointer; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text); font-family: inherit; font-size: 13px;
+  }
+  .pager button:disabled { cursor: default; opacity: 0.4; }
+  .pager select { padding: 5px 8px; font-size: 13px; }
+  .generated {
+    display: inline-block; background: var(--surface); color: var(--accent-strong);
+    border: 1px solid var(--border); border-radius: 5px;
+    padding: 0.2rem 0.6rem; font-size: 0.85rem; margin-bottom: 0.75rem;
+  }
+  /* Page-image popup — see page_image_button_cell() and the lightbox JS
+     below. Harmless dead markup on a page with no image buttons at all
+     (ARE today) — same "the shell doesn't know what a row means"
+     tolerance the rest of this file already has for unused pieces. */
+  button.page-img-btn {
+    font-size: 0.78rem; padding: 2px 8px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--text-dim);
+  }
+  button.page-img-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
+  /* Loading overlay — shown once, at page load, while the row data
+     fetch(es) (data_url, and categories_url on Sanjay's page) are in
+     flight; see render_inscriptions_table's own data_url docstring for
+     why the data isn't embedded inline any more. Per the user,
+     2026-08-29: a wait cursor on the whole page plus every control
+     disabled, not just a spinner in a corner, so a click during this
+     window can't do anything or double-fire once the page is ready.
+     [hidden] (not display:none baked in) so JS toggling the attribute
+     is the only thing that ever shows/hides this. */
+  body.loading { cursor: wait; }
+  body.loading .controls, body.loading .count { pointer-events: none; opacity: 0.6; }
+  .load-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .load-overlay[hidden] { display: none; }
+  .load-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.5rem 2rem; box-shadow: var(--shadow);
+    text-align: center; font-size: 1rem; color: var(--text);
+  }
+  #loadRetryBtn {
+    margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+  }
+  .lightbox-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; z-index: 1000;
+  }
+  .lightbox-overlay[hidden] { display: none; }
+  /* Which row this popup was opened from — see page_image_button_cell()'s
+     row_label param. Empty and collapsed (no gap) when a caller doesn't
+     pass one. */
+  .lightbox-row-label {
+    color: #ccc; font-size: 0.8rem; max-width: 92vw; text-align: center;
+    margin-bottom: 0.3rem;
+  }
+  .lightbox-row-label:empty { display: none; }
+  .lightbox-toolbar {
+    display: flex; align-items: center; gap: 0.6rem; color: #eee;
+    font-size: 0.85rem; margin-bottom: 0.5rem;
+  }
+  .lightbox-toolbar button {
+    padding: 0.25rem 0.6rem; cursor: pointer; border: 1px solid #888;
+    border-radius: 4px; background: #333; color: #eee;
+  }
+  .lightbox-toolbar button:hover { background: #444; }
+  .lightbox-body { position: relative; display: flex; align-items: center; }
+  .lightbox-imgwrap {
+    max-width: 90vw; max-height: 80vh; overflow: auto;
+    background: #111;
+  }
+  .lightbox-imgwrap img { display: block; transform-origin: top left; }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
+    font-size: 1.4rem; padding: 0.5rem 0.8rem; cursor: pointer; z-index: 2;
+  }
+  .lightbox-nav:hover { background: rgba(0,0,0,0.8); }
+  .lightbox-prev { left: 0; }
+  .lightbox-next { right: 0; }
+  /* Resolved-citation hover — see remarks_cell_html(). A native `title`
+     tooltip on the "Ibid" word itself, not a popup or a new column, per
+     the user, 2026-08-24. `title` alone doesn't work on a touchscreen —
+     no cursor, nothing to hover — so a tap toggles this visible inline
+     reveal instead (2026-08-25); the JS below does the toggling, this is
+     just its collapsed/expanded look. */
+  .cite-hint {
+    text-decoration: underline dotted var(--text-dim); text-underline-offset: 2px;
+    cursor: help;
+  }
+  .cite-hint-reveal {
+    display: block; margin-top: 0.2rem; font-size: 0.8rem;
+    color: var(--accent-strong); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.3rem 0.5rem;
+  }
+  /* A "Published in ..." citation this project can actually resolve to
+     another record — see remarks_cell_html()'s xref-link spans and
+     jumpToKey()/OTHER_CORPUS_URL in the JS. A real <button>, not a
+     hover-only affordance, per the user 2026-08-30: needs to work by
+     tap on mobile, where hover does nothing at all. Styled like an
+     inline link (not a boxed button) so it reads as part of the
+     sentence, with enough padding for a real touch target. */
+  button.xref-link {
+    font: inherit; color: var(--accent-strong); background: none; border: none;
+    padding: 0.1rem 0.15rem; margin: -0.1rem -0.15rem; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+    border-radius: 3px;
+  }
+  button.xref-link:hover, button.xref-link:focus-visible {
+    background: var(--surface-2); outline: 2px solid var(--border); outline-offset: 1px;
+  }
+  /* Landed-on-after-a-jump highlight — jumpToKey() adds this class to
+     the target <tr>, then removes it after the animation finishes.
+     Needed because the row is just one of many identical-looking rows
+     on the page it scrolls to; without this, "where did it take me"
+     is a real question on a long table. */
+  tr.xref-target { animation: xref-flash 2.6s ease-out; }
+  @keyframes xref-flash {
+    0%, 15% { background: var(--mark-bg); }
+    100% { background: transparent; }
+  }
+  /* Remarks-column truncation — see clamp_remarks_html(). A rogue
+     record's remarks can run to dozens of lines, pushing every row
+     below it out of view even in an already-filtered list; -webkit-
+     line-clamp (Chrome/Edge/Safari/Firefox 68+ — no real holdout left)
+     is the whole visual effect, JS only decides whether "Read more" is
+     needed per row and opens the full text in #remarksModal. */
+  .remarks-clamp {
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+    overflow: hidden; white-space: pre-wrap;
+  }
+  .remarks-more-btn {
+    display: block; margin-top: 0.2rem; font-size: 0.78rem;
+    color: var(--accent-copper-strong); background: none; border: none; padding: 0;
+    cursor: pointer; text-decoration: underline; font-weight: 600;
+  }
+  .remarks-more-btn[hidden] { display: none; }
+  .remarks-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1.5rem;
+  }
+  .remarks-modal-overlay[hidden] { display: none; }
+  .remarks-modal-box {
+    background: var(--surface); color: var(--text); border-radius: 10px;
+    max-width: 44rem; width: 100%; max-height: 80vh;
+    overflow-y: auto; padding: 1.5rem; position: relative;
+    box-shadow: var(--shadow);
+  }
+  .remarks-modal-close {
+    position: absolute; top: 0.5rem; right: 0.7rem;
+    font-size: 1.3rem; line-height: 1; background: none; border: none;
+    cursor: pointer; color: var(--text-dim);
+  }
+  .remarks-modal-close:hover { color: var(--text); }
+  .remarks-modal-body { white-space: pre-wrap; line-height: 1.5; }
+  /* Row-detail popup — a wider box than the plain remarks-only one
+     (there's a lot more to show), header fields in a compact two-column
+     grid, Remarks given the most vertical room since it's what the user
+     actually cares about (per the user: "most of the pop-up space used
+     for remarks"). */
+  .row-detail-box { max-width: 56rem; }
+  .row-detail-field {
+    display: grid; grid-template-columns: 9rem 1fr; gap: 0.4rem 0.75rem;
+    padding: 0.3rem 0; border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .row-detail-field:last-child { border-bottom: none; }
+  .row-detail-label {
+    color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.03em; font-weight: 600;
+  }
+  .row-detail-value {
+    line-height: 1.5; overflow-wrap: break-word;
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .row-detail-id-text {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9rem; color: var(--text);
+  }
+  /* A field this record genuinely has nothing for — per the user,
+     2026-09-28: still list the attribute, don't just omit it, so
+     "checked and blank" reads differently from "never shown at all".
+     Muted + italic, distinct from a real value's plain color. */
+  .row-detail-na { color: var(--text-dim); font-style: italic; }
+  .row-detail-remarks-body {
+    white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
+  }
+  /* The popup's own tab strip -- "Details" (the quick-facts grid) always
+     first and active by default, "Remarks" and any Column.popup_tab
+     field (a full inscription transcription, a citation list) as
+     further tabs after it, per the user, 2026-10-02: Remarks moved back
+     OFF the always-visible top of the popup (where it pushed every
+     quick fact down to the bottom for a record with many fields) and
+     into its own scrollable tab instead. */
+  .row-detail-tabs { margin-top: 1.1rem; }
+  .row-detail-tab-bar {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
+  }
+  .row-detail-tab-btn {
+    font: inherit; font-size: 0.85rem; padding: 0.35rem 0.8rem;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2);
+    color: var(--text-dim); cursor: pointer;
+  }
+  .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+  /* Tab holding a search match: same fixed yellow as <mark>. */
+  .row-detail-tab-btn.has-match { background: #fff3a0; color: #000; }
+  .row-detail-tab-content {
+    white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
+    background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
+    max-height: 22rem; overflow-y: auto;
+  }
+  @media (max-width: 640px) {
+    .row-detail-field { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
+  footer {
+    margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-dim);
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+</style>
+</head>
+<body class="loading">
+<div class="wrap">
+<div class="brand">Project InscriptionSearch</div>
+<div class="titlebar">
+  <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> Travancore Archaeological Series</h1>
+  
+</div>
+
+<div class="generated">Generated 2026-10-28 06:34</div>
+
+<div class="stats">488 records from 15 volume PDF(s) of the Travancore Archaeological Series. Vol VIII's scan stops at printed p. 29.</div>
+<div class="legend"><strong>No.</strong>: the book's "No. N" in Vols III-VII; in I, II, VIII and IX, which print no inscription numbers, the entry's place in the contents.<br><strong>Register</strong>: the Travancore department's register number and Kollam year ("3 of 1106"). <strong>ARE</strong>: the Madras Epigraphical collection number.<br><strong>Remarks</strong>: the book's translation, or the editor's introduction where the book gives none. Click a row for the introduction, text, footnotes and, marked as AI, an unverified English rendering of script lines made during OCR.</div>
+<div class="filters-help">Filters narrow each other as you go — pick a
+Volume and every other filter's list shrinks to only the values that
+actually occur among that Volume's own records (a greyed-out option
+means nothing currently matches it; it reappears the moment you widen
+another filter back out). <strong>Reset</strong> clears every filter and
+the search box back to their starting state.</div>
+<div class="filters-help">Click anywhere on a row to open its full
+details in a popup — including the complete Remarks text, which the
+table itself only shows a few lines of.</div>
+<div class="controls">
+  <div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (10)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (478)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-hint">Numbers match Roman numerals too: 2 finds II, XII, XX, XXXII…</div><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I"><span>Vol I — 16 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II"><span>Vol II — 10 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pts II-III"><span>Vol II Pts II-III — 2 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I"><span>Vol III Pt I — 33 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II"><span>Vol III Pt II — 28 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV Pt I"><span>Vol IV Pt I — 23 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V Pt I"><span>Vol V Pt I — 23 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V Pt II"><span>Vol V Pt II — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V Pt III"><span>Vol V Pt III — 19 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI Pt I"><span>Vol VI Pt I — 78 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI Pt II"><span>Vol VI Pt II — 53 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII Pt I"><span>Vol VII Pt I — 52 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII Pt II"><span>Vol VII Pt II — 75 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII"><span>Vol VIII — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX"><span>Vol IX — 24 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="language"><button type="button" class="filter-dd-btn" id="languageFilterBtn">All languages</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="languageMode" value="include" checked> Include</label><label><input type="radio" name="languageMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit"><span>Sanskrit (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (54)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="script"><button type="button" class="filter-dd-btn" id="scriptFilterBtn">All scripts</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="scriptMode" value="include" checked> Include</label><label><input type="radio" name="scriptMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Grantha"><span>Grantha (2)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Malayalam"><span>Malayalam (14)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Nagari"><span>Nagari (7)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (225)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Transliterated / none"><span>Transliterated / none (240)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+  <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="woman_death_composite">woman_death_composite (9)</option><option value="incidental_sati_mention">incidental_sati_mention (2)</option><option value="memorial_nisidhi">memorial_nisidhi (1)</option></select>
+  <select id="searchScope">
+    <option value="all">Search: all columns</option>
+    <option value="col-heading">Search: Heading only</option><option value="col-group">Search: Group only</option><option value="col-remarks">Search: Remarks only</option><option value="col-introduction">Search: Introduction only</option><option value="col-text_original">Search: Text only</option><option value="col-footnotes">Search: Footnotes only</option><option value="col-original_script">Search: Script lines (OCR) only</option><option value="col-ai_translation">Search: AI rendering only</option>
+  </select>
+  <select id="matchMode" title="Embedded: anywhere, even inside a word. Word start: 'mahavra' finds 'mahavratin' but not 'samahavraja'. Whole word: the exact word only.">
+    <option value="contains">Embedded (anywhere)</option>
+    <option value="partial">Word start</option>
+    <option value="word">Whole word</option>
+  </select>
+  <input type="search" id="q" placeholder="type to search…">
+  <button type="button" id="searchBtn">Search</button>
+  <button type="button" id="resetBtn">Reset</button>
+</div>
+<div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div class="count">
+  <span id="count"></span>
+  <span class="pager">
+    <button type="button" id="prevPage">&larr; Prev</button>
+    <span id="pageIndicator"></span>
+    <button type="button" id="nextPage">Next &rarr;</button>
+    <select id="pageSize" title="Rows per page — a smaller page paints faster on a big filtered/searched result">
+      <option value="50">50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="250">250 / page</option>
+      <option value="0">All (slow on a large result)</option>
+    </select>
+  </span>
+</div>
+<div class="table-scroll">
+<table id="t">
+<colgroup><col class="c-id" data-key="id"><col class="c-number" data-key="number"><col class="c-source" data-key="source"><col class="c-heading" data-key="heading"><col class="c-group" data-key="group"><col class="c-type" data-key="type"><col class="c-register" data-key="register"><col class="c-are_ref" data-key="are_ref"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-introduction" data-key="introduction"><col class="c-text_original" data-key="text_original"><col class="c-footnotes" data-key="footnotes"><col class="c-original_script" data-key="original_script"><col class="c-ai_translation" data-key="ai_translation"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="number">No.</th><th data-key="source">Volume</th><th data-key="heading">Heading</th><th data-key="group">Group</th><th data-key="type">Type</th><th data-key="register">Register</th><th data-key="are_ref">ARE</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">PDF page</th><th data-key="introduction">Introduction</th><th data-key="text_original">Text</th><th data-key="footnotes">Footnotes</th><th data-key="original_script">Script lines (OCR)</th><th data-key="ai_translation">AI rendering</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+<div id="loadOverlay" class="load-overlay">
+  <div class="load-box">
+    <div id="loadMessage">Loading data&hellip;</div>
+    <button type="button" id="loadRetryBtn" hidden>Retry</button>
+  </div>
+</div>
+<div id="lightbox" class="lightbox-overlay" hidden>
+  <div id="lbRowLabel" class="lightbox-row-label"></div>
+  <div class="lightbox-toolbar">
+    <button type="button" id="lbZoomOut" title="Zoom out">&minus;</button>
+    <span id="lbZoomLevel">100%</span>
+    <button type="button" id="lbZoomIn" title="Zoom in">+</button>
+    <button type="button" id="lbZoomReset" title="Reset zoom">Reset</button>
+    <span id="lbPageIndicator"></span>
+    <button type="button" id="lbClose" title="Close">Close &times;</button>
+  </div>
+  <div class="lightbox-body">
+    <button type="button" id="lbPrev" class="lightbox-nav lightbox-prev" title="Previous page">&larr;</button>
+    <div class="lightbox-imgwrap" id="lbImgWrap"><img id="lbImg" alt="scanned page"></div>
+    <button type="button" id="lbNext" class="lightbox-nav lightbox-next" title="Next page">&rarr;</button>
+  </div>
+</div>
+<div id="remarksModal" class="remarks-modal-overlay" hidden>
+  <div class="remarks-modal-box">
+    <button type="button" id="remarksModalClose" class="remarks-modal-close" title="Close">&times;</button>
+    <div id="remarksModalBody" class="remarks-modal-body"></div>
+  </div>
+</div>
+<!-- Full-row detail popup — per the user, 2026-09-28: clicking a row
+     should show every field (not just the currently-visible columns),
+     labeled explicitly ("Unique ID: ...", "Language: ...", ...), with
+     Remarks given most of the popup's own space since it's the field of
+     greatest interest. Reuses the remarks-modal-* box/overlay/close CSS
+     (same look, same Escape/click-outside-to-close behavior) with its
+     own body layout — see openRowDetailModal() in the script below. -->
+<div id="rowDetailModal" class="remarks-modal-overlay" hidden>
+  <div class="remarks-modal-box row-detail-box">
+    <button type="button" id="rowDetailModalClose" class="remarks-modal-close" title="Close">&times;</button>
+    <div id="rowDetailModalBody" class="row-detail-body"></div>
+  </div>
+</div>
+<script>
+const BLANK_FILTER_VALUE = "[[blank]]";
+const FILTER_KEYS = ['type', 'volume', 'language', 'script'];
+const COLUMN_KEYS = ['id', 'number', 'source', 'heading', 'group', 'type', 'register', 'are_ref', 'language', 'script', 'remarks', 'page', 'introduction', 'text_original', 'footnotes', 'original_script', 'ai_translation'];
+// key -> column header text, for the row-detail popup's own field
+// labels (openRowDetailModal() below) — "id" is special-cased there to
+// "Unique ID" per the user, 2026-09-28; everything else uses the same
+// header text the table column itself shows.
+const COLUMN_HEADERS = {"id": "ID", "number": "No.", "source": "Volume", "heading": "Heading", "group": "Group", "type": "Type", "register": "Register", "are_ref": "ARE", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "PDF page", "introduction": "Introduction", "text_original": "Text", "footnotes": "Footnotes", "original_script": "Script lines (OCR)", "ai_translation": "AI rendering"};
+const HIGHLIGHT_COLS = [3, 4, 10, 12, 13, 14, 15, 16];
+const REMARKS_COL_IDX = 10;
+// Column visibility/width policy — see Column.default_visible's own
+// docstring. DEFAULT_VISIBLE_KEYS ship visible; any other column
+// (including one with no matching Filter at all) starts hidden via its
+// <col> and only reappears while its own Filter (matched by key) has an
+// active selection — see updateColumnVisibility() below.
+const DEFAULT_VISIBLE_KEYS = new Set(["id", "number", "source", "heading", "remarks"]);
+const BASE_COL_WIDTHS = {"id": 8, "number": 5, "source": 8, "heading": 22, "group": 14, "type": 6, "register": 7, "are_ref": 7, "language": 8, "script": 6, "remarks": 45, "page": 4, "introduction": 0, "text_original": 0, "footnotes": 0, "original_script": 0, "ai_translation": 0};
+// Column.popup_tab's own keys — see openRowDetailModal() below.
+const POPUP_TAB_KEYS = ["introduction", "text_original", "footnotes", "original_script", "ai_translation"];
+const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
+const REMARKS_MIN_PCT = 50;
+// The set of column keys actually shown right now — recomputed by
+// updateColumnVisibility() on every filter change, consulted by
+// buildRow() below so a hidden column's real text never lands in the
+// DOM at all (not just visually hidden), which is what stops its
+// content from wrapping and inflating row height. Starts at
+// DEFAULT_VISIBLE_KEYS so the very first paint (before
+// updateColumnVisibility() has run once) already agrees with it.
+let CURRENT_VISIBLE_KEYS = new Set(DEFAULT_VISIBLE_KEYS);
+const q = document.getElementById('q');
+const searchScope = document.getElementById('searchScope');
+const matchMode = document.getElementById('matchMode');
+const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
+const categoryFilterEl = document.getElementById('categoryFilter'); // null if no row has any category
+const tbody = document.getElementById('tbody');
+const DATA_URL = "../data/tras/index.json";
+const CATEGORIES_URL = "tras/index.json";
+// The human name for one chunk ("volume"/"year") — loadData()'s own
+// progress text below reads "Loading volume XI… (45%)", never
+// "chunk 12 of 27", per the user, 2026-09-28: "X of N chunks is ok for
+// a software - not ok for a user."
+const CHUNK_LABEL = "volume";
+// See render_inscriptions_table's own enable_chunk_cache docstring --
+// SII's Sanjay page only, for now.
+const CHUNK_CACHE_ENABLED = false;
+// Cross-reference jump target (see remarks_cell_html's xref-link spans
+// and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
+// which corpus THIS page's own rows belong to ('sii'/'are'), so a click
+// on a same-corpus xref-link jumps in place while a different-corpus
+// one navigates to OTHER_CORPUS_URL. Both null on a page that doesn't
+// pass sibling_corpus_url (nothing to link to yet).
+const CURRENT_CORPUS = "tras";
+const OTHER_CORPUS_URL = null;
+// Row DATA, not DOM — see render_inscriptions_table's own comment on
+// data_url/categories_url for why this is fetched, not embedded inline.
+// Starts empty; loadData() (bottom of this script) populates it before
+// the first real render() call. Every control is disabled and the load
+// overlay shown (see body.loading in the CSS) until that happens, so
+// nothing can act on an empty ROWS in between.
+let ROWS = [];
+const countEl = document.getElementById('count');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevPage = document.getElementById('prevPage');
+const nextPage = document.getElementById('nextPage');
+const pageSizeEl = document.getElementById('pageSize');
+// One shared checkbox-dropdown mechanism for every filter — see
+// Filter's own docstring and _one_filter_control()'s HTML above.
+// FILTER_STATE[key] = {mode: 'include'|'exclude', values: Set<string>}.
+// An empty Set means "no constraint from this filter", same meaning the
+// old single empty-string <select> value had.
+const FILTER_STATE = {};
+const filterPanels = {};
+FILTER_KEYS.forEach((k) => {
+  FILTER_STATE[k] = { mode: 'include', values: new Set() };
+  filterPanels[k] = document.querySelector('.filter-dd[data-key="' + k + '"]');
+});
+
+function filterButtonLabel(key, allLabel) {
+  const st = FILTER_STATE[key];
+  if (!st || st.values.size === 0) return allLabel;
+  const verb = st.mode === 'exclude' ? 'Exclude' : 'Include';
+  return verb + ' ' + st.values.size + ' selected';
+}
+
+// Human name for a filter, derived from its own "All ..." button label
+// ("All states" -> "State") rather than a separate name baked into the
+// page — one less thing for a build script to keep in sync by hand.
+function filterDisplayName(allLabel) {
+  const rest = (allLabel || '').replace(/^All\s+/i, '');
+  const singular = rest.replace(/s$/i, '');
+  return singular ? singular[0].toUpperCase() + singular.slice(1) : rest;
+}
+
+// The value itself is what a reader picked and what actually matches
+// rows (checkbox.value, e.g. "Tamil Nadu", or "I (1)" for a volume
+// disambiguated from a same-numbered other part) -- not its <span>
+// label, which carries a per-filter-formatted count suffix ("Tamil Nadu
+// (412)", "I — 114 record(s)") with no single safe way to strip across
+// every filter's own formatting. Tried stripping a trailing "(...)"
+// group generically first; wrong for Volume, whose label ends
+// "record(s)" -- found live 2026-09-28, testing this for real, not
+// just reading the code: it silently mangled "record(s)" into "record".
+// Shared with recomputeFilterOptions()/recomputeCategoryOptions() below,
+// so a checkbox's own label and the active-filters summary line can
+// never disagree on what one value is called.
+function filterValueLabel(key, value) {
+  return value === BLANK_FILTER_VALUE ? 'Blank / not available' : value;
+}
+
+// Plain-language readout of every active filter at once — per the user,
+// 2026-09-28: the filter button itself only ever says "Include 2
+// selected", never which 2. Rebuilt on every filter change (called
+// alongside updateColumnVisibility(), same call sites) since it has to
+// reflect all filters together, not just the one that just changed.
+function updateActiveFiltersSummary() {
+  const el = document.getElementById('activeFiltersSummary');
+  if (!el) return;
+  const active = FILTER_KEYS.filter((k) => FILTER_STATE[k] && FILTER_STATE[k].values.size > 0);
+  el.hidden = active.length === 0;
+  el.textContent = '';
+  if (!active.length) return;
+  // Built with real DOM nodes, not innerHTML string concatenation --
+  // this text ultimately comes from checkbox labels (filter option
+  // values, corpus data), so it must go through textContent rather than
+  // needing its own ad hoc HTML-escaping helper.
+  el.appendChild(document.createTextNode('Active filters: '));
+  active.forEach((k, i) => {
+    if (i > 0) el.appendChild(document.createTextNode('  ·  '));
+    const st = FILTER_STATE[k];
+    const strong = document.createElement('strong');
+    strong.textContent = filterDisplayName(FILTER_ALL_LABELS[k]);
+    el.appendChild(strong);
+    const values = Array.from(st.values).map((v) => filterValueLabel(k, v)).join(', ');
+    const verb = st.mode === 'exclude' ? ' ≠ ' : ' = ';
+    el.appendChild(document.createTextNode(verb + values));
+  });
+}
+
+function updateFilterButton(key, allLabel) {
+  const panel = filterPanels[key];
+  if (!panel) return;
+  const btn = panel.querySelector('.filter-dd-btn');
+  btn.textContent = filterButtonLabel(key, allLabel);
+  panel.classList.toggle('active', FILTER_STATE[key].values.size > 0);
+}
+
+const FILTER_ALL_LABELS = {};
+FILTER_KEYS.forEach((k) => {
+  const panel = filterPanels[k];
+  FILTER_ALL_LABELS[k] = panel ? panel.querySelector('.filter-dd-btn').textContent : '';
+});
+
+// Dropdown open/close — one panel open at a time, closed by an outside
+// click or Escape. Delegated on document since panels are static (built
+// once at page load, unlike table rows), so a direct binding per button
+// would have worked too, but delegation keeps the outside-click-closes
+// logic in one place next to the open logic.
+document.addEventListener('click', (e) => {
+  const openBtn = e.target.closest('.filter-dd-btn');
+  Object.values(filterPanels).forEach((panel) => {
+    if (!panel) return;
+    const isThisOne = openBtn && panel.contains(openBtn);
+    if (isThisOne) {
+      const wasHidden = panel.querySelector('.filter-dd-panel').hidden;
+      panel.querySelector('.filter-dd-panel').hidden = !wasHidden;
+    } else if (!panel.contains(e.target)) {
+      panel.querySelector('.filter-dd-panel').hidden = true;
+    }
+  });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  Object.values(filterPanels).forEach((panel) => {
+    if (panel) panel.querySelector('.filter-dd-panel').hidden = true;
+  });
+});
+
+// Strict uppercase Roman numeral -> int, else 0 (so ordinary words,
+// lowercase text and malformed runs like "IIII" never count).
+function romanToInt(tok) {
+  if (!tok || !/^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/.test(tok)) return 0;
+  const v = {I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000};
+  let n = 0;
+  for (let i = 0; i < tok.length; i++) {
+    const c = v[tok[i]], nx = v[tok[i + 1]] || 0;
+    n += c < nx ? -c : c;
+  }
+  return n;
+}
+
+FILTER_KEYS.forEach((key) => {
+  const panel = filterPanels[key];
+  if (!panel) return;
+  const search = panel.querySelector('.filter-dd-search');
+  const optionEls = Array.from(panel.querySelectorAll('.filter-dd-opt'));
+  // Each option's searchable text also carries the decimal value of
+  // every Roman numeral in its label, so typing "2" finds Vol II, XII,
+  // XX, XXI, XXXII ... -- per the user, 2026-10-24.
+  const optionTexts = optionEls.map((opt) => {
+    const label = opt.querySelector('span').textContent;
+    const nums = label.split(/[^A-Za-z]+/).map(romanToInt).filter((n) => n > 0);
+    return foldDiacritics((label + ' ' + nums.join(' ')).toLowerCase());
+  });
+  search.addEventListener('input', () => {
+    const term = foldDiacritics(search.value.trim().toLowerCase());
+    optionEls.forEach((opt, i) => {
+      opt.hidden = term.length > 0 && !optionTexts[i].includes(term);
+    });
+  });
+  optionEls.forEach((opt) => {
+    const cb = opt.querySelector('input[type=checkbox]');
+    cb.addEventListener('change', () => {
+      const st = FILTER_STATE[key];
+      if (cb.checked) st.values.add(cb.value); else st.values.delete(cb.value);
+      updateFilterButton(key, FILTER_ALL_LABELS[key]);
+      renderFromTop();
+    });
+  });
+  panel.querySelectorAll('input[type=radio]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      FILTER_STATE[key].mode = radio.value;
+      updateFilterButton(key, FILTER_ALL_LABELS[key]);
+      if (FILTER_STATE[key].values.size > 0) renderFromTop();
+    });
+  });
+  panel.querySelector('.filter-dd-clear').addEventListener('click', () => {
+    FILTER_STATE[key].values.clear();
+    optionEls.forEach((opt) => { opt.querySelector('input[type=checkbox]').checked = false; });
+    updateFilterButton(key, FILTER_ALL_LABELS[key]);
+    renderFromTop();
+  });
+});
+
+// The text search only runs on an explicit action (the Search button, or
+// Enter in the field) — per the user 2026-08-22, not live as-you-type like
+// the filter dropdowns still are. `activeTerm` is what was last actually
+// searched for; `q.value` can differ from it while the user is still
+// typing, which is the whole point.
+let activeTerm = '';
+// Highlightable columns that default to hidden (King, Dynasty, Date,
+// Language, ...) but contain the active search term somewhere in the
+// corpus -- recomputed by updateColumnVisibility() below. Without this,
+// a row can match ONLY via a hidden column's own text (e.g. "hero"
+// inside the King field's "...anointment of heroes...") and show up as
+// a search result with no highlight anywhere on screen to explain why
+// -- found live, 2026-10-09. Same "reappear automatically" precedent
+// default_visible=False columns already get from an active Filter
+// selection, extended to the search term too.
+let TERM_MATCHED_HIDDEN_COLS = new Set();
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Strips combining diacritics (macron, dot-below, acute, etc.) so a
+// plain-ASCII search term matches the transliterated text regardless of
+// whether it carries them -- per the user, 2026-10-02: searching
+// "mahavra" found nothing because the actual text reads "mahāvra" (ā,
+// not a), even though searching "vra" alone DID find that same record.
+// NFD decomposition splits every precomposed character this corpus's
+// IAST transliteration uses (ā, ī, ū, ṭ, ḍ, ṇ, ś, ṣ, ṛ, ṁ, ...) into its
+// base letter plus one combining mark (U+0300-036F), which the regex
+// then deletes -- left with exactly the base letters, same length and
+// same character positions as the original string (each of these is a
+// single BMP code point, never a surrogate pair or a multi-character
+// decomposition), so indices computed against the FOLDED string stay
+// valid when applied back to the ORIGINAL string for highlighting.
+// Deliberately does NOT touch case -- callers already .toLowerCase() or
+// pass the 'i' regex flag where that matters.
+function foldDiacritics(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
+// non-word character to JS regex without unicode-property-escape
+// machinery, same as a space), which is fine for the plain-ASCII search
+// terms this is meant for ("sati", "hero") — a diacritic-bearing term's
+// word boundaries would be less reliable, not broken outright.
+// makeMatcher() is global ('g'), and .test() on a global regex starts
+// at re.lastIndex and moves it on: reused across rows, a match in
+// one row made the next row's test start part-way into its text and
+// silently skip real matches (found 2026-10-14). Every row test goes
+// through this, from the start.
+function testFrom0(re, text) {
+  re.lastIndex = 0;
+  return re.test(text);
+}
+
+// mode: 'contains' (embedded, anywhere), 'partial' (starts at a word
+// boundary) or 'word' (whole word): the three widths every search offers
+// (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
+function makeMatcher(term, mode) {
+  const body = escapeRegex(term);
+  const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
+                : mode === 'partial' ? '\\b(' + body + ')'
+                : '(' + body + ')';
+  return new RegExp(pattern, 'ig');
+}
+
+// Every [start, end) span of `re` within `text`, in order — the
+// free-text-search equivalent of a Row.spans entry, computed on demand
+// against the row's own precomputed plain text rather than DOM.
+function textRanges(text, re) {
+  const out = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    out.push([m.index, m.index + m[0].length]);
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out;
+}
+
+// Sets `cell.innerHTML = cellHtml`, then wraps the character ranges in
+// `ranges` (offsets into the cell's own plain text, same ordering as
+// `.textContent` — see strip_tags()'s docstring for why those agree) in
+// <mark>, walking the tree so markup the cell already carries
+// (dual_span_cell's v-direct/v-derived spans, the citation-tooltip span)
+// survives untouched. One shared primitive for both free-text search
+// (ranges from textRanges() above) and exact term-category highlighting
+// (ranges from Row.spans) — same walk either way, only where the ranges
+// came from differs. Rebuilt from `cellHtml` fresh on every call (never
+// "restored" from a prior paint) because a fresh <td> is what paintPage
+// builds every time now — no stale highlight state to undo.
+function markRanges(cell, cellHtml, ranges) {
+  cell.innerHTML = cellHtml;
+  if (!ranges || !ranges.length) return;
+  const sorted = ranges.slice().sort((a, b) => a[0] - b[0]);
+  let ri = 0;
+  let pos = 0;
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      let i = 0;
+      while (i < text.length) {
+        while (ri < sorted.length && sorted[ri][1] <= pos + i) ri++;
+        if (ri >= sorted.length) {
+          frag.appendChild(document.createTextNode(text.slice(i)));
+          break;
+        }
+        const rs = sorted[ri][0], re_ = sorted[ri][1];
+        const g = pos + i;
+        if (g < rs) {
+          const take = Math.min(rs - g, text.length - i);
+          frag.appendChild(document.createTextNode(text.slice(i, i + take)));
+          i += take;
+        } else {
+          const take = Math.min(re_ - g, text.length - i);
+          const m = document.createElement('mark');
+          m.textContent = text.slice(i, i + take);
+          frag.appendChild(m);
+          i += take;
+        }
+      }
+      pos += text.length;
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  Array.from(cell.childNodes).forEach(walk);
+}
+
+// Pagination exists because painting is what's actually slow, not
+// matching — per the user, 2026-08-24: on a full-corpus table (10,000+
+// rows), the expensive part of every filter/search keystroke was never
+// the plain regex test (a few ms over that many short strings), it was
+// rebuilding cell markup for every *matching* row, all at once, even
+// the thousands scrolled off-screen. Splitting matching from painting
+// and only building DOM for the current page's slice turns an O(all
+// matches) DOM-rewrite into an O(page size) one on every keystroke —
+// matching itself still runs over every row (it has to, to know the
+// true total and which rows belong on which page), but that half was
+// never the slow part. Extended 2026-08-28, per the user: row DOM
+// itself is now built lazily too (paintPage below), not just hidden —
+// see rows_data's own comment for the original page-load cost this
+// closes.
+let currentPage = 1;
+
+function pageSizeValue() {
+  const n = parseInt(pageSizeEl.value, 10);
+  return n > 0 ? n : Infinity; // "All" option is 0 -> unlimited
+}
+
+// Builds one <tr> from a ROWS entry, fresh every time — never reused
+// across paints, so there is no stale-DOM state (a previous search's
+// marks, a previous page's row) to undo before applying this paint's
+// own highlighting.
+function buildRow(row, term, whole, scope, catVal) {
+  const tr = document.createElement('tr');
+  // The row's own real stable_key — used by jumpToKey() below to find
+  // and scroll to this <tr> after a cross-reference click repaints the
+  // table, and by the row-detail popup's own click handler to look the
+  // clicked row back up in ROWS. row.id (NOT row.text.id) is the source
+  // of truth -- found live 2026-09-28, per the user ("Pop-up information
+  // ... does not match the information of the row clicked"): row.text.id
+  // is derived by stripping HTML tags out of the ID cell (see
+  // write_shared_data_json's own "text" comprehension), and since the ID
+  // column now renders as a tag-glyph button with the real ID only in an
+  // attribute, its stripped-tags text is the SAME glyph on every row --
+  // every <tr> collided on one identical (wrong) dataset.key.
+  tr.dataset.key = row.id || '';
+  COLUMN_KEYS.forEach((key, i) => {
+    const td = document.createElement('td');
+    // A column that isn't currently shown (col-optional-hidden, width
+    // forced to 0%) still gets a real <td> here, to keep column count
+    // aligned with <colgroup> -- but its actual text must NOT go in.
+    // Found live 2026-09-28, per the user ("large row height uniformly
+    // ... no content to fill all that space"): the hidden column's own
+    // real content (Type, Dynasty, Date, ...) was still being rendered
+    // into a 0%-wide cell, wrapping every word onto its own line and
+    // inflating that <td>'s height -- which, being the tallest cell in
+    // the row, set the whole row's height regardless of what Remarks or
+    // any other visible column actually needed. An empty hidden cell has
+    // no content to wrap, so it can no longer drive row height at all.
+    const cellHtml = CURRENT_VISIBLE_KEYS.has(key) ? (row.cells[key] || '') : '';
+    let ranges = null;
+    if (catVal) {
+      const spans = row.spans[key];
+      if (spans) {
+        ranges = spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]);
+      }
+    } else if (term && HIGHLIGHT_COLS.includes(i)) {
+      const inScope = scope === 'all' || ('col-' + key) === scope;
+      // Both sides folded (see foldDiacritics() docstring) -- the
+      // resulting offsets still line up with the row's own ORIGINAL
+      // text/HTML, which is what markRanges() below actually wraps.
+      if (inScope) ranges = textRanges(foldDiacritics(row.text[key] || ''), makeMatcher(foldDiacritics(term), whole));
+    }
+    markRanges(td, cellHtml, ranges);
+    tr.appendChild(td);
+  });
+  return tr;
+}
+
+function render() {
+  const term = activeTerm;
+  const whole = matchMode.value;   // match mode, see makeMatcher()
+  const scope = searchScope.value;
+  const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+
+  // Matching only — plain-object/string work, no DOM, so this stays
+  // cheap regardless of table size. Folded (see foldDiacritics()) so a
+  // plain-ASCII term matches the corpus's own diacritic-bearing text.
+  const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
+  const matches = [];
+  for (const row of ROWS) {
+    let textMatch = true;
+    if (re) {
+      if (scope === 'all') {
+        // Also checks the row's own unique ID (e.g. "sii|vii||721"),
+        // not just COLUMN_KEYS -- per the user, 2026-10-05: free-text
+        // search must find a record by its own ID even with no
+        // dedicated ID filter, same as Advanced Search's own
+        // rowMatchesKeyword() already does.
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
+        textMatch = testFrom0(re, foldDiacritics(all));
+      } else {
+        const key = scope.slice('col-'.length);
+        textMatch = testFrom0(re, foldDiacritics(row.text[key] || ''));
+      }
+    }
+    let match = textMatch;
+    if (match && catVal) {
+      match = row.categories.includes(catVal);
+    }
+    if (match) {
+      for (const k of FILTER_KEYS) {
+        const st = FILTER_STATE[k];
+        if (!st || st.values.size === 0) continue;
+        const isIn = rowHasAny(row, k, st.values);
+        // Include mode: row matches iff its value is one of the checked
+        // ones. Exclude mode: row matches iff its value is NOT one of
+        // them (so a row with no value for this filter at all still
+        // matches an exclude set — same rows an empty include set would
+        // otherwise have to be typed out one by one, UNLESS "Blank" is
+        // itself one of the excluded values, in which case a blank row
+        // is correctly excluded too, via the same Set-membership check).
+        const ok = st.mode === 'exclude' ? !isIn : isIn;
+        if (!ok) { match = false; break; }
+      }
+    }
+    if (match) matches.push(row);
+  }
+
+  const pageSize = pageSizeValue();
+  const totalPages = Math.max(1, Math.ceil(matches.length / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pageRows = matches.slice(start, start + pageSize);
+
+  // Paint: build <tr> DOM only for this page's slice and swap the whole
+  // tbody in one go — replaceChildren is a single reflow, not one per
+  // row, and there is nothing from a previous paint worth keeping
+  // (buildRow always starts fresh from row data).
+  const frag = document.createDocumentFragment();
+  const builtRows = [];
+  for (const row of pageRows) {
+    const tr = buildRow(row, term, whole, scope, catVal);
+    builtRows.push(tr);
+    frag.appendChild(tr);
+  }
+  tbody.replaceChildren(frag);
+  // Remarks-clamp overflow can only be measured once each <tr> is
+  // actually attached to the document (scrollHeight/clientHeight are
+  // both 0 on a detached node, e.g. still inside `frag` above) — bug
+  // found 2026-08-28, per the user: every "Read more" button was
+  // silently staying hidden because buildRow() used to measure before
+  // attach, so every clamped remarks cell showed the CSS ellipsis with
+  // no way to open the full text. Measuring here, one reflow-free pass
+  // over the just-attached rows, fixes it for both corpora sharing this
+  // shell.
+  if (REMARKS_COL_IDX >= 0) {
+    for (const tr of builtRows) updateRemarksClamp(tr.children[REMARKS_COL_IDX]);
+  }
+
+  countEl.textContent = matches.length + ' of ' + ROWS.length + ' records match'
+    + (matches.length > pageRows.length || start > 0
+        ? ' — showing ' + (matches.length ? start + 1 : 0) + '-'
+          + Math.min(start + pageSize, matches.length)
+        : '');
+  pageIndicator.textContent = 'page ' + currentPage + ' of ' + totalPages;
+  prevPage.disabled = currentPage <= 1;
+  nextPage.disabled = currentPage >= totalPages;
+}
+
+function runSearch() {
+  activeTerm = q.value.trim();
+  currentPage = 1;
+  // Reveal any hidden column the new term actually matches in, same as
+  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+  // own docstring.
+  updateColumnVisibility();
+  render();
+}
+
+// A row's own value for filter `key`, normalized so a missing/empty
+// value always compares equal to the "Blank / not available" checkbox's
+// own sentinel (see BLANK_FILTER_VALUE's Python-side docstring) — the
+// one place both render()'s matching loop and recomputeFilterOptions()
+// below read a row's filter value, so the two can never disagree on
+// what "blank" means.
+// A filter value may also be a LIST -- a record in Sanskrit and Telugu
+// belongs under both Language options (2026-10-24, per the user). An
+// empty list counts as blank, same as a missing value.
+function filterValuesOf(row, key) {
+  const v = row.filters[key];
+  if (Array.isArray(v)) return v.length ? v : [BLANK_FILTER_VALUE];
+  return [v ? v : BLANK_FILTER_VALUE];
+}
+function rowHasAny(row, key, values) {
+  return filterValuesOf(row, key).some((v) => values.has(v));
+}
+
+// filterValueLabel() (value -> display text, Blank sentinel included) is
+// already defined above, for updateActiveFiltersSummary() — reused here
+// as-is so an option's checkbox-list label and its summary-line label
+// can never disagree.
+
+// Cascading filters — per the user, 2026-09-28: "if Vol is set to
+// volume 2, only states which appear in inscriptions of that volume
+// should get displayed" in every OTHER filter's own option list, AND
+// (per the user's own follow-up the same day) the "(N)" count shown
+// next to each option should reflect the CURRENT filter combination,
+// not the whole corpus's static build-time count — "Tamil Nadu (x)
+// will look different... compared to Language = Tamil filter". Both are
+// naturally the same computation (a per-value row count under the
+// current filter combination), so this rebuilds each option's full
+// label from that count on every call rather than just toggling
+// disabled -- recomputed from scratch on every filter change (not just
+// once at load), since narrowing OR widening any filter changes both.
+//
+// For each filter `key`, counts are tallied over rows matching every
+// OTHER active filter — deliberately excluding `key`'s own current
+// selection from this pass, or a filter could never be widened back
+// out again once narrowed (checking Volume=II would otherwise instantly
+// zero out every other Volume checkbox, since no row can be both II and
+// III at once). The free-text search box stays out of this on purpose —
+// cascading is a relationship between the filters/category themselves,
+// which the user's own request describes in terms of ("Language =
+// Tamil filter"), not the search box.
+function recomputeFilterOptions() {
+  FILTER_KEYS.forEach((key) => {
+    const panel = filterPanels[key];
+    if (!panel) return;
+    const counts = new Map();
+    for (const row of ROWS) {
+      let ok = true;
+      for (const k of FILTER_KEYS) {
+        if (k === key) continue;
+        const st = FILTER_STATE[k];
+        if (!st || st.values.size === 0) continue;
+        const isIn = rowHasAny(row, k, st.values);
+        if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
+      }
+      if (ok) {
+        filterValuesOf(row, key).forEach((v) => counts.set(v, (counts.get(v) || 0) + 1));
+      }
+    }
+    panel.querySelectorAll('.filter-dd-opt').forEach((opt) => {
+      const cb = opt.querySelector('input[type=checkbox]');
+      const count = counts.get(cb.value) || 0;
+      // A checked box always stays enabled and visible, even if it would
+      // now match zero rows — otherwise a reader could never uncheck
+      // the very selection that narrowed everything else away. An
+      // unchecked, now-impossible option is disabled (greyed, not
+      // clickable) rather than hidden outright, so the reader can see
+      // AT A GLANCE what widening another filter would bring back,
+      // rather than the option just silently vanishing.
+      const shouldDisable = count === 0 && !cb.checked;
+      cb.disabled = shouldDisable;
+      opt.classList.toggle('filter-dd-opt-unavailable', shouldDisable);
+      opt.querySelector('span').textContent =
+        filterValueLabel(key, cb.value) + ' (' + count + ')';
+    });
+  });
+  recomputeCategoryOptions();
+}
+
+// The category <select>'s own dynamic-count/cascading counterpart —
+// per the user, 2026-09-28: "one item where filter is not effective is
+// in categories... it would be great if the number inside () can
+// actually be updated based on the filter selection." A row can carry
+// several categories at once (Row.categories is a list, unlike every
+// other filter's single value), so this tallies by iterating each row's
+// own category list rather than a single filterValueOf() lookup.
+// Mirrors recomputeFilterOptions()'s own "exclude self" reasoning: does
+// NOT exclude the category filter's own current selection from the
+// count basis, since (unlike Include/Exclude checkbox filters) there's
+// only one <select> value active at a time here and nothing else in
+// this same dropdown to widen back out to.
+function recomputeCategoryOptions() {
+  if (!categoryFilterEl) return;
+  const counts = new Map();
+  for (const row of ROWS) {
+    let ok = true;
+    for (const k of FILTER_KEYS) {
+      const st = FILTER_STATE[k];
+      if (!st || st.values.size === 0) continue;
+      const isIn = rowHasAny(row, k, st.values);
+      if ((st.mode === 'exclude' ? !isIn : isIn) === false) { ok = false; break; }
+    }
+    if (!ok) continue;
+    (row.categories || []).forEach((cat) => counts.set(cat, (counts.get(cat) || 0) + 1));
+  }
+  Array.from(categoryFilterEl.options).forEach((opt) => {
+    if (!opt.value) return; // the "All categories" placeholder itself
+    const count = counts.get(opt.value) || 0;
+    opt.textContent = opt.value + ' (' + count + ')';
+    // Same rule as the checkbox filters: a currently-selected option
+    // never disables itself, even at zero, so it can still be cleared.
+    opt.disabled = count === 0 && categoryFilterEl.value !== opt.value;
+  });
+}
+
+// Column visibility/width — see Column.default_visible's own docstring.
+// A column (matched by key against a <col data-key>) is shown if it
+// ships default-visible OR its own Filter currently has an active
+// selection. Remarks absorbs/returns the width of whatever else is
+// shown/hidden, floored at REMARKS_MIN_PCT so it never drops below the
+// "at least 50%" the user asked for — the table simply gets a bit wider
+// than 100% (already inside a horizontally-scrolling .table-scroll) in
+// the rare case several optional columns are visible at once.
+function updateColumnVisibility() {
+  updateActiveFiltersSummary();
+  if (!REMARKS_KEY) return;
+  const visible = new Set(DEFAULT_VISIBLE_KEYS);
+  FILTER_KEYS.forEach((k) => {
+    if (FILTER_STATE[k] && FILTER_STATE[k].values.size > 0) visible.add(k);
+  });
+  // Recomputed fresh every call from the CURRENT activeTerm/scope, so
+  // every call site that already clears/sets activeTerm before calling
+  // this (runSearch, resetBtn, jumpToKey) gets the right answer for
+  // free -- see TERM_MATCHED_HIDDEN_COLS's own docstring above.
+  TERM_MATCHED_HIDDEN_COLS = new Set();
+  if (activeTerm && searchScope.value === 'all') {
+    const re = makeMatcher(foldDiacritics(activeTerm), matchMode.value);
+    HIGHLIGHT_COLS.forEach((idx) => {
+      const key = COLUMN_KEYS[idx];
+      if (DEFAULT_VISIBLE_KEYS.has(key)) return;
+      // A popup_tab field is never a table column (Column.popup_tab's
+      // own docstring) -- revealing it squeezed a zero-width column of
+      // Kannada text onto the page, headers stacked, 2026-10-24.
+      if (POPUP_TAB_KEYS.includes(key)) return;
+      if (ROWS.some((row) => testFrom0(re, foldDiacritics(row.text[key] || '')))) {
+        TERM_MATCHED_HIDDEN_COLS.add(key);
+      }
+    });
+  }
+  TERM_MATCHED_HIDDEN_COLS.forEach((k) => visible.add(k));
+  CURRENT_VISIBLE_KEYS = visible;
+  let extra = 0;
+  Object.keys(BASE_COL_WIDTHS).forEach((key) => {
+    const col = document.querySelector('col[data-key="' + key + '"]');
+    if (!col) return;
+    const show = visible.has(key);
+    col.classList.toggle('col-optional-hidden', !show);
+    // visibility:collapse (col-optional-hidden's own CSS, above) does NOT
+    // reliably reclaim that column's declared width in a fixed-layout
+    // table -- found live 2026-09-28, per the user ("only 50% of the
+    // available width... the remaining is empty"): the visible columns
+    // rendered fine at their own widths, but the collapsed ones' combined
+    // width just sat there as blank space instead of being redistributed.
+    // Setting the hidden column's own width to 0% here, directly, is what
+    // actually reclaims the space regardless of how any given browser
+    // handles collapse's own width semantics -- this inline style wins
+    // over the static per-column width rule by specificity.
+    col.style.width = show ? '' : '0%';
+    if (show && !DEFAULT_VISIBLE_KEYS.has(key) && key !== REMARKS_KEY) {
+      extra += BASE_COL_WIDTHS[key];
+    }
+  });
+  const remarksCol = document.querySelector('col[data-key="' + REMARKS_KEY + '"]');
+  if (remarksCol) {
+    const pct = Math.max(REMARKS_MIN_PCT, BASE_COL_WIDTHS[REMARKS_KEY] - extra);
+    remarksCol.style.width = pct + '%';
+  }
+}
+
+// Any change that could change *which* rows match (not just how a page
+// of them is painted) resets to page 1 — staying on page 6 of a result
+// set that's now 2 rows long would just show an empty page.
+function renderFromTop() {
+  updateColumnVisibility();
+  recomputeFilterOptions();
+  currentPage = 1;
+  render();
+}
+
+searchBtn.addEventListener('click', runSearch);
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+searchScope.addEventListener('change', renderFromTop);
+matchMode.addEventListener('change', renderFromTop);
+pageSizeEl.addEventListener('change', renderFromTop);
+if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop);
+prevPage.addEventListener('click', () => { currentPage--; render(); });
+nextPage.addEventListener('click', () => { currentPage++; render(); });
+resetBtn.addEventListener('click', () => {
+  q.value = '';
+  activeTerm = '';
+  FILTER_KEYS.forEach((k) => {
+    FILTER_STATE[k] = { mode: 'include', values: new Set() };
+    const panel = filterPanels[k];
+    if (panel) {
+      panel.querySelectorAll('input[type=checkbox]').forEach((cb) => { cb.checked = false; });
+      panel.querySelector('input[type=radio][value=include]').checked = true;
+      updateFilterButton(k, FILTER_ALL_LABELS[k]);
+    }
+  });
+  if (categoryFilterEl) categoryFilterEl.value = '';
+  searchScope.value = 'all';
+  matchMode.value = 'contains';
+  pageSizeEl.value = '50';
+  currentPage = 1;
+  updateColumnVisibility();
+  recomputeFilterOptions();
+  render();
+});
+updateColumnVisibility();
+
+// Loading overlay + control-disabling — see body.loading in the CSS and
+// this function's own call at the bottom of this script. Per the user,
+// 2026-08-29: not just a spinner, every interactive control actually
+// disabled (not only visually dimmed via pointer-events) so a click or
+// a keyboard Enter during the fetch window can't fire at all, and
+// nothing can double-fire once the page becomes interactive.
+const CONTROL_ELS = [q, searchBtn, resetBtn, searchScope, matchMode,
+                      pageSizeEl, prevPage, nextPage,
+                      ...FILTER_KEYS.map((k) => filterPanels[k] && filterPanels[k].querySelector('.filter-dd-btn')).filter(Boolean)];
+if (categoryFilterEl) CONTROL_ELS.push(categoryFilterEl);
+const loadOverlay = document.getElementById('loadOverlay');
+const loadMessage = document.getElementById('loadMessage');
+const loadRetryBtn = document.getElementById('loadRetryBtn');
+
+function setControlsDisabled(disabled) {
+  CONTROL_ELS.forEach((el) => { el.disabled = disabled; });
+}
+
+// url with its own last path segment (the index.json filename itself)
+// dropped, so a chunk's own bare filename (from the index it came from)
+// resolves next to it — e.g. "../data/sii/index.json" -> "../data/sii/".
+function dirOf(url) {
+  return url.slice(0, url.lastIndexOf('/') + 1);
+}
+
+async function fetchJson(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
+  return resp.json();
+}
+
+// Chunk cache (IndexedDB) -- see render_inscriptions_table's own
+// enable_chunk_cache docstring for the full design. Every function here
+// degrades silently (resolves to null/undefined, or is a no-op) if
+// IndexedDB is unavailable or any operation fails -- this is a pure
+// optimization, a page must load exactly as before if it can't be used.
+let _chunkDbPromise = null;
+function openChunkDb() {
+  if (!CHUNK_CACHE_ENABLED || typeof indexedDB === 'undefined') return Promise.resolve(null);
+  if (_chunkDbPromise) return _chunkDbPromise;
+  _chunkDbPromise = new Promise((resolve) => {
+    let req;
+    try {
+      req = indexedDB.open('hero-search-chunk-cache', 1);
+    } catch (e) {
+      resolve(null);
+      return;
+    }
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore('chunks', { keyPath: 'url' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+  return _chunkDbPromise;
+}
+
+// Resolves the cached {data} for `url` only if it's still at `modified`
+// -- any mismatch (stale, or never cached) resolves undefined, same as a
+// cache miss, so the caller always falls through to a real fetch.
+function getCachedChunk(url, modified) {
+  return openChunkDb().then((db) => new Promise((resolve) => {
+    if (!db) { resolve(undefined); return; }
+    try {
+      const req = db.transaction('chunks', 'readonly').objectStore('chunks').get(url);
+      req.onsuccess = () => {
+        const rec = req.result;
+        resolve(rec && rec.modified === modified ? rec.data : undefined);
+      };
+      req.onerror = () => resolve(undefined);
+    } catch (e) {
+      resolve(undefined);
+    }
+  }));
+}
+
+// Fire-and-forget -- a failed write just means the next visit re-fetches
+// this one chunk, never worth blocking or retrying for.
+function putCachedChunk(url, modified, data) {
+  openChunkDb().then((db) => {
+    if (!db) return;
+    try {
+      db.transaction('chunks', 'readwrite').objectStore('chunks').put({ url, modified, data });
+    } catch (e) { /* best-effort only */ }
+  });
+}
+
+// Visible purely for manual verification while this is being tested on
+// just SII's own Sanjay page (per the user, 2026-10-03) -- logged once
+// at the end of loadData() below, not used by any real logic.
+const CHUNK_CACHE_STATS = { hits: 0, misses: 0 };
+
+// `modified` is the manifest entry's own value (undefined when the cache
+// is disabled for this page, or for an older index.json predating this
+// field) -- getCachedChunk() already treats "no match" and "never
+// cached" identically, so this reads the same either way.
+async function fetchChunkJson(url, modified) {
+  if (CHUNK_CACHE_ENABLED) {
+    const cached = await getCachedChunk(url, modified);
+    if (cached !== undefined) {
+      CHUNK_CACHE_STATS.hits++;
+      return cached;
+    }
+  }
+  const data = await fetchJson(url);
+  if (CHUNK_CACHE_ENABLED) {
+    CHUNK_CACHE_STATS.misses++;
+    putCachedChunk(url, modified, data);
+  }
+  return data;
+}
+
+// DATA_URL/CATEGORIES_URL are each an index.json manifest now, not a
+// single data file — see write_shared_data_json()'s own docstring for
+// why (one file per SII volume / ARE report year, so no chunk ever
+// grows unbounded the way one flat corpus-wide file did). This fetches
+// the index, then every chunk it lists, then flattens them into the
+// same plain ROWS array the rest of this script already expects — every
+// other function (pagination, filtering, the row-detail popup, ...)
+// keeps working completely unchanged, since a flat array is a flat
+// array regardless of how many requests built it.
+async function loadData() {
+  document.body.classList.add('loading');
+  loadOverlay.hidden = false;
+  loadMessage.textContent = 'Loading data\u2026';
+  loadRetryBtn.hidden = true;
+  setControlsDisabled(true);
+  try {
+    const dataDir = dirOf(DATA_URL);
+    const dataIndex = await fetchJson(DATA_URL);
+
+    let suppByKey = null, suppCount = 0;
+    if (CATEGORIES_URL) {
+      const suppDir = dirOf(CATEGORIES_URL);
+      const suppIndex = await fetchJson(CATEGORIES_URL);
+      suppByKey = new Map(suppIndex.map((e) => [e.key, { url: suppDir + e.file, modified: e.modified }]));
+      suppCount = suppIndex.length;
+    }
+
+    // A live "Loading volume XI… (45%)" readout, not a raw "12 of
+    // 27 chunks" count — per the user, 2026-09-28: the chunk count means
+    // nothing to a reader, but the percentage and which real unit just
+    // finished both do. `total` counts every fetch this load will make
+    // (each data chunk, plus its own matching supplement chunk when
+    // there is one), bumped as each individually resolves even though
+    // they all run in parallel via Promise.all below.
+    const total = dataIndex.length + suppCount;
+    let done = 0;
+    function noteProgress(label) {
+      done++;
+      const pct = total ? Math.round((done / total) * 100) : 100;
+      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+    }
+
+    // One chunk fetched (data + its own matching supplement, if any) at
+    // a time, in parallel across every chunk — each merge is strictly
+    // LOCAL to its own chunk's array indices, never a global row index
+    // (see write_supplement_json()'s own docstring for why that stopped
+    // being safe once chunking split the data into separate arrays:
+    // index 0 now means "first row of THIS chunk", a different row in
+    // every chunk, not a single corpus-wide position).
+    const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
+      const chunkRows = await fetchChunkJson(dataDir + entry.file, entry.modified);
+      noteProgress(entry.key);
+      const supp = suppByKey && suppByKey.get(entry.key);
+      if (supp) {
+        const suppData = await fetchChunkJson(supp.url, supp.modified);
+        noteProgress(entry.key);
+        // cells/text/filters are Object.assign'd in (not overwritten
+        // wholesale) since the shared chunk already has its own
+        // non-excluded keys for this row that must survive the merge.
+        Object.keys(suppData).forEach((localIdx) => {
+          const s = suppData[localIdx];
+          const row = chunkRows[localIdx];
+          if (s.spans) row.spans = s.spans;
+          if (s.categories) row.categories = s.categories;
+          if (s.cells) Object.assign(row.cells, s.cells);
+          if (s.text) Object.assign(row.text, s.text);
+          if (s.filters) Object.assign(row.filters, s.filters);
+        });
+      }
+      return chunkRows;
+    }));
+    const data = chunkArrays.flat();
+    if (CHUNK_CACHE_ENABLED) {
+      console.log('[chunk-cache] ' + CHUNK_CACHE_STATS.hits + ' from cache, ' +
+                  CHUNK_CACHE_STATS.misses + ' fetched over the network');
+    }
+
+    data.forEach((r) => {
+      if (!r.spans) r.spans = {};
+      if (!r.categories) r.categories = [];
+    });
+    ROWS = data;
+    // stable_key -> ROWS index, for jumpToKey() and the row-detail
+    // popup's own row lookup, both below. Built once here, not per-use,
+    // since ROWS never changes after load. Keyed on each row's own real
+    // ``id`` field (write_shared_data_json's own top-level "id", NOT
+    // r.text.id — see buildRow()'s tr.dataset.key comment for why that
+    // collided on one shared, wrong value for every row).
+    STABLE_KEY_INDEX = new Map(ROWS.map((r, i) => [r.id || '', i]));
+    loadOverlay.hidden = true;
+    document.body.classList.remove('loading');
+    setControlsDisabled(false);
+    // Defensive, not currently load-bearing: FILTER_STATE has nothing
+    // pre-checked before data loads today, so the one-time top-level
+    // updateColumnVisibility() call earlier in this script already left
+    // column widths correct. Re-running it here costs nothing and keeps
+    // this render() call self-sufficient if a future change ever makes a
+    // filter pre-select itself (a URL param, a saved view) before this
+    // first paint.
+    updateColumnVisibility();
+    recomputeFilterOptions();
+    render();
+    // A cross-reference click on the OTHER corpus's page (jumpToKey()
+    // below) navigates here with ?jump=<stable_key> rather than trying
+    // to fetch/merge this page's data itself — simplest thing that
+    // works, and keeps the public/Sanjay data-fetch boundary exactly as
+    // it already is. Handled only after the real render() above, so the
+    // jump lands on a fully-painted, unfiltered table.
+    const jumpKey = new URLSearchParams(location.search).get('jump');
+    if (jumpKey) jumpToKey(jumpKey);
+  } catch (err) {
+    // Any one chunk's fetch failing (a flaky connection, a 404 from a
+    // stale index) throws the same way the old single-file fetch did —
+    // one clear error and a Retry button, never a silently partial
+    // table with some chunks missing.
+    loadMessage.textContent = 'Could not load data: ' + err.message;
+    loadRetryBtn.hidden = false;
+  }
+}
+loadRetryBtn.addEventListener('click', loadData);
+loadData();
+
+// stable_key -> ROWS index (see loadData() above for when this is
+// built) and jumpToKey()/the xref-link click handler that uses it —
+// per the user, 2026-08-30: a "Published in ..." citation that
+// resolves to another record this project holds should be a real,
+// tappable link (works on mobile, where hover does nothing), same-page
+// or cross-page depending on which corpus it names.
+let STABLE_KEY_INDEX = new Map();
+
+function jumpToKey(key) {
+  const idx = STABLE_KEY_INDEX.get(key);
+  if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  // Clear every filter so the target can't be hidden by whatever view
+  // state the reader was in — a citation jump is "take me to this
+  // record", not "take me to this record if it happens to still match
+  // your search". Same fields resetBtn's own handler clears.
+  activeTerm = '';
+  q.value = '';
+  matchMode.value = 'contains';
+  searchScope.value = 'all';
+  if (categoryFilterEl) categoryFilterEl.value = '';
+  FILTER_KEYS.forEach((k) => {
+    FILTER_STATE[k] = { mode: 'include', values: new Set() };
+    const panel = filterPanels[k];
+    if (panel) {
+      panel.querySelectorAll('input[type=checkbox]').forEach((cb) => { cb.checked = false; });
+      panel.querySelector('input[type=radio][value=include]').checked = true;
+      updateFilterButton(k, FILTER_ALL_LABELS[k]);
+    }
+  });
+  updateColumnVisibility();
+  recomputeFilterOptions();
+  // With every filter cleared, `matches` in render() is ROWS in its
+  // original order, so the target's page follows directly from its
+  // index — no need to re-derive position from the DOM.
+  currentPage = Math.floor(idx / pageSizeValue()) + 1;
+  render();
+  requestAnimationFrame(() => {
+    const tr = tbody.querySelector('tr[data-key="' + CSS.escape(key) + '"]');
+    if (!tr) return;
+    tr.scrollIntoView({behavior: 'smooth', block: 'center'});
+    tr.classList.add('xref-target');
+    setTimeout(() => tr.classList.remove('xref-target'), 2600);
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button.xref-link');
+  if (!b) return;
+  e.preventDefault();
+  const key = b.dataset.key;
+  if (b.dataset.corpus === CURRENT_CORPUS) {
+    jumpToKey(key);
+  } else if (OTHER_CORPUS_URL) {
+    location.href = OTHER_CORPUS_URL + '?jump=' + encodeURIComponent(key);
+  }
+});
+
+// Click-to-copy the ID chip — execCommand is tried first, deliberately:
+// these pages are opened from file://, where navigator.clipboard exists
+// but writeText can throw synchronously rather than rejecting, so a
+// .then(ok, fail) chain never reaches its failure handler and nothing is
+// copied, silently. The deprecated path is the one that actually works
+// locally; the async API is the fallback, not the default. If both fail
+// the id is left selected, so Ctrl+C still works.
+//
+// Delegated on `document` (2026-08-28, was a per-button querySelectorAll
+// binding) — idchip buttons are now built fresh by buildRow() on every
+// paint (only the current page's rows exist in the DOM at all), so a
+// one-time binding at load would find nothing yet and a rebinding after
+// every render() would be wasted duplicate work. Same reasoning already
+// applied to the citation tap-to-reveal and "Read more" button below.
+(function () {
+  function flash(b, msg) {
+    const was = b.dataset.label || b.textContent;
+    b.dataset.label = was;
+    b.classList.add('copied');
+    b.textContent = msg;
+    // 1.8s, not the original 1s -- the flashed text is now often the
+    // full stable_id (15+ characters on this project's longer keys),
+    // which needs more than a flash of a screen to actually read on a
+    // tap, not just enough to notice something happened.
+    setTimeout(() => { b.classList.remove('copied'); b.textContent = b.dataset.label; }, 1800);
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectOnly(b) {
+    const r = document.createRange();
+    r.selectNodeContents(b);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  // The flashed message on a successful copy is the real stable_id text
+  // itself, not a generic "copied" word — per the user, 2026-09-28: a
+  // touchscreen has no hover, so tapping the icon is the ONLY way a
+  // touch reader ever sees the full ID at all, and this same click
+  // already has to fire for the copy to work, so no second gesture
+  // (long-press, a separate reveal button) is needed to satisfy both at
+  // once. Desktop readers get the same full text on hover via the
+  // button's own `title` attribute (set in id_chip_html()) without
+  // needing to click anything first.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.idchip');
+    if (!b) return;
+    e.preventDefault();
+    const id = b.dataset.id;
+    if (legacyCopy(id)) { flash(b, id); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(
+          () => flash(b, id),
+          () => { selectOnly(b); flash(b, 'press Ctrl+C'); }
+        );
+        return;
+      }
+    } catch (err) { /* fall through to selection */ }
+    selectOnly(b);
+    flash(b, 'press Ctrl+C');
+  });
+})();
+
+// Page-image popup — one lightbox shared by every "View page" button on
+// the page, per page_image_button_cell()'s data-images attribute (a
+// comma-separated list of image paths, in page order). Runs even when
+// no such button exists on this particular page (ARE today) — the
+// querySelectorAll below just finds nothing and nothing happens.
+(function() {
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbImgWrap = document.getElementById('lbImgWrap');
+  const lbZoomLevel = document.getElementById('lbZoomLevel');
+  const lbPageIndicator = document.getElementById('lbPageIndicator');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
+  const lbRowLabel = document.getElementById('lbRowLabel');
+
+  let images = [];
+  let idx = 0;
+  let zoom = 1;
+  const ZOOM_MIN = 0.25, ZOOM_MAX = 5, ZOOM_STEP = 0.25;
+
+  // page_image_button_cell()'s own data-images paths are relative to
+  // Web/'s own root (e.g. "images/sii/XVIII/p0142.jpg") -- correct as
+  // an <img src> on the public page (Web/SII-Inscriptions.html, same
+  // directory as images/), but this exact row data is ALSO reused
+  // verbatim on the Sanjay copy (Web/Sanjay/SII-Inscriptions.html, one
+  // directory deeper) -- confirmed live, 2026-09-20: every "View page"
+  // image 404'd there because the browser resolved the same relative
+  // path against the wrong base. IMAGE_BASE is a build-time constant
+  // (render_inscriptions_table's own image_base param, computed by
+  // each build script from its own --out path relative to Web/'s
+  // root) -- deliberately NOT sniffed from location.pathname at
+  // runtime (a '/Sanjay/'-in-the-URL check would silently break for
+  // any future page nested deeper than one level), so this stays
+  // correct for wherever a build script actually places its output.
+  const IMAGE_BASE = "";
+  function resolveImagePath(p) { return IMAGE_BASE + p; }
+
+  function applyZoom() {
+    lbImg.style.transform = 'scale(' + zoom + ')';
+    lbZoomLevel.textContent = Math.round(zoom * 100) + '%';
+  }
+  function setZoom(z) {
+    zoom = Math.min(Math.max(z, ZOOM_MIN), ZOOM_MAX);
+    applyZoom();
+  }
+  function show() {
+    lbImg.src = resolveImagePath(images[idx]);
+    lbPageIndicator.textContent = images.length > 1 ? (idx + 1) + ' / ' + images.length : '';
+    lbPrev.style.display = images.length > 1 ? '' : 'none';
+    lbNext.style.display = images.length > 1 ? '' : 'none';
+    zoom = 1;
+    applyZoom();
+    lbImgWrap.scrollTop = 0;
+    lbImgWrap.scrollLeft = 0;
+  }
+  function openLightbox(imgList, rowLabel) {
+    images = imgList;
+    idx = 0;
+    lbRowLabel.textContent = rowLabel || '';
+    show();
+    lightbox.hidden = false;
+  }
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lbImg.src = '';
+  }
+  function step(delta) {
+    idx = (idx + delta + images.length) % images.length;
+    show();
+  }
+
+  // Delegated (2026-08-28, was a per-button querySelectorAll binding) —
+  // same reason as the idchip binding above: these buttons are only
+  // ever in the DOM for the current page's rows.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.page-img-btn');
+    if (!b) return;
+    openLightbox(b.dataset.images.split(','), b.dataset.rowLabel);
+  });
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', () => step(-1));
+  lbNext.addEventListener('click', () => step(1));
+  document.getElementById('lbZoomIn').addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
+  document.getElementById('lbZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
+  document.getElementById('lbZoomReset').addEventListener('click', () => setZoom(1));
+
+  // Click anywhere outside the toolbar/image (i.e. directly on the dark
+  // overlay backdrop) closes the popup — per the user.
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.hidden) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft' && images.length > 1) step(-1);
+    else if (e.key === 'ArrowRight' && images.length > 1) step(1);
+    else if (e.key === '+' || e.key === '=') setZoom(zoom + ZOOM_STEP);
+    else if (e.key === '-') setZoom(zoom - ZOOM_STEP);
+  });
+
+  // Ctrl/Cmd + wheel to zoom — a reader studying a diacritic closely will
+  // likely reach for the wheel before the toolbar buttons.
+  lbImgWrap.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+  }, { passive: false });
+})();
+
+// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
+// .cite-hint span, and CSS above. `title` gives a real tooltip on a
+// mouse hover already; a touchscreen has no hover at all, so a tap
+// toggles a visible inline line under the word instead — added
+// 2026-08-25, per the user. Delegated on `document` rather than bound
+// per-span, since highlightCell() can rebuild a cell's markup (from its
+// own saved original) on every search, which would otherwise leave a
+// freshly-restored .cite-hint with no listener attached.
+document.addEventListener('click', (e) => {
+  const hint = e.target.closest('.cite-hint');
+  if (!hint) return;
+  const next = hint.nextElementSibling;
+  if (next && next.classList.contains('cite-hint-reveal')) {
+    next.remove();
+    return;
+  }
+  const reveal = document.createElement('span');
+  reveal.className = 'cite-hint-reveal';
+  reveal.textContent = hint.getAttribute('title') || '';
+  hint.insertAdjacentElement('afterend', reveal);
+});
+
+// Remarks-column truncation — see clamp_remarks_html(). Only the
+// "Read more" button's visibility is decided in JS; the clamp itself is
+// pure CSS. Run per-row, only for rows actually on the current page
+// (render()'s paint loop) — scrollHeight is meaningless on a
+// display:none row, and re-checking every row in the table on every
+// keystroke would be wasted work at full table size.
+function updateRemarksClamp(cell) {
+  const clampEl = cell.querySelector('.remarks-clamp');
+  const btn = cell.querySelector('.remarks-more-btn');
+  if (!clampEl || !btn) return;
+  // +1px fudge for sub-pixel rounding between scrollHeight/clientHeight
+  // on some browsers' zoom levels — without it a handful of borderline
+  // rows flip the button on and off depending on font rendering.
+  btn.hidden = clampEl.scrollHeight <= clampEl.clientHeight + 1;
+}
+
+(function() {
+  const modal = document.getElementById('remarksModal');
+  const modalBody = document.getElementById('remarksModalBody');
+  const modalClose = document.getElementById('remarksModalClose');
+
+  function openRemarksModal(html) {
+    modalBody.innerHTML = html;
+    modal.hidden = false;
+  }
+  function closeRemarksModal() {
+    modal.hidden = true;
+    modalBody.innerHTML = '';
+  }
+  modalClose.addEventListener('click', closeRemarksModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRemarksModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeRemarksModal();
+  });
+  // Delegated for the same reason the citation tap-to-reveal is: a
+  // .remarks-more-btn can be (re)painted by render() at any time, so a
+  // per-button listener would go stale.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remarks-more-btn');
+    if (!btn) return;
+    const clampEl = btn.previousElementSibling;
+    if (!clampEl) return;
+    openRemarksModal(clampEl.innerHTML);
+  });
+})();
+
+// Full-row detail popup — click anywhere on a row (that isn't one of
+// its own buttons: the ID copy chip, a page-image button, a "Read more"
+// button, or a cross-reference link, each already handled elsewhere) to
+// see every field, not just the currently-visible columns. Per the
+// user, 2026-09-28: labeled explicitly ("Unique ID: ...", "Language:
+// ...", ...), Remarks given most of the popup's own space.
+(function() {
+  const modal = document.getElementById('rowDetailModal');
+  const modalBody = document.getElementById('rowDetailModalBody');
+  const modalClose = document.getElementById('rowDetailModalClose');
+
+  function fieldLabel(key) {
+    return key === 'id' ? 'Unique ID' : (COLUMN_HEADERS[key] || key);
+  }
+
+  // The remarks cell's own HTML is wrapped in the 5-line CSS clamp (see
+  // remarks_cell_html()) — the popup wants the full text unclamped, the
+  // same content the "Read more" button already opens, so this pulls
+  // straight out of .remarks-clamp rather than duplicating that markup.
+  function fullRemarksHtml(cellHtml) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = cellHtml || '';
+    const clamp = tmp.querySelector('.remarks-clamp');
+    return clamp ? clamp.innerHTML : tmp.innerHTML;
+  }
+
+  function appendNotAvailable(dd) {
+    const na = document.createElement('span');
+    na.className = 'row-detail-na';
+    na.textContent = 'Not available';
+    dd.appendChild(na);
+  }
+
+  // Per the user, 2026-10-02: the popup is now ALWAYS tabbed, "Details"
+  // first (active by default) and "Remarks" as its own separate tab
+  // right after it — reverting the 2026-09-30 change that put Remarks
+  // unconditionally at the TOP of the popup, which (for a record with
+  // many fields) pushed every quick fact down below a long block of
+  // narration the reader didn't necessarily come to read first. Remarks
+  // can be lengthy enough to need its own scroll, which is exactly what
+  // a tab panel (.row-detail-tab-content's own max-height+overflow-y)
+  // already gives every `popup_tab` column — Remarks is now built the
+  // same way instead of as a special-cased always-visible section, and
+  // any real `popup_tab` columns (a full inscription transcription, a
+  // citation list) still follow it as further tabs.
+  // The popup marks the active search term (or the selected category's
+  // spans) in EVERY field, not just the table's highlightable columns --
+  // the search itself checks every column, and a match that only lives
+  // in a popup_tab field (Commentary, English Transliteration...) had
+  // nothing on screen to explain it. Per the user, 2026-10-24 (was
+  // inserting raw cell HTML, never highlighted). Returns whether
+  // anything got marked, so the tab holding it can be flagged.
+  function popupRanges(row, key) {
+    const catVal = categoryFilterEl ? categoryFilterEl.value : '';
+    if (catVal) {
+      const spans = row.spans[key];
+      return spans ? spans.filter((s) => s[2] === catVal).map((s) => [s[0], s[1]]) : null;
+    }
+    if (!activeTerm) return null;
+    const scope = searchScope.value;
+    if (scope !== 'all' && ('col-' + key) !== scope) return null;
+    return textRanges(foldDiacritics(row.text[key] || ''), makeMatcher(foldDiacritics(activeTerm), matchMode.value));
+  }
+  function fillHighlighted(el, row, key, html) {
+    const ranges = popupRanges(row, key);
+    markRanges(el, html, ranges);
+    return !!(ranges && ranges.length);
+  }
+
+  function openRowDetailModal(row) {
+    modalBody.innerHTML = '';
+
+    const tabs = [];
+    let detailsMatch = false;
+
+    const factsGrid = document.createElement('div');
+    factsGrid.className = 'row-detail-facts';
+    COLUMN_KEYS.forEach((key) => {
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
+      const html = row.cells[key];
+      const field = document.createElement('div');
+      field.className = 'row-detail-field';
+      const dt = document.createElement('div');
+      dt.className = 'row-detail-label';
+      dt.textContent = fieldLabel(key) + ':';
+      const dd = document.createElement('div');
+      dd.className = 'row-detail-value';
+      // Every field is listed, even when this record has nothing for it
+      // -- per the user, 2026-09-28: seeing "Language: Not available" is
+      // itself information (this record was checked and genuinely has
+      // none), which an omitted row can't convey nearly as clearly.
+      // Muted/italic, not the same color as a real value, so the two are
+      // never mistaken for each other at a glance.
+      if (html) {
+        if (fillHighlighted(dd, row, key, html)) detailsMatch = true;
+      } else {
+        appendNotAvailable(dd);
+      }
+      // The ID field's own cell is just the tag-glyph copy button (its
+      // real text lives only in a title/data-id attribute) -- per the
+      // user, 2026-09-28: show the complete ID as plain, readable text
+      // right next to the icon, not hidden behind a hover/tap.
+      if (key === 'id' && row.id) {
+        const idText = document.createElement('code');
+        idText.className = 'row-detail-id-text';
+        idText.textContent = row.id;
+        dd.appendChild(idText);
+      }
+      field.appendChild(dt);
+      field.appendChild(dd);
+      factsGrid.appendChild(field);
+    });
+    tabs.push({ key: '__details__', label: 'Details', el: factsGrid, hit: detailsMatch });
+
+    // Remarks and every popup_tab field (Commentary, English Transliteration,
+    // ...) now only become their own tab when they actually have content --
+    // per the user, 2026-10-06: an empty tab a reader clicks into just to
+    // find "Not available" (the Details grid already says that for every
+    // field, inline) wasn't worth a whole tab of its own. Unlike Details'
+    // own per-FIELD "Not available" (still shown there -- "checked, nothing
+    // there" is real information worth keeping inline), a popup TAB is a
+    // bigger ask (a click) for the same non-answer, so it's omitted
+    // entirely here instead. One shared change, both audiences (Sanjay and
+    // public both run this same shell) -- not a per-corpus setting.
+    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+      const body = document.createElement('div');
+      body.className = 'row-detail-remarks-body';
+      // row.text's offsets start with the clamped text, so they line up
+      // with the unclamped inner HTML too (the button text comes after).
+      const hit = fillHighlighted(body, row, REMARKS_KEY, fullRemarksHtml(row.cells[REMARKS_KEY]));
+      tabs.push({ key: REMARKS_KEY, label: fieldLabel(REMARKS_KEY), el: body, hit });
+    }
+
+    POPUP_TAB_KEYS.forEach((key) => {
+      const html = row.cells[key];
+      if (!html) return;
+      const body = document.createElement('div');
+      const hit = fillHighlighted(body, row, key, html);
+      tabs.push({ key, label: fieldLabel(key), el: body, hit });
+    });
+
+    const tabsWrap = document.createElement('div');
+    tabsWrap.className = 'row-detail-tabs';
+    const tabBar = document.createElement('div');
+    tabBar.className = 'row-detail-tab-bar';
+    const tabContent = document.createElement('div');
+    tabContent.className = 'row-detail-tab-content';
+
+    function showTab(key) {
+      Array.from(tabBar.children).forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.key === key);
+      });
+      tabContent.innerHTML = '';
+      const tab = tabs.find((t) => t.key === key);
+      if (tab) tabContent.appendChild(tab.el);
+    }
+
+    tabs.forEach((tab) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-detail-tab-btn';
+      btn.dataset.key = tab.key;
+      btn.textContent = tab.label;
+      // Flag every tab holding a match (per the user, 2026-10-24), so a
+      // hit in a tab other than the open one isn't missed.
+      if (tab.hit) {
+        btn.classList.add('has-match');
+        btn.title = 'Contains the search match';
+      }
+      btn.addEventListener('click', () => showTab(tab.key));
+      tabBar.appendChild(btn);
+    });
+    tabsWrap.appendChild(tabBar);
+    tabsWrap.appendChild(tabContent);
+    modalBody.appendChild(tabsWrap);
+    // Details stays first unless it has no match and another tab does.
+    const firstHit = tabs[0].hit ? tabs[0] : tabs.find((t) => t.hit);
+    showTab((firstHit || tabs[0]).key);
+
+    modal.hidden = false;
+  }
+  function closeRowDetailModal() {
+    modal.hidden = true;
+    modalBody.innerHTML = '';
+  }
+  modalClose.addEventListener('click', closeRowDetailModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRowDetailModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeRowDetailModal();
+  });
+  tbody.addEventListener('click', (e) => {
+    // A row's own interactive elements (idchip, page-img-btn,
+    // remarks-more-btn, xref-link) are all <button>s with their own
+    // handlers -- let those run instead of also opening this popup.
+    if (e.target.closest('button')) return;
+    // Don't hijack a text selection someone just finished dragging out
+    // of a cell to copy -- a real click leaves nothing selected.
+    if (window.getSelection().toString()) return;
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    const idx = STABLE_KEY_INDEX.get(tr.dataset.key);
+    if (idx === undefined) return;
+    openRowDetailModal(ROWS[idx]);
+  });
+})();
+// Public pages only (subscribe_link_html is empty, so this element
+// doesn't exist, on every Sanjay page) -- fires on click without
+// blocking the default target="_blank" navigation, same convention as
+// index.html's own feedbackLink tracking.
+(function() {
+  const subscribeLink = document.getElementById('subscribeLink');
+  if (subscribeLink) {
+    subscribeLink.addEventListener('click', function() {
+      if (typeof gtag === 'function') gtag('event', 'subscribe_click');
+    });
+  }
+})();
+</script>
+</body>
+</html>
