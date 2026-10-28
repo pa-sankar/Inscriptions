@@ -148,6 +148,14 @@
     background: none; border: none; cursor: pointer; color: var(--text-dim);
   }
   .row-detail-close:hover { color: var(--text); }
+  .help-box { max-width: 44rem; font-size: 14px; line-height: 1.55; }
+  .help-box h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+  .help-box h3 { margin: 1rem 0 0.3rem; font-size: 1rem; }
+  .help-box ul { margin: 0.2rem 0; padding-left: 1.2rem; }
+  .help-btn {
+    font: inherit; font-size: 13px; cursor: pointer; border-radius: 999px; padding: 2px 12px;
+    border: 1px solid var(--accent-strong); background: var(--surface); color: var(--accent-strong);
+  }
   .row-detail-field {
     display: grid; grid-template-columns: 9rem 1fr; gap: 0.4rem 0.75rem;
     padding: 0.3rem 0; border-bottom: 1px solid var(--border); align-items: baseline;
@@ -190,6 +198,9 @@
   <div class="sub-head">Cross-corpus search across South Indian Inscriptions, Annual Reports on Indian Epigraphy, Epigraphia Carnatica, Tamil Nadu Inscriptions, Epigraphia Telanganica, Epigraphia Andhrica, Karnatak Inscriptions, Travancore Archaeological Series.</div>
   <div class="scope-note">
     <strong>Sanjay view:</strong> every loaded corpus; the public page searches only the corpora live there. <strong>Filters</strong>: Dynasty, District, State, Century, Language, Material and Type dropdowns, plus King and Place text boxes, all combine with the keyword (TrAS has no dropdown buckets yet, so a dropdown filter leaves it out). Clicking a bar or cell on <a href="AtAGlance.html">At a Glance</a> opens this page filtered to exactly the records it counted (century, state, district, dynasty, language, material, type); remove a filter with its ×. <strong>Click a row for every field</strong> &mdash; the table only shows what's needed to identify and skim a row, keeping room for Remarks.
+    <p>New here? Pick a corpus, narrow with any of the category lists or the King and Place boxes, add a
+      keyword if you like, and click a row for the full record.
+      <button type="button" class="help-btn" id="helpOpen">How to use these filters</button></p>
   </div>
 
   <div class="controls">
@@ -259,7 +270,60 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-28 09:57 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 10:14 via <code>scripts/build_advanced_search.py</code>.</footer>
+</div>
+
+<div class="row-detail-overlay" id="helpModal" hidden>
+  <div class="row-detail-box help-box" role="dialog" aria-labelledby="helpTitle">
+    <button type="button" class="row-detail-close" id="helpClose" aria-label="Close">&times;</button>
+    <h2 id="helpTitle">How to use Advanced Search</h2>
+    <p>One search across every corpus on this page. Every control below narrows the results, and they all
+      combine: a record must match <em>all</em> of them. Leave a control blank (or on &ldquo;Any&rdquo;) to ignore it.</p>
+    <h3>1. Choose where to look</h3>
+    <ul>
+      <li><b>Corpora</b> &mdash; untick a corpus to leave it out.</li>
+      <li><b>Volume / range</b> &mdash; one volume (<code>IV</code> or <code>4</code>), a range (<code>4-10</code>),
+        or for the Annual Reports a year (<code>1928-29</code>) or range of years.</li>
+    </ul>
+    <h3>2. Narrow by category</h3>
+    <ul>
+      <li><b>Dynasty</b>, <b>District</b>, <b>State</b>, <b>Century</b>, <b>Language</b>, <b>Material</b>
+        (copper plate or stone and other), and where shown <b>Type</b> (hero-stone / sati-stone) &mdash; pick
+        a value from the list. Choosing one runs the search straight away.</li>
+      <li>These use the same groupings as the <a href="AtAGlance.html">At a Glance</a> charts: all spellings of
+        a dynasty are grouped together, and the century comes from the record&rsquo;s first convertible date.
+        A record whose dynasty or date the source does not give will not appear under any value.</li>
+    </ul>
+    <h3>3. Narrow by name</h3>
+    <ul>
+      <li><b>King</b> &mdash; part of a king&rsquo;s name, e.g. <code>Rajaraja</code>. Checked against the King
+        field (and Dynasty, where a corpus records the king there).</li>
+      <li><b>Place</b> &mdash; part of a village, taluk or district name, e.g. <code>Hunsur</code>. Checked
+        against every place field the record has.</li>
+      <li>Both ignore capitals and diacritics: <code>hoysala</code> finds <em>Hoysa&#7735;a</em>.</li>
+    </ul>
+    <h3>4. Search the text</h3>
+    <ul>
+      <li><b>Keyword</b> searches every field of the record, including Remarks and its ID; press Enter or
+        <b>Search</b>.</li>
+      <li><b>Match</b>: <em>Partial</em> (default) finds words starting with your term; <em>Embedded</em> finds it
+        anywhere, even inside a longer word; <em>Full word</em> finds only the exact word.</li>
+    </ul>
+    <h3>5. Read the results</h3>
+    <ul>
+      <li>The table keeps to what identifies a record. <b>Click a row</b> for every field; your search terms
+        are highlighted there, and a tab holding a match is marked in yellow.</li>
+      <li>Results arrive corpus by corpus; the count at the top is final once loading reaches 100%.</li>
+      <li><b>Clear</b> resets everything. The page&rsquo;s address can carry filters, which is how a click on an
+        At a Glance chart opens a ready-made search.</li>
+    </ul>
+    <h3>Examples</h3>
+    <ul>
+      <li>Hoysa&#7735;a copper plates: Dynasty <i>Hoysa&#7735;a</i>, Material <i>Copper plate</i>.</li>
+      <li>12th-century records mentioning a temple near Belur: Century <i>12th</i>, Place <code>Belur</code>,
+        Keyword <code>temple</code>.</li>
+    </ul>
+  </div>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -694,6 +758,28 @@ function applyUrl() {
   return true;
 }
 
+// Google Analytics: which filters people use (2026-10-28, per the user).
+// Category values and whether a keyword/King/Place was given -- never the
+// typed text itself. Register the filter_* parameters as custom dimensions
+// in GA (Admin > Custom definitions) to report on them.
+function trackSearch(corpora, range, keyword, mode, facets, ft) {
+  if (typeof gtag !== 'function') return;
+  const ev = {corpora: corpora.join(','), corpus_count: corpora.length,
+    filters_used: Object.keys(facets).concat(ft.king ? ['king'] : [], ft.place ? ['place'] : [],
+      range ? ['volume'] : [], keyword ? ['keyword'] : []).join(',') || 'none',
+    match_mode: mode};
+  Object.entries(facets).forEach(([d, v]) => { ev['filter_' + d] = v; });
+  gtag('event', 'advanced_search', ev);
+}
+const helpModal = document.getElementById('helpModal');
+document.getElementById('helpOpen').addEventListener('click', () => {
+  helpModal.hidden = false;
+  if (typeof gtag === 'function') gtag('event', 'help_open', {page_help: 'advanced_search'});
+});
+document.getElementById('helpClose').addEventListener('click', () => { helpModal.hidden = true; });
+helpModal.addEventListener('click', (e) => { if (e.target === helpModal) helpModal.hidden = true; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') helpModal.hidden = true; });
+
 async function runSearch() {
   const corpora = checkedCorpora();
   const summary = document.getElementById('resultSummary');
@@ -714,6 +800,7 @@ async function runSearch() {
   currentFieldTerms = [ft.king, ft.place].filter(Boolean);
   currentSearchTerm = keyword;
   currentSearchMode = mode;
+  trackSearch(corpora, range, keyword, mode, facets, ft);
   currentTerm = keyword;
   currentMode = mode;
   summary.textContent = 'Loading\u2026';
