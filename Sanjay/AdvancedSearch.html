@@ -259,7 +259,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-28 09:33 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 09:57 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -630,7 +630,8 @@ async function loadFacetFile(corpus, file) {
   return {dims: shared.dims.concat(extra.dims), vocab: shared.vocab.concat(extra.vocab),
           rows: shared.rows.map((r, i) => r.concat(extra.rows[i]))};
 }
-// One dropdown per dim, over the values in this page's own corpora:
+// One dropdown per dim, over the values in this page's own corpora (no
+// counts: static totals misled once other filters were set, 2026-10-28):
 // alphabetical like every other dropdown (2026-10-24, per the user),
 // centuries in order. Type comes from the Sanjay overlay only.
 async function loadFacetIndex() {
@@ -651,8 +652,7 @@ async function loadFacetIndex() {
     const g = document.createElement('div'); g.className = 'ctrl-group';
     g.innerHTML = '<label class="group-label" for="facet_' + d + '">' + FACET_NAMES[d] + '</label>' +
       '<select id="facet_' + d + '"><option value="">Any</option>' +
-      vals.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(facetValueLabel(d, v)) +
-        ' (' + counts[d][v].toLocaleString() + ')</option>').join('') + '</select>' +
+      vals.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(facetValueLabel(d, v)) + '</option>').join('') + '</select>' +
       (SELECT_HINTS[d] ? '<div class="hint">' + SELECT_HINTS[d] + '</div>' : '');
     box.appendChild(g);
     facetSelect(d).addEventListener('change', () => { delete urlFacets[d]; paintFacetChips(); runSearch(); });
