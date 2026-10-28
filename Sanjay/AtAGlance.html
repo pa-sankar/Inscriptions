@@ -47,6 +47,8 @@
           border-radius: 999px; padding: 4px 12px; cursor: pointer; font: inherit; font-size: 13px; }
   .chip[aria-pressed="true"] { background: var(--accent-strong); color: var(--surface); border-color: var(--accent-strong); }
   .chip.link { background: none; border-style: dashed; }
+  .howto { margin: 12px 0 4px; padding: 10px 14px; border-left: 4px solid var(--accent-strong);
+           background: var(--surface-2); border-radius: 6px; font-size: 14px; line-height: 1.5; }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
   .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
   .kpi b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
@@ -99,11 +101,18 @@
   <h1>At a Glance</h1>
   <div class="sub-head">94,028 records across 7 corpora: what the published record covers, by century, place, dynasty and kind.</div>
   <div class="sub-head note"><strong>Sanjay view:</strong> every loaded corpus. The public page (release 1.4) will count only the corpora live there.</div>
+  <div class="howto" role="note">
+    <b>Every bar is a link.</b> Click or tap any bar (or a table row, or a cell in the corpus &times; century
+    grid) to open <a href="AdvancedSearch.html">Advanced Search</a> already filtered to exactly those
+    inscriptions, with the same corpora selected, so its result count matches the number on the bar.
+    From there you can narrow further with a keyword or the other filters, and open any record for its full
+    text. Hover a bar to see its count first. Want a chart of your own? Jump to <a href="#explore">Explore</a>.
+  </div>
   <div class="chips" id="chips" role="group" aria-label="Corpora counted"></div>
   <div class="kpis" id="kpis"></div>
   <h2>At a glance</h2>
   <div class="charts" id="charts"></div>
-  <h2>Explore</h2>
+  <h2 id="explore">Explore</h2>
   <p class="note">Build your own chart: choose what to count by, add any filters, then click a bar to list
     those records in Advanced Search. Follows the corpus buttons above.
     <button type="button" class="help-btn" id="xHelpOpen">How to make a custom chart</button></p>
@@ -150,7 +159,7 @@
     <li><b>Copper plate:</b> ARE's Copper Plate section, or "copper plate" in the place or the start of Remarks. <b>Hero-stone / Sati-stone:</b> the hero-stone word-list classification shown in each corpus page's Type column (Sanjay pages for SII and ARE).</li>
     <li>These are counts of what survives and was published, not of what was carved: a district looks dense where a survey was thorough.</li>
   </ul>
-  <footer>Sanjay review area. Generated 2026-10-28 10:14 via <code>scripts/build_at_a_glance.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 11:50 via <code>scripts/build_at_a_glance.py</code>.</footer>
 </div>
 <div id="tip" role="tooltip"></div>
 <script>
@@ -395,6 +404,24 @@ function xShowValues(d) {   // live counts: rows matching the other filters
 
 render();
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 150); });
+</script>
+<button type="button" id="backToTop" aria-label="Back to top" title="Back to top">&#8593;</button>
+<style>
+  #backToTop { position: fixed; right: 18px; bottom: 18px; z-index: 900; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(0,0,0,.15); background: #3f5a3c; color: #fff;
+    font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #backToTop.show { opacity: .9; pointer-events: auto; }
+  #backToTop:hover, #backToTop:focus-visible { opacity: 1; }
+  @media print { #backToTop { display: none; } }
+</style>
+<script>
+(function () {
+  var b = document.getElementById('backToTop');
+  function upd() { b.classList.toggle('show', window.scrollY > window.innerHeight); }
+  window.addEventListener('scroll', upd, {passive: true}); upd();
+  b.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
+})();
 </script>
 </body>
 </html>

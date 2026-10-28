@@ -273,7 +273,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-10-28 10:14.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-10-28 11:49.</footer>
 </div>
 
 <div class="row-detail-overlay" id="helpModal" hidden>
@@ -1127,6 +1127,24 @@ function closeRowDetailModal() {
 }
 
 loadFacetIndex().then(() => { if (applyUrl()) runSearch(); });
+</script>
+<button type="button" id="backToTop" aria-label="Back to top" title="Back to top">&#8593;</button>
+<style>
+  #backToTop { position: fixed; right: 18px; bottom: 18px; z-index: 900; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(0,0,0,.15); background: #3f5a3c; color: #fff;
+    font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #backToTop.show { opacity: .9; pointer-events: auto; }
+  #backToTop:hover, #backToTop:focus-visible { opacity: 1; }
+  @media print { #backToTop { display: none; } }
+</style>
+<script>
+(function () {
+  var b = document.getElementById('backToTop');
+  function upd() { b.classList.toggle('show', window.scrollY > window.innerHeight); }
+  window.addEventListener('scroll', upd, {passive: true}); upd();
+  b.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
+})();
 </script>
 </body>
 </html>
