@@ -532,6 +532,14 @@
   .row-detail-tab-btn.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
   /* Tab holding a search match: same fixed yellow as <mark>. */
   .row-detail-tab-btn.has-match { background: #fff3a0; color: #000; }
+  .match-nav { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--text-dim); }
+  .match-nav[hidden], .match-nav button[hidden] { display: none; }
+  .match-nav button {
+    font: inherit; font-size: 0.82rem; padding: 0.25rem 0.7rem; border: 1px solid var(--border);
+    border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer;
+  }
+  .match-nav button:hover { border-color: var(--accent); }
+  mark.current { background: #ffb347; outline: 2px solid #e08a00; }
   .row-detail-tab-content {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
     background: var(--surface-2); border-radius: 6px; padding: 0.8rem 1rem;
@@ -555,7 +563,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-28 17:09</div>
+<div class="generated">Generated 2026-10-28 17:43</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -920,8 +928,18 @@ function escapeRegex(s) {
 // valid when applied back to the ORIGINAL string for highlighting.
 // Deliberately does NOT touch case -- callers already .toLowerCase() or
 // pass the 'i' regex flag where that matters.
+// Length-preserving, character by character (2026-10-28): whole-string
+// NFD lengthened Tamil text (a vowel sign like U+0BCA splits into two
+// non-combining characters), so every highlight after Tamil script landed
+// a few letters late. A character whose fold is not one letter stays as is.
 function foldDiacritics(s) {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (!/[^\u0000-\u024f\u1e00-\u1eff]/.test(s)) return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let out = '';
+  for (const ch of s) {
+    const f = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    out += f.length === ch.length ? f : ch;
+  }
+  return out;
 }
 
 // Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
@@ -2125,7 +2143,39 @@ function updateRemarksClamp(cell) {
       tabContent.innerHTML = '';
       const tab = tabs.find((t) => t.key === key);
       if (tab) tabContent.appendChild(tab.el);
+      initMatchNav();
     }
+
+    // Match navigation (2026-10-28, per the user): opening a tab scrolls
+    // its first match into view; "Match 1 of N" with Prev/Next appears
+    // when the tab holds more than one.
+    const matchNav = document.createElement('div');
+    matchNav.className = 'match-nav';
+    matchNav.innerHTML = '<span class="match-nav-count"></span>' +
+      '<button type="button" data-step="-1" title="Previous match">&#8249; Prev</button>' +
+      '<button type="button" data-step="1" title="Next match">Next &#8250;</button>';
+    let navMarks = [], navIdx = 0;
+    function goToMatch(i) {
+      if (!navMarks.length) return;
+      navIdx = (i + navMarks.length) % navMarks.length;
+      navMarks.forEach((m, j) => m.classList.toggle('current', j === navIdx));
+      const m = navMarks[navIdx];
+      tabContent.scrollTop += m.getBoundingClientRect().top - tabContent.getBoundingClientRect().top
+        - tabContent.clientHeight / 3;
+      matchNav.querySelector('.match-nav-count').textContent =
+        navMarks.length === 1 ? '1 match' : 'Match ' + (navIdx + 1) + ' of ' + navMarks.length;
+    }
+    function initMatchNav() {
+      navMarks = Array.from(tabContent.querySelectorAll('mark'));
+      matchNav.hidden = !navMarks.length;
+      matchNav.querySelectorAll('button').forEach((b) => { b.hidden = navMarks.length < 2; });
+      tabContent.scrollTop = 0;
+      if (navMarks.length) requestAnimationFrame(() => goToMatch(0));
+    }
+    matchNav.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-step]');
+      if (b) goToMatch(navIdx + Number(b.dataset.step));
+    });
 
     tabs.forEach((tab) => {
       const btn = document.createElement('button');
@@ -2142,6 +2192,7 @@ function updateRemarksClamp(cell) {
       btn.addEventListener('click', () => showTab(tab.key));
       tabBar.appendChild(btn);
     });
+    tabBar.appendChild(matchNav);
     tabsWrap.appendChild(tabBar);
     tabsWrap.appendChild(tabContent);
     modalBody.appendChild(tabsWrap);
