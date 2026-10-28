@@ -567,7 +567,7 @@
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-10-28 13:39</div>
+<div class="generated">Generated 2026-10-28 17:09</div>
 
 <div class="stats">56572 records from 66 report(s), 6843 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
@@ -1190,14 +1190,28 @@ function render() {
   nextPage.disabled = currentPage >= totalPages;
 }
 
+// The button is disabled and reads "Searching..." until the results are
+// painted (2026-10-28, per the user: a slow search looked like a click
+// that never registered). The work is synchronous, so it waits two
+// frames to let the browser paint the busy button first.
 function runSearch() {
-  activeTerm = q.value.trim();
-  currentPage = 1;
-  // Reveal any hidden column the new term actually matches in, same as
-  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
-  // own docstring.
-  updateColumnVisibility();
-  render();
+  if (searchBtn.disabled) return;
+  searchBtn.disabled = true;
+  searchBtn.textContent = 'Searching…';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try {
+      activeTerm = q.value.trim();
+      currentPage = 1;
+      // Reveal any hidden column the new term actually matches in, same as
+      // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+      // own docstring.
+      updateColumnVisibility();
+      render();
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }));
 }
 
 // A row's own value for filter `key`, normalized so a missing/empty

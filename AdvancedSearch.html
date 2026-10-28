@@ -54,32 +54,75 @@
   }
   .scope-note strong { color: var(--accent-copper-strong); }
   .home-link { font-size: 13px; }
+  /* A grid whose cells push their control to the bottom: label and hint
+     sit above, so every box in a row lines up (2026-10-28, per the user). */
   .controls {
-    display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: flex-end;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+    gap: 1rem 1.1rem; align-items: end;
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 16px;
+    padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 10px;
   }
-  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
-  .ctrl-group label.group-label {
+  .ctrl-group { display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; min-width: 0; height: 100%; }
+  .ctrl-wide { grid-column: 1 / -1; }
+  .ctrl-buttons { flex-direction: row; justify-content: flex-start; gap: 0.7rem; }
+  .ctrl-group .group-label {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim);
     font-weight: 600;
   }
-  .corpus-checks { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
-  .corpus-checks label {
-    display: flex; align-items: center; gap: 0.35rem; font-size: 13.5px; cursor: pointer;
+  .hint-inline { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .corpus-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .corpus-chip {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-dim);
+    border-radius: 999px; padding: 4px 12px; cursor: pointer; font: inherit; font-size: 13px;
+    text-decoration: line-through;
   }
-  input[type=text] {
+  .corpus-chip[aria-pressed="true"] {
+    background: var(--accent-strong); color: var(--surface); border-color: var(--accent-strong);
+    text-decoration: none;
+  }
+  input[type=text], .controls select {
     background: var(--surface); border: 1px solid var(--border); padding: 7px 10px;
     border-radius: 7px; color: var(--text); font-family: inherit; font-size: 13.5px;
+    width: 100%; min-width: 0; height: 34px;
   }
-  #volumeInput { width: 11rem; }
-  #keywordInput { width: 16rem; }
   button#searchBtn, button#clearBtn {
     padding: 0.5rem 1.1rem; border-radius: 7px; border: 1px solid var(--accent);
     background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 13.5px;
   }
+  button#searchBtn:disabled { opacity: 0.6; cursor: progress; }
   button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
-  .hint { font-size: 11.5px; color: var(--text-dim); max-width: 16rem; }
+  .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.35; }
+  .select-row { display: flex; gap: 4px; }
+  .select-row select { flex: 1; }
+  .multi-btn {
+    flex: none; border: 1px solid var(--border); background: var(--surface); color: var(--accent-strong);
+    border-radius: 7px; padding: 0 9px; cursor: pointer; font-size: 14px;
+  }
+  .multi-btn:hover, .multi-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .criteria {
+    font-size: 13px; color: var(--text-dim); margin: 0 0 8px; padding: 6px 10px;
+    border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 4px;
+  }
+  .criteria b { color: var(--text); font-weight: 600; }
+  .criteria .neg { color: var(--accent-copper-strong); }
+  .multi-box { max-width: 30rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .multi-box h2 { margin: 0; font-size: 1.1rem; }
+  .multi-mode { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 13px; }
+  .multi-mode label { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+  #multiFilter {
+    background: var(--surface); border: 1px solid var(--border); padding: 6px 10px;
+    border-radius: 7px; color: var(--text); font: inherit; font-size: 13.5px;
+  }
+  .multi-options { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 7px; padding: 4px; }
+  .multi-options label { display: flex; align-items: center; gap: 0.4rem; padding: 3px 6px; border-radius: 5px; cursor: pointer; font-size: 13.5px; }
+  .multi-options label:hover { background: var(--surface-2); }
+  .multi-options label[hidden] { display: none; }
+  .multi-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+  .multi-actions button {
+    padding: 0.4rem 1rem; border-radius: 7px; border: 1px solid var(--border); background: none;
+    color: var(--text); cursor: pointer; font: inherit; font-size: 13.5px;
+  }
+  #multiApply { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
   .facet-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; margin: 0 0 8px; }
   .facet-chips[hidden] { display: none; }
   .facet-chip {
@@ -88,11 +131,6 @@
   }
   .facet-chip:hover { background: var(--accent); color: #fff; }
   .facet-selects { display: contents; }
-  .facet-selects select, #kingInput, #placeInput { max-width: 14rem; }
-  .facet-selects select {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
-    padding: 6px 8px; color: var(--text); font: inherit; font-size: 13.5px;
-  }
   .result-summary { font-size: 13px; color: var(--text-dim); margin: 6px 0 10px; }
   .pager {
     display: flex; align-items: center; gap: 0.8rem; margin: 10px 0; font-size: 13px;
@@ -207,48 +245,47 @@
   </div>
 
   <div class="controls">
-    <div class="ctrl-group">
-      <label class="group-label">Corpora</label>
-      <div class="corpus-checks" id="corpusChecks"></div>
+    <div class="ctrl-group ctrl-wide">
+      <span class="group-label">Corpora <span class="hint-inline">&mdash; click a name to include or leave it out</span></span>
+      <div class="corpus-chips" id="corpusChecks"></div>
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="volumeInput">Volume / range</label>
+      <div class="hint">Numeral or number (SII); year or year-range (ARE). Blank = all.</div>
       <input type="text" id="volumeInput" placeholder="e.g. IV or 4-10 or 1928-29">
-      <div class="hint">Roman numeral or plain number for a numbered series (SII); a year or
-        year-range for ARE. Blank = every volume.</div>
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="keywordInput">Keyword</label>
-      <input type="text" id="keywordInput" placeholder="searches Remarks, Location, ID, etc.">
+      <div class="hint">Remarks, location, ID and more.</div>
+      <input type="text" id="keywordInput" placeholder="e.g. gotra">
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="matchModeInput">Match</label>
+      <div class="hint" title="Embedded: &quot;mahavra&quot; matches &quot;samahavraja&quot; too. Partial: matches &quot;mahavratin&quot; but not &quot;samahavraja&quot;. Full: exact word only. Always case-insensitive and diacritic-folded; also matches a record's own unique ID.">Case- and accent-insensitive. &#9432;</div>
       <select id="matchModeInput">
         <option value="embedded">Embedded (anywhere)</option>
         <option value="partial" selected>Partial (word start)</option>
         <option value="full">Full word</option>
       </select>
-      <div class="hint">Embedded: "mahavra" matches "samahavraja" too. Partial: matches
-        "mahavratin" but not "samahavraja". Full: exact word only. Always
-        case-insensitive and diacritic-folded; also matches a record's own unique ID.</div>
     </div>
-    <div class="facet-selects" id="facetSelects"></div>
     <div class="ctrl-group">
       <label class="group-label" for="kingInput">King</label>
+      <div class="hint">Any part of the king's name.</div>
       <input type="text" id="kingInput" placeholder="e.g. Rajaraja">
     </div>
     <div class="ctrl-group">
-      <label class="group-label" for="placeInput">Place (village / taluk / district)</label>
+      <label class="group-label" for="placeInput">Place</label>
+      <div class="hint">Village, taluk or district.</div>
       <input type="text" id="placeInput" placeholder="e.g. Hunsur">
     </div>
-    <div class="ctrl-group">
+    <div class="facet-selects" id="facetSelects"></div>
+    <div class="ctrl-group ctrl-wide ctrl-buttons">
       <button type="button" id="searchBtn">Search</button>
-    </div>
-    <div class="ctrl-group">
       <button type="button" id="clearBtn">Clear</button>
     </div>
   </div>
 
+  <div class="criteria" id="criteriaSummary"></div>
   <div class="facet-chips" id="facetChips" hidden></div>
   <div class="result-summary" id="resultSummary"></div>
   <div class="table-scroll">
@@ -273,7 +310,24 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-10-28 16:33.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-10-28 17:06.</footer>
+</div>
+
+<div class="row-detail-overlay" id="multiModal" hidden>
+  <div class="row-detail-box multi-box" role="dialog" aria-labelledby="multiTitle">
+    <button type="button" class="row-detail-close" id="multiClose" aria-label="Close">&times;</button>
+    <h2 id="multiTitle"></h2>
+    <div class="multi-mode" role="radiogroup">
+      <label><input type="radio" name="multiMode" value="include" checked> Include the ticked values</label>
+      <label><input type="radio" name="multiMode" value="exclude"> Exclude the ticked values</label>
+    </div>
+    <input type="search" id="multiFilter" placeholder="Type to narrow this list&hellip;">
+    <div class="multi-options" id="multiOptions"></div>
+    <div class="multi-actions">
+      <button type="button" id="multiNone">Untick all</button>
+      <button type="button" id="multiApply">Apply</button>
+    </div>
+  </div>
 </div>
 
 <div class="row-detail-overlay" id="helpModal" hidden>
@@ -284,7 +338,7 @@
       combine: a record must match <em>all</em> of them. Leave a control blank (or on &ldquo;Any&rdquo;) to ignore it.</p>
     <h3>1. Choose where to look</h3>
     <ul>
-      <li><b>Corpora</b> &mdash; untick a corpus to leave it out.</li>
+      <li><b>Corpora</b> &mdash; click a corpus name to leave it out; click again to bring it back.</li>
       <li><b>Volume / range</b> &mdash; one volume (<code>IV</code> or <code>4</code>), a range (<code>4-10</code>),
         or for the Annual Reports a year (<code>1928-29</code>) or range of years.</li>
     </ul>
@@ -293,6 +347,9 @@
       <li><b>Dynasty</b>, <b>District</b>, <b>State</b>, <b>Century</b>, <b>Language</b>, <b>Material</b>
         (copper plate or stone and other), and where shown <b>Type</b> (hero-stone / sati-stone) &mdash; pick
         a value from the list. Choosing one runs the search straight away.</li>
+      <li>The <b>&#9776;</b> button beside a list opens it as a checklist: tick several values, and choose
+        <b>Include</b> (records with any of them) or <b>Exclude</b> (records with none of them).</li>
+      <li>The line under the filters always says which filters the results are using.</li>
       <li>These use the same groupings as the <a href="AtAGlance.html">At a Glance</a> charts: all spellings of
         a dynasty are grouped together, and the century comes from the record&rsquo;s first convertible date.
         A record whose dynasty or date the source does not give will not appear under any value.</li>
@@ -412,23 +469,32 @@ async function fetchJson(url) {
   return resp.json();
 }
 
-// -- Corpus checkboxes, built from CORPUS_CONFIG so the page never
-// drifts from what main() actually wired up --
+// -- Corpus chips, built from CORPUS_CONFIG so the page never drifts
+// from what main() actually wired up. Clicking a name toggles it, as on
+// At a Glance (2026-10-28, per the user; was a row of checkboxes). Past
+// ~10 corpora this wants a checklist popup like the category lists. --
 const corpusChecksEl = document.getElementById('corpusChecks');
 Object.keys(CORPUS_CONFIG).forEach((key) => {
-  const label = document.createElement('label');
-  const cb = document.createElement('input');
-  cb.type = 'checkbox';
-  cb.value = key;
-  cb.checked = true;
-  cb.id = 'corpus-' + key;
-  label.appendChild(cb);
-  label.appendChild(document.createTextNode(CORPUS_CONFIG[key].fullName));
-  corpusChecksEl.appendChild(label);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'corpus-chip';
+  b.dataset.c = key;
+  b.setAttribute('aria-pressed', 'true');
+  b.textContent = CORPUS_CONFIG[key].fullName;
+  corpusChecksEl.appendChild(b);
 });
+corpusChecksEl.addEventListener('click', (e) => {
+  const b = e.target.closest('.corpus-chip'); if (!b) return;
+  b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+  paintCriteria();
+});
+function setCorpora(keys) {
+  corpusChecksEl.querySelectorAll('.corpus-chip').forEach((b) =>
+    b.setAttribute('aria-pressed', keys === null || keys.includes(b.dataset.c) ? 'true' : 'false'));
+}
 
 function checkedCorpora() {
-  return Array.from(corpusChecksEl.querySelectorAll('input:checked')).map((cb) => cb.value);
+  return Array.from(corpusChecksEl.querySelectorAll('.corpus-chip[aria-pressed="true"]')).map((b) => b.dataset.c);
 }
 
 // Tags one raw chunk row with its corpus + a union-remapped set of
@@ -655,11 +721,103 @@ const SELECT_HINTS = {language: 'The first language the record names.',
   material: 'Copper plate when the record says so; everything else is stone and other.',
   type: 'Hero-stone / Sati-stone classification.'};
 function facetSelect(d) { return document.getElementById('facet_' + d); }
+// Each dropdown's choice as {mode: 'include'|'exclude', values: [...]}.
+// The dropdown picks one value; its checklist popup picks several and
+// can exclude them instead (2026-10-28, per the user).
+const facetState = {};
+const FACET_VALUES = {}; // dim -> its dropdown's values, in display order
 function activeFacets() {
-  const out = Object.assign({}, urlFacets);
-  SELECT_DIMS.forEach((d) => { const s = facetSelect(d); if (s && s.value) out[d] = s.value; });
+  const out = {};
+  Object.entries(urlFacets).forEach(([d, v]) => { out[d] = {mode: 'include', values: [v]}; });
+  Object.entries(facetState).forEach(([d, st]) => { if (st.values.length) out[d] = st; });
   return out;
 }
+// Shows a multi-value or exclude choice in the dropdown itself as one
+// extra option, so the closed dropdown never claims "Any" while a
+// checklist filter is active.
+function paintFacetSelect(d) {
+  const sel = facetSelect(d); if (!sel) return;
+  const st = facetState[d];
+  let multi = sel.querySelector('option[value="__multi"]');
+  const btn = sel.parentElement.querySelector('.multi-btn');
+  btn.classList.toggle('active', !!st);
+  if (!st || (st.mode === 'include' && st.values.length === 1)) {
+    if (multi) multi.remove();
+    sel.value = st ? st.values[0] : '';
+    return;
+  }
+  if (!multi) { multi = document.createElement('option'); multi.value = '__multi'; sel.appendChild(multi); }
+  multi.textContent = (st.mode === 'exclude' ? 'Not ' : '') +
+    (st.values.length === 1 ? facetValueLabel(d, st.values[0]) : st.values.length + ' values');
+  sel.value = '__multi';
+}
+function setFacetState(d, st) {
+  if (st && st.values.length) facetState[d] = st; else delete facetState[d];
+  delete urlFacets[d];
+  paintFacetSelect(d);
+  paintFacetChips();
+}
+
+const multiModal = document.getElementById('multiModal');
+const multiOptions = document.getElementById('multiOptions');
+const multiFilter = document.getElementById('multiFilter');
+let multiDim = null;
+function openMulti(d) {
+  multiDim = d;
+  const st = facetState[d] || {mode: 'include', values: []};
+  document.getElementById('multiTitle').textContent = FACET_NAMES[d];
+  multiModal.querySelector('input[value="' + st.mode + '"]').checked = true;
+  multiOptions.innerHTML = FACET_VALUES[d].map((v) =>
+    '<label><input type="checkbox" value="' + escapeHtml(v) + '"' + (st.values.includes(v) ? ' checked' : '') +
+    '><span>' + escapeHtml(facetValueLabel(d, v)) + '</span></label>').join('');
+  multiFilter.value = '';
+  multiModal.hidden = false;
+  multiFilter.focus();
+}
+multiFilter.addEventListener('input', () => {
+  const t = foldDiacritics(multiFilter.value.trim().toLowerCase());
+  multiOptions.querySelectorAll('label').forEach((l) => {
+    l.hidden = !!t && !foldDiacritics(l.textContent.toLowerCase()).includes(t);
+  });
+});
+document.getElementById('multiNone').addEventListener('click', () => {
+  multiOptions.querySelectorAll('input').forEach((cb) => { cb.checked = false; });
+});
+document.getElementById('multiApply').addEventListener('click', () => {
+  const values = Array.from(multiOptions.querySelectorAll('input:checked')).map((cb) => cb.value);
+  const mode = multiModal.querySelector('input[name="multiMode"]:checked').value;
+  multiModal.hidden = true;
+  setFacetState(multiDim, {mode, values});
+  runSearch();
+});
+document.getElementById('multiClose').addEventListener('click', () => { multiModal.hidden = true; });
+multiModal.addEventListener('click', (e) => { if (e.target === multiModal) multiModal.hidden = true; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') multiModal.hidden = true; });
+
+// The one line under the filters saying what the results are using
+// (2026-10-28, per the user). Repainted on every control change, so it
+// also shows a choice not yet searched.
+function paintCriteria() {
+  const esc = escapeHtml, parts = [];
+  const all = Object.keys(CORPUS_CONFIG), on = checkedCorpora();
+  parts.push('<b>Corpora:</b> ' + (on.length === all.length ? 'all' : on.length ? on.map((c) => esc(CORPUS_CONFIG[c].fullName)).join(', ') : 'none'));
+  const vol = document.getElementById('volumeInput').value.trim();
+  if (vol) parts.push('<b>Volume:</b> ' + esc(vol));
+  const kw = document.getElementById('keywordInput').value.trim();
+  if (kw) parts.push('<b>Keyword:</b> “' + esc(kw) + '” (' +
+    esc(document.getElementById('matchModeInput').selectedOptions[0].textContent) + ')');
+  Object.entries(activeFacets()).forEach(([d, st]) => {
+    const vals = st.values.map((v) => esc(facetValueLabel(d, v))).join(' or ');
+    parts.push('<b>' + FACET_NAMES[d] + ':</b> ' + (st.mode === 'exclude' ? '<span class="neg">not ' + vals + '</span>' : vals));
+  });
+  const ft = fieldTerms();
+  if (ft.king) parts.push('<b>King:</b> “' + esc(ft.king) + '”');
+  if (ft.place) parts.push('<b>Place:</b> “' + esc(ft.place) + '”');
+  document.getElementById('criteriaSummary').innerHTML = 'Filtering on — ' + parts.join(' · ');
+}
+['volumeInput', 'keywordInput', 'kingInput', 'placeInput'].forEach((id) =>
+  document.getElementById(id).addEventListener('input', paintCriteria));
+document.getElementById('matchModeInput').addEventListener('change', paintCriteria);
 function paintFacetChips() {
   const box = document.getElementById('facetChips');
   const f = Object.assign({}, urlFacets);
@@ -668,6 +826,7 @@ function paintFacetChips() {
   box.innerHTML = dims.length ? '<span class="hint">From At a Glance:</span>' + dims.map((d) =>
     '<button type="button" class="facet-chip" data-dim="' + d + '" title="Remove this filter">' +
     escapeHtml(FACET_NAMES[d] + ': ' + facetValueLabel(d, f[d])) + ' ×</button>').join('') : '';
+  paintCriteria();
 }
 document.getElementById('facetChips').addEventListener('click', (e) => {
   const b = e.target.closest('.facet-chip'); if (!b) return;
@@ -680,11 +839,12 @@ function filterByFacets(rows, facetFile, facets) {
   if (Object.keys(facets).some((d) => !facetFile.dims.includes(d))) return [];
   const want = facetFile.dims.map((d, i) => {
     if (!(d in facets)) return null;
-    return new Set([facetFile.vocab[i].indexOf(facets[d])].filter((j) => j >= 0));
+    return {exclude: facets[d].mode === 'exclude',
+            set: new Set(facets[d].values.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0))};
   });
   return rows.filter((_, ri) => {
     const fr = facetFile.rows[ri];
-    return fr && want.every((s, i) => s === null || s.has(fr[i]));
+    return fr && want.every((w, i) => w === null || w.set.has(fr[i]) !== w.exclude);
   });
 }
 // One chunk's facets: the shared file, plus the overlay's dims (Sanjay)
@@ -716,14 +876,24 @@ async function loadFacetIndex() {
     if (!vals.length) return;
     if (d === 'century') vals.sort((a, b) => (a === 'undated') - (b === 'undated') || a - b);
     else vals.sort((a, b) => facetValueLabel(d, a).localeCompare(facetValueLabel(d, b)));
+    FACET_VALUES[d] = vals;
     const g = document.createElement('div'); g.className = 'ctrl-group';
     g.innerHTML = '<label class="group-label" for="facet_' + d + '">' + FACET_NAMES[d] + '</label>' +
-      '<select id="facet_' + d + '"><option value="">Any</option>' +
+      (SELECT_HINTS[d] ? '<div class="hint">' + SELECT_HINTS[d] + '</div>' : '') +
+      '<div class="select-row"><select id="facet_' + d + '"><option value="">Any</option>' +
       vals.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(facetValueLabel(d, v)) + '</option>').join('') + '</select>' +
-      (SELECT_HINTS[d] ? '<div class="hint">' + SELECT_HINTS[d] + '</div>' : '');
+      '<button type="button" class="multi-btn" title="Pick several, or exclude" aria-label="' + FACET_NAMES[d] +
+      ': pick several, or exclude">&#9776;</button></div>';
     box.appendChild(g);
-    facetSelect(d).addEventListener('change', () => { delete urlFacets[d]; paintFacetChips(); runSearch(); });
+    g.querySelector('.multi-btn').addEventListener('click', () => openMulti(d));
+    facetSelect(d).addEventListener('change', () => {
+      const v = facetSelect(d).value;
+      if (v === '__multi') return;
+      setFacetState(d, v ? {mode: 'include', values: [v]} : null);
+      runSearch();
+    });
   });
+  paintCriteria();
 }
 
 // A chosen category is marked in the popup like a keyword (2026-10-28, per
@@ -732,8 +902,9 @@ async function loadFacetIndex() {
 // spelling shares once folded ("Chalukya"); century/material/type aren't text.
 const TEXT_DIMS = ['dynasty', 'district', 'state', 'language'];
 function facetTerms(facets) {
-  return TEXT_DIMS.filter((d) => facets[d] && !['unknown', 'other'].includes(facets[d]))
-    .map((d) => d === 'dynasty' ? facets[d].split(' ')[0].split('(')[0] : facets[d]);
+  return TEXT_DIMS.filter((d) => facets[d] && facets[d].mode === 'include')
+    .flatMap((d) => facets[d].values.filter((v) => !['unknown', 'other'].includes(v))
+      .map((v) => d === 'dynasty' ? v.split(' ')[0].split('(')[0] : v));
 }
 
 // King / Place: free-text, matched (embedded, folded) against that field
@@ -755,14 +926,13 @@ function applyUrl() {
   if (![...p.keys()].length) return false;
   if (p.get('corpus')) {  // data keys (sii,epca,taka ...), stable whatever the display names
     const keys = p.get('corpus').split(',').filter(Boolean);
-    corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = keys.includes(cb.value); });
+    setCorpora(keys);
   }
   FACET_DIMS.forEach((d) => { if (p.get(d) !== null) urlFacets[d] = p.get(d); });
   SELECT_DIMS.forEach((d) => {
-    const sel = facetSelect(d);
-    if (!sel || !urlFacets[d]) return;
-    sel.value = urlFacets[d];
-    if (sel.value === urlFacets[d]) delete urlFacets[d]; // else keep it as a chip ("Not recorded")
+    const v = urlFacets[d];
+    if (!facetSelect(d) || !v || !FACET_VALUES[d].includes(v)) return; // else a chip ("Not recorded")
+    setFacetState(d, {mode: 'include', values: [v]});
   });
   if (p.get('king')) document.getElementById('kingInput').value = p.get('king');
   if (p.get('place')) document.getElementById('placeInput').value = p.get('place');
@@ -781,7 +951,9 @@ function trackSearch(corpora, range, keyword, mode, facets, ft) {
     filters_used: Object.keys(facets).concat(ft.king ? ['king'] : [], ft.place ? ['place'] : [],
       range ? ['volume'] : [], keyword ? ['keyword'] : []).join(',') || 'none',
     match_mode: mode};
-  Object.entries(facets).forEach(([d, v]) => { ev['filter_' + d] = v; });
+  Object.entries(facets).forEach(([d, st]) => {
+    ev['filter_' + d] = (st.mode === 'exclude' ? 'not:' : '') + st.values.join('|');
+  });
   gtag('event', 'advanced_search', ev);
 }
 const helpModal = document.getElementById('helpModal');
@@ -793,10 +965,28 @@ document.getElementById('helpClose').addEventListener('click', () => { helpModal
 helpModal.addEventListener('click', (e) => { if (e.target === helpModal) helpModal.hidden = true; });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') helpModal.hidden = true; });
 
+// Search stays disabled, reading "Searching...", until this search's
+// last chunk is in (2026-10-28, per the user: loading every corpus takes
+// long enough that an unchanged screen looked like a lost click). A
+// newer search or Clear takes the button over.
+const searchBtnEl = document.getElementById('searchBtn');
+function setSearchBusy(busy) {
+  searchBtnEl.disabled = busy;
+  searchBtnEl.textContent = busy ? 'Searching\u2026' : 'Search';
+}
 async function runSearch() {
+  const myGen = ++searchGeneration;
+  setSearchBusy(true);
+  paintCriteria();
+  try {
+    await runSearchInner(myGen);
+  } finally {
+    if (myGen === searchGeneration) setSearchBusy(false);
+  }
+}
+async function runSearchInner(myGen) {
   const corpora = checkedCorpora();
   const summary = document.getElementById('resultSummary');
-  const myGen = ++searchGeneration;
   currentResults = [];
   currentPage = 1;
   paintPage();
@@ -932,17 +1122,19 @@ function renderResults(rows, term, mode) {
 document.getElementById('searchBtn').addEventListener('click', runSearch);
 document.getElementById('clearBtn').addEventListener('click', () => {
   searchGeneration++; // cancel any in-flight incremental search
+  setSearchBusy(false);
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
   document.getElementById('matchModeInput').value = 'partial';
-  SELECT_DIMS.forEach((d) => { const s = facetSelect(d); if (s) s.value = ''; });
+  SELECT_DIMS.forEach((d) => { if (facetSelect(d)) setFacetState(d, null); });
   document.getElementById('kingInput').value = '';
   document.getElementById('placeInput').value = '';
   currentFieldTerms = [];
   urlFacets = {};
   paintFacetChips();
   history.replaceState(null, '', location.pathname);
-  corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = true; });
+  setCorpora(null);
+  paintCriteria();
   document.getElementById('resultsBody').innerHTML = '';
   document.getElementById('resultSummary').textContent = '';
   document.getElementById('pagerStatus').textContent = '';

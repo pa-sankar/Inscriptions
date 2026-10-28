@@ -560,7 +560,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-24 11:48</div>
+<div class="generated">Generated 2026-10-28 17:09</div>
 
 <div class="stats">8066 records from 36 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1183,14 +1183,28 @@ function render() {
   nextPage.disabled = currentPage >= totalPages;
 }
 
+// The button is disabled and reads "Searching..." until the results are
+// painted (2026-10-28, per the user: a slow search looked like a click
+// that never registered). The work is synchronous, so it waits two
+// frames to let the browser paint the busy button first.
 function runSearch() {
-  activeTerm = q.value.trim();
-  currentPage = 1;
-  // Reveal any hidden column the new term actually matches in, same as
-  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
-  // own docstring.
-  updateColumnVisibility();
-  render();
+  if (searchBtn.disabled) return;
+  searchBtn.disabled = true;
+  searchBtn.textContent = 'Searching…';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try {
+      activeTerm = q.value.trim();
+      currentPage = 1;
+      // Reveal any hidden column the new term actually matches in, same as
+      // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+      // own docstring.
+      updateColumnVisibility();
+      render();
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }));
 }
 
 // A row's own value for filter `key`, normalized so a missing/empty
@@ -2177,6 +2191,24 @@ function updateRemarksClamp(cell) {
       if (typeof gtag === 'function') gtag('event', 'subscribe_click');
     });
   }
+})();
+</script>
+<button type="button" id="backToTop" aria-label="Back to top" title="Back to top">&#8593;</button>
+<style>
+  #backToTop { position: fixed; right: 18px; bottom: 18px; z-index: 900; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(0,0,0,.15); background: #3f5a3c; color: #fff;
+    font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #backToTop.show { opacity: .9; pointer-events: auto; }
+  #backToTop:hover, #backToTop:focus-visible { opacity: 1; }
+  @media print { #backToTop { display: none; } }
+</style>
+<script>
+(function () {
+  var b = document.getElementById('backToTop');
+  function upd() { b.classList.toggle('show', window.scrollY > window.innerHeight); }
+  window.addEventListener('scroll', upd, {passive: true}); upd();
+  b.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
 })();
 </script>
 </body>

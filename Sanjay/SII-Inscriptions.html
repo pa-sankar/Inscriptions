@@ -560,7 +560,7 @@
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
 
-<div class="generated">Generated 2026-10-24 11:48</div>
+<div class="generated">Generated 2026-10-28 17:08</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -1183,14 +1183,28 @@ function render() {
   nextPage.disabled = currentPage >= totalPages;
 }
 
+// The button is disabled and reads "Searching..." until the results are
+// painted (2026-10-28, per the user: a slow search looked like a click
+// that never registered). The work is synchronous, so it waits two
+// frames to let the browser paint the busy button first.
 function runSearch() {
-  activeTerm = q.value.trim();
-  currentPage = 1;
-  // Reveal any hidden column the new term actually matches in, same as
-  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
-  // own docstring.
-  updateColumnVisibility();
-  render();
+  if (searchBtn.disabled) return;
+  searchBtn.disabled = true;
+  searchBtn.textContent = 'Searching…';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try {
+      activeTerm = q.value.trim();
+      currentPage = 1;
+      // Reveal any hidden column the new term actually matches in, same as
+      // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+      // own docstring.
+      updateColumnVisibility();
+      render();
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }));
 }
 
 // A row's own value for filter `key`, normalized so a missing/empty
@@ -2177,6 +2191,24 @@ function updateRemarksClamp(cell) {
       if (typeof gtag === 'function') gtag('event', 'subscribe_click');
     });
   }
+})();
+</script>
+<button type="button" id="backToTop" aria-label="Back to top" title="Back to top">&#8593;</button>
+<style>
+  #backToTop { position: fixed; right: 18px; bottom: 18px; z-index: 900; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(0,0,0,.15); background: #3f5a3c; color: #fff;
+    font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #backToTop.show { opacity: .9; pointer-events: auto; }
+  #backToTop:hover, #backToTop:focus-visible { opacity: 1; }
+  @media print { #backToTop { display: none; } }
+</style>
+<script>
+(function () {
+  var b = document.getElementById('backToTop');
+  function upd() { b.classList.toggle('show', window.scrollY > window.innerHeight); }
+  window.addEventListener('scroll', upd, {passive: true}); upd();
+  b.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
 })();
 </script>
 </body>

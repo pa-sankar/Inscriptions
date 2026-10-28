@@ -562,7 +562,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-28 14:11</div>
+<div class="generated">Generated 2026-10-28 17:09</div>
 
 <div class="stats">488 records from 15 volume PDF(s) of the Travancore Archaeological Series. Vol VIII's scan stops at printed p. 29.</div>
 <div class="legend"><strong>No.</strong>: the book's "No. N" in Vols III-VII; in I, II, VIII and IX, which print no inscription numbers, the entry's place in the contents.<br><strong>Register</strong>: the Travancore department's register number and Kollam year ("3 of 1106"). <strong>ARE</strong>: the Madras Epigraphical collection number.<br><strong>Remarks</strong>: the book's translation, or the editor's introduction where the book gives none. Click a row for the introduction, text, footnotes and, marked as AI, an unverified English rendering of script lines made during OCR.</div>
@@ -1185,14 +1185,28 @@ function render() {
   nextPage.disabled = currentPage >= totalPages;
 }
 
+// The button is disabled and reads "Searching..." until the results are
+// painted (2026-10-28, per the user: a slow search looked like a click
+// that never registered). The work is synchronous, so it waits two
+// frames to let the browser paint the busy button first.
 function runSearch() {
-  activeTerm = q.value.trim();
-  currentPage = 1;
-  // Reveal any hidden column the new term actually matches in, same as
-  // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
-  // own docstring.
-  updateColumnVisibility();
-  render();
+  if (searchBtn.disabled) return;
+  searchBtn.disabled = true;
+  searchBtn.textContent = 'Searching…';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try {
+      activeTerm = q.value.trim();
+      currentPage = 1;
+      // Reveal any hidden column the new term actually matches in, same as
+      // a Filter selection already does -- see TERM_MATCHED_HIDDEN_COLS's
+      // own docstring.
+      updateColumnVisibility();
+      render();
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }));
 }
 
 // A row's own value for filter `key`, normalized so a missing/empty
