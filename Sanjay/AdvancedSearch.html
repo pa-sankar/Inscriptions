@@ -86,7 +86,27 @@
     padding: 0.5rem 1.1rem; border-radius: 7px; border: 1px solid var(--accent);
     background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 13.5px;
   }
-  button#searchBtn:disabled { opacity: 0.6; cursor: progress; }
+  button#searchBtn:disabled {
+    background: var(--surface-2); border-color: var(--border); color: var(--text-dim); cursor: progress;
+  }
+  /* The Match help icon: filled, so it is noticed (2026-10-28, per the user). */
+  .info-tip {
+    display: inline-flex; align-items: center; justify-content: center; width: 1.15rem; height: 1.15rem;
+    border-radius: 50%; background: var(--accent-copper); color: #fff; font-weight: 700; font-size: 11px;
+    cursor: help; vertical-align: middle; margin-left: 2px;
+  }
+  .info-tip:hover { background: var(--accent-copper-strong); }
+  .search-box { max-width: 24rem; text-align: center; }
+  .search-box h2 { margin: 0 0 0.4rem; font-size: 1.15rem; }
+  .search-box .multi-actions { justify-content: center; }
+  #searchStop { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .spinner {
+    display: inline-block; width: 0.9em; height: 0.9em; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+    vertical-align: -0.1em;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .partial-note { color: var(--accent-copper-strong); font-weight: 600; }
   button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
   .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.35; }
   .select-row { display: flex; gap: 4px; }
@@ -266,7 +286,7 @@
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="matchModeInput">Match</label>
-      <div class="hint" title="Embedded: &quot;mahavra&quot; matches &quot;samahavraja&quot; too. Partial: matches &quot;mahavratin&quot; but not &quot;samahavraja&quot;. Full: exact word only. Always case-insensitive and diacritic-folded; also matches a record's own unique ID.">Case- and accent-insensitive. &#9432;</div>
+      <div class="hint">Case- and accent-insensitive. <span class="info-tip" tabindex="0" title="Embedded: &quot;mahavra&quot; matches &quot;samahavraja&quot; too. Partial: matches &quot;mahavratin&quot; but not &quot;samahavraja&quot;. Full: exact word only. Always case-insensitive and diacritic-folded; also matches a record's own unique ID.">?</span></div>
       <select id="matchModeInput">
         <option value="embedded">Embedded (anywhere)</option>
         <option value="partial" selected>Partial (word start)</option>
@@ -315,7 +335,18 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-28 17:42 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 18:42 via <code>scripts/build_advanced_search.py</code>.</footer>
+</div>
+
+<div class="row-detail-overlay" id="searchModal" hidden>
+  <div class="row-detail-box search-box" role="alertdialog" aria-labelledby="searchModalTitle">
+    <h2 id="searchModalTitle"><span class="spinner" aria-hidden="true"></span> Searching&hellip;</h2>
+    <p id="searchModalStatus"></p>
+    <div class="multi-actions">
+      <button type="button" id="searchStop" title="Show the results found so far">Stop</button>
+      <button type="button" id="searchCancel" title="Go back without results">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <div class="row-detail-overlay" id="multiModal" hidden>
@@ -352,14 +383,41 @@
       <li><b>Dynasty</b>, <b>District</b>, <b>State</b>, <b>Century</b>, <b>Language</b>, <b>Material</b>
         (copper plate or stone and other), and where shown <b>Type</b> (hero-stone / sati-stone) &mdash; pick
         a value from the list. Choosing one runs the search straight away.</li>
-      <li>The <b>&#9776;</b> button beside a list opens it as a checklist: tick several values, and choose
-        <b>Include</b> (records with any of them) or <b>Exclude</b> (records with none of them).</li>
-      <li>The line under the filters always says which filters the results are using.</li>
+      <li>To pick several values at once, or to leave values out, use the <b>&#9776;</b> button beside the
+        list (next section).</li>
+      <li>The &ldquo;Filtering on&rdquo; line under the filters always says which filters the results are using.</li>
       <li>These use the same groupings as the <a href="AtAGlance.html">At a Glance</a> charts: all spellings of
         a dynasty are grouped together, and the century comes from the record&rsquo;s first convertible date.
         A record whose dynasty or date the source does not give will not appear under any value.</li>
     </ul>
-    <h3>3. Narrow by name</h3>
+    <h3>3. Several values, or everything except some: the &#9776; button</h3>
+    <p>Each category list has a <b>&#9776;</b> button to its right. It opens the whole list as a checklist:</p>
+    <ul>
+      <li><b>Tick</b> as many values as you like. The box at the top narrows a long list as you type, and
+        ignores capitals and diacritics (<code>chal</code> finds <i>Ch&#257;&#7735;ukya</i>).</li>
+      <li><b>Include the ticked values</b> (the default) keeps records with <em>any</em> of them.</li>
+      <li><b>Exclude the ticked values</b> keeps records with <em>none</em> of them. Records whose value the
+        source doesn&rsquo;t give are left out too, so &ldquo;not Tamil Nadu&rdquo; means a state known to be
+        elsewhere.</li>
+      <li><b>Apply</b> runs the search. The list then reads e.g. <i>3 values</i> or <i>Not Tamil Nadu</i>, and
+        the &#9776; button stays highlighted. Choose <i>Any</i> in the list, or <b>Untick all</b>, to drop it.</li>
+    </ul>
+    <p><b>Try these:</b></p>
+    <ul>
+      <li><b>Inscriptions outside Tamil Nadu</b>: State &#9776; &rarr; tick <i>Tamil Nadu</i> &rarr;
+        <b>Exclude</b> &rarr; Apply.</li>
+      <li><b>Every Chalukya line together</b>: Dynasty &#9776; &rarr; type <code>chal</code> &rarr; tick
+        <i>Ch&#257;&#7735;ukya of B&#257;d&#257;mi</i>, <i>Ch&#257;&#7735;ukya of Kaly&#257;&#7751;a</i>,
+        <i>Eastern Ch&#257;&#7735;ukya</i> and <i>Ch&#257;&#7735;ukya (unspecified)</i> &rarr; Apply.
+        (<i>Chaulukya (Gujarat)</i> is a different dynasty; tick it too only if you want it.)</li>
+      <li><b>The Telugu country</b>: State &#9776; &rarr; tick <i>Andhra Pradesh</i> and <i>Telangana</i>
+        &rarr; Apply.</li>
+      <li><b>Not in Tamil or Kannada</b>: Language &#9776; &rarr; tick <i>Tamil</i> and <i>Kannada</i>
+        &rarr; <b>Exclude</b> &rarr; Apply.</li>
+      <li>Lists combine: Dynasty <i>all Chalukyas</i> plus State <i>not Karnataka</i> finds Chalukya records
+        outside Karnataka.</li>
+    </ul>
+    <h3>4. Narrow by name</h3>
     <ul>
       <li><b>King</b> &mdash; part of a king&rsquo;s name, e.g. <code>Rajaraja</code>. Checked against the King
         field (and Dynasty, where a corpus records the king there).</li>
@@ -367,14 +425,14 @@
         against every place field the record has.</li>
       <li>Both ignore capitals and diacritics: <code>hoysala</code> finds <em>Hoysa&#7735;a</em>.</li>
     </ul>
-    <h3>4. Search the text</h3>
+    <h3>5. Search the text</h3>
     <ul>
       <li><b>Keyword</b> searches every field of the record, including Remarks and its ID; press Enter or
         <b>Search</b>.</li>
       <li><b>Match</b>: <em>Partial</em> (default) finds words starting with your term; <em>Embedded</em> finds it
         anywhere, even inside a longer word; <em>Full word</em> finds only the exact word.</li>
     </ul>
-    <h3>5. Read the results</h3>
+    <h3>6. Read the results</h3>
     <ul>
       <li>The table keeps to what identifies a record. <b>Click a row</b> for every field; your search terms
         are highlighted there, and a tab holding a match is marked in yellow.</li>
@@ -399,7 +457,7 @@
 </div>
 
 <script>
-const CORPUS_CONFIG = {"sii": {"label": "SII", "fullName": "South Indian Inscriptions", "dataUrl": "../data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "fullName": "Annual Reports on Indian Epigraphy", "dataUrl": "../data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "Sl.No", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epca": {"label": "EC", "fullName": "Epigraphia Carnatica", "dataUrl": "../data/epca/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "inscription_no", "header": "Inscr. #", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "text_roman", "header": "English Transliteration", "popup_tab": true}, {"key": "text_original", "header": "Kannada Original", "popup_tab": true}], "unionMap": {"sl_no": "inscription_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "taka": {"label": "TN Inscriptions", "fullName": "Tamil Nadu Inscriptions", "dataUrl": "../data/taka/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "serial_no", "header": "Serial No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Source", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "tamil_fields", "header": "Tamil Fields", "popup_tab": true}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epte": {"label": "ET", "fullName": "Epigraphia Telanganica", "dataUrl": "../data/epte/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "serial_no", "header": "Serial No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "reign_of", "header": "Reign Of", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "references", "header": "All References", "popup_tab": true}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": null, "king": "reign_of", "date": "date", "remarks": "remarks", "page": "page"}}, "epan": {"label": "EA", "fullName": "Epigraphia Andhrica", "dataUrl": "../data/epan/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "article_no", "header": "Article #", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "title", "header": "Title", "popup_tab": false}, {"key": "author", "header": "Author", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "remarks", "header": "Excerpt", "popup_tab": false}, {"key": "full_text", "header": "Full Text", "popup_tab": true}], "unionMap": {"sl_no": "article_no", "source": "source", "kind": null, "type": "type", "location": null, "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}, "kri": {"label": "KI", "fullName": "Karnatak Inscriptions", "dataUrl": "../data/kri/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "citation", "header": "Citation", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true}], "unionMap": {"sl_no": "citation", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "tras": {"label": "TAS", "fullName": "Travancore Archaeological Series", "dataUrl": "../data/tras/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "number", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "heading", "header": "Heading", "popup_tab": false}, {"key": "group", "header": "Group", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "register", "header": "Register", "popup_tab": false}, {"key": "are_ref", "header": "ARE", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "PDF page", "popup_tab": false}, {"key": "introduction", "header": "Introduction", "popup_tab": true}, {"key": "text_original", "header": "Text", "popup_tab": true}, {"key": "footnotes", "header": "Footnotes", "popup_tab": true}, {"key": "original_script", "header": "Script lines (OCR)", "popup_tab": true}, {"key": "ai_translation", "header": "AI rendering", "popup_tab": true}], "unionMap": {"sl_no": "number", "source": "source", "kind": null, "type": "type", "location": "heading", "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}};
+const CORPUS_CONFIG = {"sii": {"label": "SII", "fullName": "South Indian Inscriptions", "dataUrl": "../data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "image", "header": "Image", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "fullName": "Annual Reports on Indian Epigraphy", "dataUrl": "../data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "sl_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Year", "popup_tab": false}, {"key": "kind", "header": "Kind", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "place", "header": "Place/Source", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epca": {"label": "EC", "fullName": "Epigraphia Carnatica", "dataUrl": "../data/epca/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "inscription_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "text_roman", "header": "English Transliteration", "popup_tab": true}, {"key": "text_original", "header": "Kannada Original", "popup_tab": true}], "unionMap": {"sl_no": "inscription_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "taka": {"label": "TN Inscriptions", "fullName": "Tamil Nadu Inscriptions", "dataUrl": "../data/taka/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "serial_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "kind", "header": "Source", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "king", "header": "King", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "tamil_fields", "header": "Tamil Fields", "popup_tab": true}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epte": {"label": "ET", "fullName": "Epigraphia Telanganica", "dataUrl": "../data/epte/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "serial_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "reign_of", "header": "Reign Of", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "references", "header": "All References", "popup_tab": true}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": null, "king": "reign_of", "date": "date", "remarks": "remarks", "page": "page"}}, "epan": {"label": "EA", "fullName": "Epigraphia Andhrica", "dataUrl": "../data/epan/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "article_no", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "title", "header": "Title", "popup_tab": false}, {"key": "author", "header": "Author", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "remarks", "header": "Excerpt", "popup_tab": false}, {"key": "full_text", "header": "Full Text", "popup_tab": true}], "unionMap": {"sl_no": "article_no", "source": "source", "kind": null, "type": "type", "location": null, "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}, "kri": {"label": "KI", "fullName": "Karnatak Inscriptions", "dataUrl": "../data/kri/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "citation", "header": "Citation", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "location", "header": "Location", "popup_tab": false}, {"key": "date", "header": "Date", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "Page", "popup_tab": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true}], "unionMap": {"sl_no": "citation", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "tras": {"label": "TAS", "fullName": "Travancore Archaeological Series", "dataUrl": "../data/tras/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false}, {"key": "number", "header": "No.", "popup_tab": false}, {"key": "source", "header": "Volume", "popup_tab": false}, {"key": "heading", "header": "Heading", "popup_tab": false}, {"key": "group", "header": "Group", "popup_tab": false}, {"key": "type", "header": "Type", "popup_tab": false}, {"key": "register", "header": "Register", "popup_tab": false}, {"key": "are_ref", "header": "ARE", "popup_tab": false}, {"key": "language", "header": "Language", "popup_tab": false}, {"key": "script", "header": "Script", "popup_tab": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false}, {"key": "page", "header": "PDF page", "popup_tab": false}, {"key": "introduction", "header": "Introduction", "popup_tab": true}, {"key": "text_original", "header": "Text", "popup_tab": true}, {"key": "footnotes", "header": "Footnotes", "popup_tab": true}, {"key": "original_script", "header": "Script lines (OCR)", "popup_tab": true}, {"key": "ai_translation", "header": "AI rendering", "popup_tab": true}], "unionMap": {"sl_no": "number", "source": "source", "kind": null, "type": "type", "location": "heading", "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}};
 // Shared facet files, one set per corpus (only the searched corpora are
 // fetched); the Sanjay page adds a "type"-only overlay of its own.
 const FACETS_BASE = "../data/facets/";
@@ -852,10 +910,14 @@ document.getElementById('facetChips').addEventListener('click', (e) => {
 function filterByFacets(rows, facetFile, facets) {
   if (!facetFile) return [];
   if (Object.keys(facets).some((d) => !facetFile.dims.includes(d))) return [];
+  // Exclude also drops a record whose value isn't recorded: "not Tamil
+  // Nadu" means a state known to be elsewhere, not "state unknown".
+  const NOT_RECORDED = ['unknown', 'not classified'];
   const want = facetFile.dims.map((d, i) => {
     if (!(d in facets)) return null;
-    return {exclude: facets[d].mode === 'exclude',
-            set: new Set(facets[d].values.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0))};
+    const exclude = facets[d].mode === 'exclude';
+    const vals = exclude ? facets[d].values.concat(NOT_RECORDED) : facets[d].values;
+    return {exclude, set: new Set(vals.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0))};
   });
   return rows.filter((_, ri) => {
     const fr = facetFile.rows[ri];
@@ -984,10 +1046,29 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') helpModal.
 // last chunk is in (2026-10-28, per the user: loading every corpus takes
 // long enough that an unchanged screen looked like a lost click). A
 // newer search or Clear takes the button over.
+// While it runs, a "Searching..." dialog offers Stop (keep the results
+// found so far, marked as partial) and Cancel (drop them) -- 2026-10-28,
+// per the user. It appears only after a short delay, so a quick search
+// never flashes it.
 const searchBtnEl = document.getElementById('searchBtn');
+const searchModal = document.getElementById('searchModal');
+const searchModalStatus = document.getElementById('searchModalStatus');
+let searchModalTimer = null;
+let searchPct = 0;
 function setSearchBusy(busy) {
   searchBtnEl.disabled = busy;
   searchBtnEl.textContent = busy ? 'Searching\u2026' : 'Search';
+  clearTimeout(searchModalTimer);
+  if (busy) {
+    searchPct = 0;
+    paintSearchModal();
+    searchModalTimer = setTimeout(() => { searchModal.hidden = false; }, 400);
+  } else {
+    searchModal.hidden = true;
+  }
+}
+function paintSearchModal() {
+  searchModalStatus.textContent = currentResults.length + ' result(s) found so far \u2014 ' + searchPct + '% loaded';
 }
 async function runSearch() {
   const myGen = ++searchGeneration;
@@ -999,6 +1080,22 @@ async function runSearch() {
     if (myGen === searchGeneration) setSearchBusy(false);
   }
 }
+document.getElementById('searchStop').addEventListener('click', () => {
+  searchGeneration++; // late chunks are ignored from here on
+  setSearchBusy(false);
+  paintPage();
+  document.getElementById('resultSummary').innerHTML = '<span class="partial-note">Partial results: ' +
+    currentResults.length + ' found before the search was stopped at ' + searchPct +
+    '% loaded. Search again for the full list.</span>';
+});
+document.getElementById('searchCancel').addEventListener('click', () => {
+  searchGeneration++;
+  setSearchBusy(false);
+  currentResults = [];
+  currentPage = 1;
+  paintPage();
+  document.getElementById('resultSummary').textContent = 'Search cancelled.';
+});
 async function runSearchInner(myGen) {
   const corpora = checkedCorpora();
   const summary = document.getElementById('resultSummary');
@@ -1039,8 +1136,10 @@ async function runSearchInner(myGen) {
     function noteChunkDone() {
       doneChunks++;
       if (myGen !== searchGeneration) return;
+      searchPct = Math.round((doneChunks / totalChunks) * 100);
+      paintSearchModal();
       if (doneChunks < totalChunks) {
-        const pct = Math.round((doneChunks / totalChunks) * 100);
+        const pct = searchPct;
         summary.textContent = currentResults.length + ' result(s) so far \u2014 loading\u2026 (' + pct + '%)';
       } else {
         summary.textContent = currentResults.length + ' result(s) across ' + corpora.length + ' corpus/corpora.';

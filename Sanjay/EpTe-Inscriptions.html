@@ -210,6 +210,10 @@
     border-radius: 7px; color: var(--text); font-family: inherit; font-size: 14px;
   }
   #searchBtn:hover, #resetBtn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  #searchBtn:disabled {
+    opacity: 0.45; cursor: progress; font-style: italic; border-style: dashed;
+    color: var(--text-dim); border-color: var(--border);
+  }
   /* Fixed yellow/black in every theme -- a highlight's whole job is to
      stand out regardless of theme, so it doesn't follow the theme. */
   mark { background: #fff3a0; color: #000; padding: 0 1px; border-radius: 2px; }
@@ -288,11 +292,11 @@
      hover shade. */
   tbody tr { cursor: pointer; }
   tbody tr:hover { background: var(--surface-2); }
-  col.c-id { width: 8%; }
+  col.c-id { width: 7%; }
   col.c-serial_no { width: 6%; }
-  col.c-source { width: 10%; }
+  col.c-source { width: 9%; }
   col.c-type { width: 6%; }
-  col.c-location { width: 18%; }
+  col.c-location { width: 20%; }
   col.c-dynasty { width: 8%; }
   col.c-reign_of { width: 8%; }
   col.c-date { width: 6%; }
@@ -567,7 +571,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-28 17:43</div>
+<div class="generated">Generated 2026-10-28 18:45</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -614,7 +618,7 @@ table itself only shows a few lines of.</div>
 <div class="table-scroll">
 <table id="t">
 <colgroup><col class="c-id" data-key="id"><col class="c-serial_no" data-key="serial_no"><col class="c-source" data-key="source"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-reign_of" data-key="reign_of"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-references" data-key="references"><col class="c-inscription_text" data-key="inscription_text"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="serial_no">Serial No.</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="reign_of">Reign Of</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="references">All References</th><th data-key="inscription_text">Inscription Text</th></tr></thead>
+<thead><tr><th data-key="id">ID</th><th data-key="serial_no">No.</th><th data-key="source">Volume</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="reign_of">Reign Of</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="references">All References</th><th data-key="inscription_text">Inscription Text</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -668,7 +672,7 @@ const COLUMN_KEYS = ['id', 'serial_no', 'source', 'type', 'location', 'dynasty',
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "serial_no": "Serial No.", "source": "Volume", "type": "Type", "location": "Location", "dynasty": "Dynasty", "reign_of": "Reign Of", "date": "Date", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "Page", "references": "All References", "inscription_text": "Inscription Text"};
+const COLUMN_HEADERS = {"id": "ID", "serial_no": "No.", "source": "Volume", "type": "Type", "location": "Location", "dynasty": "Dynasty", "reign_of": "Reign Of", "date": "Date", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "Page", "references": "All References", "inscription_text": "Inscription Text"};
 const HIGHLIGHT_COLS = [4, 5, 10];
 const REMARKS_COL_IDX = 10;
 // Column visibility/width policy — see Column.default_visible's own
@@ -677,7 +681,7 @@ const REMARKS_COL_IDX = 10;
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "serial_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 8, "serial_no": 6, "source": 10, "type": 6, "location": 18, "dynasty": 8, "reign_of": 8, "date": 6, "language": 8, "script": 6, "remarks": 58, "page": 4, "references": 0, "inscription_text": 0};
+const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "type": 6, "location": 20, "dynasty": 8, "reign_of": 8, "date": 6, "language": 8, "script": 6, "remarks": 58, "page": 4, "references": 0, "inscription_text": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["references", "inscription_text"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
