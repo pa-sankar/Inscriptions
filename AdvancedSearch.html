@@ -273,7 +273,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-10-28 11:49.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-10-28 12:04.</footer>
 </div>
 
 <div class="row-detail-overlay" id="helpModal" hidden>
@@ -726,6 +726,16 @@ async function loadFacetIndex() {
   });
 }
 
+// A chosen category is marked in the popup like a keyword (2026-10-28, per
+// the user). Only the dims whose value is printed text: a dynasty bucket
+// "Chāḷukya of Bādāmi" is marked by its first word, which the record's own
+// spelling shares once folded ("Chalukya"); century/material/type aren't text.
+const TEXT_DIMS = ['dynasty', 'district', 'state', 'language'];
+function facetTerms(facets) {
+  return TEXT_DIMS.filter((d) => facets[d] && !['unknown', 'other'].includes(facets[d]))
+    .map((d) => d === 'dynasty' ? facets[d].split(' ')[0].split('(')[0] : facets[d]);
+}
+
 // King / Place: free-text, matched (embedded, folded) against that field
 // only. Place covers every location-ish field a corpus carries.
 const PLACE_KEY = /location|place|village|taluk|district|heading/i;
@@ -800,7 +810,7 @@ async function runSearch() {
   const facets = activeFacets();
   const useFacets = Object.keys(facets).length > 0;
   const ft = fieldTerms();
-  currentFieldTerms = [ft.king, ft.place].filter(Boolean);
+  currentFieldTerms = [ft.king, ft.place].filter(Boolean).concat(facetTerms(facets));
   currentSearchTerm = keyword;
   currentSearchMode = mode;
   trackSearch(corpora, range, keyword, mode, facets, ft);
