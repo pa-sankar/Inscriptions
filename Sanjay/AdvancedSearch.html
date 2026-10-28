@@ -84,7 +84,9 @@
     border-radius: 999px; padding: 2px 10px; cursor: pointer; font: inherit; font-size: 12.5px;
   }
   .facet-chip:hover { background: var(--accent); color: #fff; }
-  select#languageInput {
+  .facet-selects { display: contents; }
+  .facet-selects select, #kingInput, #placeInput { max-width: 14rem; }
+  .facet-selects select {
     background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
     padding: 6px 8px; color: var(--text); font: inherit; font-size: 13.5px;
   }
@@ -187,7 +189,7 @@
   <h1>Advanced Search</h1>
   <div class="sub-head">Cross-corpus search across South Indian Inscriptions, Annual Reports on Indian Epigraphy, Epigraphia Carnatica, Tamil Nadu Inscriptions, Epigraphia Telanganica, Epigraphia Andhrica, Karnatak Inscriptions, Travancore Archaeological Series.</div>
   <div class="scope-note">
-    <strong>Sanjay view:</strong> every loaded corpus; the public page searches only the corpora live there. <strong>Language</strong> is a filter (the first language a record names). Clicking a bar or cell on <a href="AtAGlance.html">At a Glance</a> opens this page filtered to exactly the records it counted (century, state, district, dynasty, language, material, type); remove a filter with its ×. <strong>Click a row for every field</strong> &mdash; the table only shows what's needed to identify and skim a row, keeping room for Remarks.
+    <strong>Sanjay view:</strong> every loaded corpus; the public page searches only the corpora live there. <strong>Filters</strong>: Dynasty, District, State, Century, Language, Material and Type dropdowns, plus King and Place text boxes, all combine with the keyword (TrAS has no dropdown buckets yet, so a dropdown filter leaves it out). Clicking a bar or cell on <a href="AtAGlance.html">At a Glance</a> opens this page filtered to exactly the records it counted (century, state, district, dynasty, language, material, type); remove a filter with its ×. <strong>Click a row for every field</strong> &mdash; the table only shows what's needed to identify and skim a row, keeping room for Remarks.
   </div>
 
   <div class="controls">
@@ -216,10 +218,14 @@
         "mahavratin" but not "samahavraja". Full: exact word only. Always
         case-insensitive and diacritic-folded; also matches a record's own unique ID.</div>
     </div>
+    <div class="facet-selects" id="facetSelects"></div>
     <div class="ctrl-group">
-      <label class="group-label" for="languageInput">Language</label>
-      <select id="languageInput"><option value="">Any language</option></select>
-      <div class="hint">The first language the record names.</div>
+      <label class="group-label" for="kingInput">King</label>
+      <input type="text" id="kingInput" placeholder="e.g. Rajaraja">
+    </div>
+    <div class="ctrl-group">
+      <label class="group-label" for="placeInput">Place (village / taluk / district)</label>
+      <input type="text" id="placeInput" placeholder="e.g. Hunsur">
     </div>
     <div class="ctrl-group">
       <button type="button" id="searchBtn">Search</button>
@@ -253,7 +259,7 @@
     </select>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-10-28 06:35 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 09:33 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="rowDetailModal" hidden>
@@ -479,6 +485,8 @@ function markRanges(cell, cellHtml, ranges) {
 // matcher is built per use instead of reusing one).
 let currentSearchTerm = '';
 let currentSearchMode = 'partial';
+// King / Place filter terms, also marked in the popup (embedded match).
+let currentFieldTerms = [];
 
 // Checks every text field AND the row's own unique ID -- per the user,
 // 2026-10-05: free-text search must always reach a record's own ID too
@@ -573,15 +581,21 @@ function facetValueLabel(dim, v) {
   return ({unknown: 'Not recorded', other: 'Other', 'not classified': 'Not classified yet',
            unclassified: 'Other records'})[v] || v;
 }
+// Every dim but corpus (the checkboxes) gets a dropdown (2026-10-28, per
+// the user); a URL value no dropdown offers ("Not recorded") stays a chip.
+const SELECT_DIMS = ['dynasty', 'district', 'state', 'century', 'language', 'material', 'type'];
+const SELECT_HINTS = {language: 'The first language the record names.',
+  material: 'Copper plate when the record says so; everything else is stone and other.',
+  type: 'Hero-stone / Sati-stone classification.'};
+function facetSelect(d) { return document.getElementById('facet_' + d); }
 function activeFacets() {
   const out = Object.assign({}, urlFacets);
-  const lang = document.getElementById('languageInput').value;
-  if (lang) out.language = lang; else delete out.language;
+  SELECT_DIMS.forEach((d) => { const s = facetSelect(d); if (s && s.value) out[d] = s.value; });
   return out;
 }
 function paintFacetChips() {
   const box = document.getElementById('facetChips');
-  const f = Object.assign({}, urlFacets); delete f.language; // the dropdown shows that one
+  const f = Object.assign({}, urlFacets);
   const dims = Object.keys(f);
   box.hidden = !dims.length;
   box.innerHTML = dims.length ? '<span class="hint">From At a Glance:</span>' + dims.map((d) =>
@@ -591,9 +605,6 @@ function paintFacetChips() {
 document.getElementById('facetChips').addEventListener('click', (e) => {
   const b = e.target.closest('.facet-chip'); if (!b) return;
   delete urlFacets[b.dataset.dim]; paintFacetChips(); runSearch();
-});
-document.getElementById('languageInput').addEventListener('change', () => {
-  delete urlFacets.language; runSearch();
 });
 // Keeps only the rows whose buckets match every active facet; a chunk
 // with no facet file (or lacking a dim) matches nothing rather than all.
@@ -619,18 +630,48 @@ async function loadFacetFile(corpus, file) {
   return {dims: shared.dims.concat(extra.dims), vocab: shared.vocab.concat(extra.vocab),
           rows: shared.rows.map((r, i) => r.concat(extra.rows[i]))};
 }
-// Language dropdown: every language in this page's own corpora,
-// alphabetical like every other dropdown (2026-10-24, per the user).
+// One dropdown per dim, over the values in this page's own corpora:
+// alphabetical like every other dropdown (2026-10-24, per the user),
+// centuries in order. Type comes from the Sanjay overlay only.
 async function loadFacetIndex() {
   const counts = {};
-  await Promise.all(Object.keys(CORPUS_CONFIG).map((c) =>
-    fetchJson(FACETS_BASE + c + '/index.json').then((idx) => {
-      Object.entries((idx.counts || {}).language || {}).forEach(([k, n]) => { counts[k] = (counts[k] || 0) + n; });
-    }).catch(() => {})));
-  const sel = document.getElementById('languageInput');
-  Object.keys(counts).filter((v) => v !== 'unknown' && v !== 'Other')
-    .sort((a, b) => a.localeCompare(b))
-    .forEach((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+  const add = (idx) => Object.entries(idx.counts || {}).forEach(([d, vals]) => {
+    counts[d] = counts[d] || {};
+    Object.entries(vals).forEach(([k, n]) => { counts[d][k] = (counts[d][k] || 0) + n; });
+  });
+  await Promise.all(Object.keys(CORPUS_CONFIG).flatMap((c) =>
+    [FACETS_BASE, FACETS_OVERLAY].filter(Boolean).map((base) =>
+      fetchJson(base + c + '/index.json').then(add).catch(() => {}))));
+  const box = document.getElementById('facetSelects');
+  SELECT_DIMS.forEach((d) => {
+    const vals = Object.keys(counts[d] || {}).filter((v) => !['unknown', 'Other', 'other', 'not classified'].includes(v) && !/^[[(]/.test(v));
+    if (!vals.length) return;
+    if (d === 'century') vals.sort((a, b) => (a === 'undated') - (b === 'undated') || a - b);
+    else vals.sort((a, b) => facetValueLabel(d, a).localeCompare(facetValueLabel(d, b)));
+    const g = document.createElement('div'); g.className = 'ctrl-group';
+    g.innerHTML = '<label class="group-label" for="facet_' + d + '">' + FACET_NAMES[d] + '</label>' +
+      '<select id="facet_' + d + '"><option value="">Any</option>' +
+      vals.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(facetValueLabel(d, v)) +
+        ' (' + counts[d][v].toLocaleString() + ')</option>').join('') + '</select>' +
+      (SELECT_HINTS[d] ? '<div class="hint">' + SELECT_HINTS[d] + '</div>' : '');
+    box.appendChild(g);
+    facetSelect(d).addEventListener('change', () => { delete urlFacets[d]; paintFacetChips(); runSearch(); });
+  });
+}
+
+// King / Place: free-text, matched (embedded, folded) against that field
+// only. Place covers every location-ish field a corpus carries.
+const PLACE_KEY = /location|place|village|taluk|district|heading/i;
+function fieldTerms() {
+  return {king: document.getElementById('kingInput').value.trim(),
+          place: document.getElementById('placeInput').value.trim()};
+}
+function rowMatchesFields(row, ft) {
+  const has = (vals, term) => vals.some((v) => v && makeMatcher(foldDiacritics(term), 'embedded').test(foldDiacritics(v)));
+  if (ft.king && !has([row.union.king, row.text.king, row.text.reign_of, row.text.dynasty], ft.king)) return false;
+  if (ft.place && !has(Object.keys(row.text).filter((k) => PLACE_KEY.test(k)).map((k) => row.text[k])
+                       .concat([row.union.location]), ft.place)) return false;
+  return true;
 }
 function applyUrl() {
   const p = new URLSearchParams(location.search);
@@ -640,11 +681,14 @@ function applyUrl() {
     corpusChecksEl.querySelectorAll('input').forEach((cb) => { cb.checked = keys.includes(cb.value); });
   }
   FACET_DIMS.forEach((d) => { if (p.get(d) !== null) urlFacets[d] = p.get(d); });
-  if (urlFacets.language) {
-    const sel = document.getElementById('languageInput');
-    sel.value = urlFacets.language;
-    if (sel.value === urlFacets.language) delete urlFacets.language; // else keep it as a chip ("Not recorded")
-  }
+  SELECT_DIMS.forEach((d) => {
+    const sel = facetSelect(d);
+    if (!sel || !urlFacets[d]) return;
+    sel.value = urlFacets[d];
+    if (sel.value === urlFacets[d]) delete urlFacets[d]; // else keep it as a chip ("Not recorded")
+  });
+  if (p.get('king')) document.getElementById('kingInput').value = p.get('king');
+  if (p.get('place')) document.getElementById('placeInput').value = p.get('place');
   if (p.get('q')) document.getElementById('keywordInput').value = p.get('q');
   paintFacetChips();
   return true;
@@ -666,6 +710,8 @@ async function runSearch() {
   const mode = document.getElementById('matchModeInput').value;
   const facets = activeFacets();
   const useFacets = Object.keys(facets).length > 0;
+  const ft = fieldTerms();
+  currentFieldTerms = [ft.king, ft.place].filter(Boolean);
   currentSearchTerm = keyword;
   currentSearchMode = mode;
   currentTerm = keyword;
@@ -706,7 +752,8 @@ async function runSearch() {
               if (myGen !== searchGeneration) return;
               const kept = useFacets ? filterByFacets(chunkRows, facetFile, facets) : chunkRows;
               const rows = kept.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
-              const matched = keyword ? rows.filter((r) => rowMatchesKeyword(r, keyword, mode)) : rows;
+              const matched = rows.filter((r) => rowMatchesFields(r, ft) &&
+                (!keyword || rowMatchesKeyword(r, keyword, mode)));
               if (matched.length) {
                 currentResults = currentResults.concat(matched);
                 paintPage();
@@ -788,7 +835,10 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
   document.getElementById('matchModeInput').value = 'partial';
-  document.getElementById('languageInput').value = '';
+  SELECT_DIMS.forEach((d) => { const s = facetSelect(d); if (s) s.value = ''; });
+  document.getElementById('kingInput').value = '';
+  document.getElementById('placeInput').value = '';
+  currentFieldTerms = [];
   urlFacets = {};
   paintFacetChips();
   history.replaceState(null, '', location.pathname);
@@ -805,6 +855,8 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 });
 document.getElementById('volumeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 document.getElementById('keywordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+['kingInput', 'placeInput'].forEach((id) => document.getElementById(id)
+  .addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); }));
 
 // -- ID chip click-to-copy -- same mechanism every per-corpus page
 // already uses (inscriptions_table_html.py's own copyIdChip), ported
@@ -880,8 +932,10 @@ function appendNotAvailable(dd) {
 // Returns whether anything got marked, so the popup can flag the tab
 // holding the match (per the user, 2026-10-24).
 function highlightInto(el, html, plainText) {
-  if (!currentSearchTerm) { el.innerHTML = html; return false; }
-  const ranges = textRanges(foldDiacritics(plainText), makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode));
+  if (!currentSearchTerm && !currentFieldTerms.length) { el.innerHTML = html; return false; }
+  const folded = foldDiacritics(plainText);
+  const ranges = (currentSearchTerm ? textRanges(folded, makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode)) : [])
+    .concat(...currentFieldTerms.map((t) => textRanges(folded, makeMatcher(foldDiacritics(t), 'embedded'))));
   markRanges(el, html, ranges);
   return ranges.length > 0;
 }
