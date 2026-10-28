@@ -76,6 +76,10 @@
   #tip { position: fixed; pointer-events: none; background: var(--text); color: var(--bg); font-size: 12px;
          padding: 4px 8px; border-radius: 6px; display: none; z-index: 9; }
   .method li { margin: 3px 0; }
+  .xctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; margin: 4px 0 10px; }
+  .xctl select { font: inherit; font-size: 13px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; max-width: 16rem; }
+  .xchip { font: inherit; font-size: 12.5px; border: 1px solid var(--accent); background: var(--surface); color: var(--accent-strong); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+  .xchip:hover { background: var(--accent); color: var(--surface); }
   footer { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
 </style>
 </head>
@@ -89,6 +93,15 @@
   <div class="kpis" id="kpis"></div>
   <h2>At a glance</h2>
   <div class="charts" id="charts"></div>
+  <h2>Explore</h2>
+  <p class="note">Build your own chart: pick what to count by, add filters, and click a bar to list its records. Follows the corpus buttons above.</p>
+  <div class="xctl">Count records by <select id="xBy" aria-label="Count by"></select>
+    <span id="xFilters"></span>
+    <select id="xAddDim" aria-label="Add a filter"><option value="">+ add filter&hellip;</option></select>
+    <select id="xAddVal" aria-label="Filter value" hidden></select>
+    <a href="#" id="xReset" class="note">reset</a></div>
+  <figure class="chart wide"><div class="fhead"><h3 id="xTitle"></h3><button class="tbtn" id="xTable">Table</button></div>
+    <p class="note" id="xNote"></p><div id="xChart"><p class="note">Loading&hellip;</p></div></figure>
   <h2>How these are counted</h2>
   <ul class="method note">
     <li><b>Source:</b> the records published on this site's corpus pages, as they stand at build time. A record printed in two corpora (an ARE summary later published in full in SII or Epigraphia Carnatica) is counted in each. TN Inscriptions are the Tamil Nadu State Department of Archaeology's numbered and district volumes together with the Inscriptions of the Pudukkottai State.</li>
@@ -98,7 +111,7 @@
     <li><b>Copper plate:</b> ARE's Copper Plate section, or "copper plate" in the place or the start of Remarks. <b>Hero-stone / Sati-stone:</b> the hero-stone word-list classification shown in each corpus page's Type column (Sanjay pages for SII and ARE).</li>
     <li>These are counts of what survives and was published, not of what was carved: a district looks dense where a survey was thorough.</li>
   </ul>
-  <footer>Sanjay review area. Generated 2026-10-24 16:41 via <code>scripts/build_at_a_glance.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-10-28 10:03 via <code>scripts/build_at_a_glance.py</code>.</footer>
 </div>
 <div id="tip" role="tooltip"></div>
 <script>
@@ -161,7 +174,8 @@ function barChart(rows, title, wide, dim) {
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">` + rows.map((r, i) => {
     const y = i * lh + 2, bw = Math.max(2, track * r.value / max);
     const tip = `${r.label}: ${fmt(r.value)} (${(100 * r.value / all).toFixed(1)}%)`;
-    return `<g class="hit" data-href="${esc(searchUrl(dim, r.key))}" data-tip="${esc(tip + ' — click to list them')}"><rect x="0" y="${y}" width="${W}" height="${lh}" fill="transparent"/>` +
+    const href = r.href !== undefined ? r.href : searchUrl(dim, r.key);
+    return `<g class="hit"${href ? ` data-href="${esc(href)}"` : ''} data-tip="${esc(href ? tip + ' — click to list them' : tip)}"><rect x="0" y="${y}" width="${W}" height="${lh}" fill="transparent"/>` +
       `<text class="bar-label" x="${lw - 8}" y="${y + 15}" text-anchor="end">${esc(r.label.length > 22 ? r.label.slice(0, 21) + '…' : r.label)}</text>` +
       `<rect class="bar-track" x="${lw}" y="${y + 5}" width="${track}" height="12" rx="4"/>` +
       `<rect class="bar${r.muted ? ' muted' : ''}" x="${lw}" y="${y + 5}" width="${bw.toFixed(1)}" height="12" rx="4"/>` +
@@ -171,7 +185,7 @@ function barChart(rows, title, wide, dim) {
 function table(rows, dim) {
   const all = rows.reduce((a, r) => a + r.value, 0);
   return '<table class="data"><tr><th>Value</th><th>Records</th><th>%</th></tr>' + rows.map(r =>
-    `<tr><td><a href="${esc(searchUrl(dim, r.key))}">${esc(r.label)}</a></td><td class="n">${fmt(r.value)}</td><td class="n">${(100 * r.value / all).toFixed(1)}</td></tr>`).join('') + '</table>';
+    `<tr><td>${(h => h ? `<a href="${esc(h)}">${esc(r.label)}</a>` : esc(r.label))(r.href !== undefined ? r.href : searchUrl(dim, r.key))}</td><td class="n">${fmt(r.value)}</td><td class="n">${(100 * r.value / all).toFixed(1)}</td></tr>`).join('') + '</table>';
 }
 const asTable = new Set();
 function heatGrid() {
@@ -207,6 +221,7 @@ function render() {
       `<p class="note">${esc(typeof c.note === 'function' ? c.note() : c.note)}</p>${asTable.has(c.id) ? table(rows, c.id) : barChart(rows, c.title, c.wide && innerWidth > 900, c.id)}</figure>`;
   }).join('') + `<figure class="chart wide"><div class="fhead"><h3>Corpus × century</h3></div>` +
     `<p class="note">Which centuries each corpus covers (all corpora shown; switched-off ones are faded).</p>${heatGrid()}</figure>`;
+  if (window.renderExplore) renderExplore();
 }
 
 const chips = document.getElementById('chips');
@@ -233,6 +248,96 @@ document.addEventListener('mousemove', e => {
   tip.textContent = t.dataset.tip; tip.style.display = 'block';
   tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY + 14) + 'px';
 });
+
+// -- Explore (see EXPLORE_HTML in build_at_a_glance.py) --
+const XNAMES = {corpus: 'Corpus', century: 'Century', state: 'State', district: 'District', dynasty: 'Dynasty',
+                language: 'Language', material: 'Material', type: 'Type'};
+const XMUTED = {unknown: 'Not recorded', undated: 'Undated', other: 'Other dynasty', 'not classified': 'Not classified yet',
+                unclassified: 'Other records'};
+const XTOP = 25;
+let X = null, xBy = 'century', xFilt = {}, xTable = false;
+const xLabel = (d, v) => d === 'corpus' ? (FULL[v] || v) : XMUTED[v] || (d === 'century' ? ord(v) : v);
+function xCount(by, skip) {   // by-value -> count, over rows matching every filter but `skip`
+  const m = new Map(), bi = X.dims.indexOf(by), ci = X.dims.indexOf('corpus');
+  const fs = Object.entries(xFilt).filter(([d]) => d !== skip)
+    .map(([d, v]) => [X.dims.indexOf(d), X.vocab[X.dims.indexOf(d)].indexOf(v)]);
+  for (const row of X.rows) {
+    if (!on.has(X.vocab[ci][row[ci]]) || !fs.every(([i, j]) => row[i] === j)) continue;
+    const k = X.vocab[bi][row[bi]]; m.set(k, (m.get(k) || 0) + row[row.length - 1]);
+  }
+  return m;
+}
+function xHref(extra) {
+  const f = Object.assign({}, xFilt, extra), p = new URLSearchParams();
+  p.set('corpus', f.corpus ? f.corpus : [...on].join(',')); delete f.corpus;
+  Object.entries(f).forEach(([d, v]) => p.set(d, v));
+  return 'AdvancedSearch.html?' + p.toString();
+}
+function xSyncUrl() {
+  const p = new URLSearchParams(); p.set('by', xBy); Object.entries(xFilt).forEach(([d, v]) => p.set(d, v));
+  history.replaceState(null, '', location.pathname + '?' + p.toString() + location.hash);
+}
+function renderExplore() {
+  if (!X) return;
+  const m = xCount(xBy, xBy);
+  let rows = [...m.entries()].map(([k, v]) => ({key: k, label: xLabel(xBy, k), value: v, muted: k in XMUTED,
+                                                 href: xHref({[xBy]: k})}));
+  const muted = rows.filter(r => r.muted);
+  rows = rows.filter(r => !r.muted);
+  if (xBy === 'century') rows.sort((a, b) => a.key - b.key); else rows.sort((a, b) => b.value - a.value);
+  let note = '';
+  if (!xTable && xBy !== 'century' && rows.length > XTOP) {
+    const rest = rows.slice(XTOP), n = rest.reduce((a, r) => a + r.value, 0);
+    rows = rows.slice(0, XTOP).concat([{key: '', label: `Others (${rest.length})`, value: n, muted: true, href: null}]);
+    note = `Top ${XTOP}; the other ${rest.length} are grouped as Others (Table lists all). `;
+  }
+  rows = rows.concat(muted);
+  const total = rows.reduce((a, r) => a + r.value, 0);
+  const fl = Object.entries(xFilt).map(([d, v]) => `${XNAMES[d]} ${xLabel(d, v)}`).join(', ');
+  document.getElementById('xTitle').textContent = `By ${XNAMES[xBy].toLowerCase()}` + (fl ? ` — ${fl}` : '');
+  document.getElementById('xNote').textContent = `${fmt(total)} records. ` + note +
+    (muted.length ? 'Greyed bars are records without this value.' : '');
+  document.getElementById('xChart').innerHTML = total
+    ? (xTable ? table(rows, xBy) : barChart(rows, '', innerWidth > 900, xBy))
+    : '<p class="note">No records match.</p>';
+  document.getElementById('xTable').textContent = xTable ? 'Chart' : 'Table';
+  document.getElementById('xFilters').innerHTML = Object.entries(xFilt).map(([d, v]) =>
+    `<button class="xchip" data-d="${esc(d)}" title="Remove this filter">${esc(XNAMES[d] + ': ' + xLabel(d, v))} ×</button>`).join(' ') +
+    (Object.keys(xFilt).length ? '' : '<span class="note">(no filters)</span>');
+  document.getElementById('xAddDim').innerHTML = '<option value="">+ add filter…</option>' +
+    X.dims.filter(d => d !== xBy && !(d in xFilt)).map(d => `<option value="${d}">${XNAMES[d]}</option>`).join('');
+  document.getElementById('xAddVal').hidden = true;
+}
+function xShowValues(d) {   // live counts: rows matching the other filters
+  const m = xCount(d, d), sel = document.getElementById('xAddVal');
+  const vals = [...m.entries()].filter(([k, n]) => n > 0 && !(k in XMUTED) && !/^[\[(]/.test(k));
+  vals.sort(d === 'century' ? ((a, b) => a[0] - b[0]) : ((a, b) => xLabel(d, a[0]).localeCompare(xLabel(d, b[0]))));
+  sel.innerHTML = `<option value="">${XNAMES[d]}…</option>` +
+    vals.map(([k, n]) => `<option value="${esc(k)}">${esc(xLabel(d, k))} (${fmt(n)})</option>`).join('');
+  sel.dataset.d = d; sel.hidden = false; sel.focus();
+}
+(async () => {
+  try { X = await (await fetch("AtAGlance-explore.json")).json(); }
+  catch (e) { document.getElementById('xChart').innerHTML = '<p class="note">Could not load the Explore data.</p>'; return; }
+  const p = new URLSearchParams(location.search);
+  if (X.dims.includes(p.get('by'))) xBy = p.get('by');
+  X.dims.forEach(d => { if (p.get(d) && d !== xBy && X.vocab[X.dims.indexOf(d)].includes(p.get(d))) xFilt[d] = p.get(d); });
+  const by = document.getElementById('xBy');
+  by.innerHTML = X.dims.map(d => `<option value="${d}"${d === xBy ? ' selected' : ''}>${XNAMES[d]}</option>`).join('');
+  by.addEventListener('change', e => { xBy = e.target.value; delete xFilt[xBy]; xSyncUrl(); renderExplore(); });
+  document.getElementById('xAddDim').addEventListener('change', e => { if (e.target.value) xShowValues(e.target.value); });
+  document.getElementById('xAddVal').addEventListener('change', e => {
+    if (!e.target.value) return; xFilt[e.target.dataset.d] = e.target.value; xSyncUrl(); renderExplore(); });
+  document.getElementById('xFilters').addEventListener('click', e => {
+    const b = e.target.closest('.xchip'); if (!b) return; delete xFilt[b.dataset.d]; xSyncUrl(); renderExplore(); });
+  document.getElementById('xReset').addEventListener('click', e => {
+    e.preventDefault(); xBy = 'century'; xFilt = {}; by.value = xBy; xSyncUrl(); renderExplore(); });
+  document.getElementById('xTable').addEventListener('click', () => { xTable = !xTable; renderExplore(); });
+  document.getElementById('xChart').addEventListener('click', e => {
+    const h = e.target.closest('[data-href]'); if (h && !e.target.closest('a')) location.href = h.dataset.href; });
+  renderExplore();
+})();
+
 render();
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 150); });
 </script>
