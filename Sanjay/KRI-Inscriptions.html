@@ -516,6 +516,8 @@
      "checked and blank" reads differently from "never shown at all".
      Muted + italic, distinct from a real value's plain color. */
   .row-detail-na { color: var(--text-dim); font-style: italic; }
+  /* A note drawn by CSS, kept out of the cell's searchable text (2026-11-01). */
+  .cell-note::before { content: attr(data-note); color: var(--text-dim); font-style: italic; }
   .row-detail-remarks-body {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
   }
@@ -572,7 +574,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-01 12:35</div>
+<div class="generated">Generated 2026-11-01 20:46</div>
 
 <div class="stats">127 records from 3 volume(s). Remarks is the English commentary printed alongside each inscription; a row's detail popup also carries the original-script text.</div>
 <div class="legend"><strong>Citation</strong>: the book's own "No. N of YYYY-YY." cross-reference to the Annual Report on [South] Indian Epigraphy.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Original Text</strong>: click any row for its full detail popup -- the original-script (or, for some records, Roman-transliterated) verse text, not shown as its own table column to keep the table itself readable.</div>

@@ -514,6 +514,8 @@
      "checked and blank" reads differently from "never shown at all".
      Muted + italic, distinct from a real value's plain color. */
   .row-detail-na { color: var(--text-dim); font-style: italic; }
+  /* A note drawn by CSS, kept out of the cell's searchable text (2026-11-01). */
+  .cell-note::before { content: attr(data-note); color: var(--text-dim); font-style: italic; }
   .row-detail-remarks-body {
     white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
   }
@@ -570,7 +572,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-01 12:35</div>
+<div class="generated">Generated 2026-11-01 20:46</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
