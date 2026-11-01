@@ -530,6 +530,9 @@
      quick fact down to the bottom for a record with many fields) and
      into its own scrollable tab instead. */
   .row-detail-tabs { margin-top: 1.1rem; }
+  .row-detail-header { padding: 0 2rem 0.7rem 0; margin-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  .row-detail-title { font-size: 1.1rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.3rem; }
+  .row-detail-idline { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .row-detail-tab-bar {
     display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
   }
@@ -572,7 +575,7 @@
   <a href="ARE-Inscriptions.html" class="cross-link">ARE Inscriptions →</a>
 </div>
 
-<div class="generated">Generated 2026-10-28 18:42</div>
+<div class="generated">Generated 2026-11-01 12:32</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR (a volume mid-migration is excluded whole, not shown with a quality gradient row to row — see the script's own docstring). See <a href="../Sources.html#sii">Sources</a> for where each volume came from. Language is shown but always empty for now — not yet parsed from vernacular text.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
@@ -666,6 +669,32 @@ table itself only shows a few lines of.</div>
   </div>
 </div>
 <script>
+
+function readableId(id) {
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Reports on Indian Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const p = (id || '').split('|');
+  const name = NAMES[p[0]];
+  if (!name) return '';
+  const vol = (v) => (v || '').replace(/_?pt/i, ' Part ').toUpperCase().replace(' PART ', ' Part ');
+  const out = [name];
+  if (p[0] === 'are') {
+    if (p[1]) out.push(p[1]);
+    if (p[2]) out.push('Appendix ' + p[2].toUpperCase());
+    if (p[3]) out.push('No. ' + p[3]);
+  } else if (p[0] === 'sii') {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Part ' + p[2].toUpperCase());
+    if (p[3]) out.push('No. ' + p[3]);
+  } else if (p[0] === 'epan') {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Article ' + p[2]);
+  } else {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Inscription ' + p[2]);
+  }
+  return out.join(', ');
+}
+
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'type', 'volume', 'state'];
 const COLUMN_KEYS = ['id', 'sl_no', 'source', 'kind', 'type', 'location', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'commentary', 'page', 'image'];
@@ -2068,6 +2097,32 @@ function updateRemarksClamp(cell) {
 
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
+
+    // Header shown above every tab: the record's ID (with copy button) and
+    // the same ID spelled out (per the user, 2026-11-01).
+    if (row.id) {
+      const head = document.createElement('div');
+      head.className = 'row-detail-header';
+      const title = document.createElement('div');
+      title.className = 'row-detail-title';
+      title.textContent = readableId(row.id);
+      const idLine = document.createElement('div');
+      idLine.className = 'row-detail-idline';
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'idchip';
+      chip.dataset.id = row.id;
+      chip.title = 'Copy ' + row.id;
+      chip.innerHTML = '&#127991;&#65039;';
+      const code = document.createElement('code');
+      code.className = 'row-detail-id-text';
+      code.textContent = row.id;
+      idLine.appendChild(chip);
+      idLine.appendChild(code);
+      if (title.textContent) head.appendChild(title);
+      head.appendChild(idLine);
+      modalBody.appendChild(head);
+    }
 
     const tabs = [];
     let detailsMatch = false;

@@ -528,6 +528,9 @@
      quick fact down to the bottom for a record with many fields) and
      into its own scrollable tab instead. */
   .row-detail-tabs { margin-top: 1.1rem; }
+  .row-detail-header { padding: 0 2rem 0.7rem 0; margin-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  .row-detail-title { font-size: 1.1rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.3rem; }
+  .row-detail-idline { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .row-detail-tab-bar {
     display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;
   }
@@ -570,7 +573,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-10-28 18:46</div>
+<div class="generated">Generated 2026-11-01 12:31</div>
 
 <div class="stats">11430 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the English transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>English Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the English transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -664,6 +667,32 @@ table itself only shows a few lines of.</div>
   </div>
 </div>
 <script>
+
+function readableId(id) {
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Reports on Indian Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const p = (id || '').split('|');
+  const name = NAMES[p[0]];
+  if (!name) return '';
+  const vol = (v) => (v || '').replace(/_?pt/i, ' Part ').toUpperCase().replace(' PART ', ' Part ');
+  const out = [name];
+  if (p[0] === 'are') {
+    if (p[1]) out.push(p[1]);
+    if (p[2]) out.push('Appendix ' + p[2].toUpperCase());
+    if (p[3]) out.push('No. ' + p[3]);
+  } else if (p[0] === 'sii') {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Part ' + p[2].toUpperCase());
+    if (p[3]) out.push('No. ' + p[3]);
+  } else if (p[0] === 'epan') {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Article ' + p[2]);
+  } else {
+    if (p[1]) out.push('Volume ' + vol(p[1]));
+    if (p[2]) out.push('Inscription ' + p[2]);
+  }
+  return out.join(', ');
+}
+
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['type', 'volume', 'language'];
 const COLUMN_KEYS = ['id', 'inscription_no', 'source', 'type', 'location', 'dynasty', 'king', 'date', 'language', 'remarks', 'page', 'text_roman', 'text_original'];
@@ -2066,6 +2095,32 @@ function updateRemarksClamp(cell) {
 
   function openRowDetailModal(row) {
     modalBody.innerHTML = '';
+
+    // Header shown above every tab: the record's ID (with copy button) and
+    // the same ID spelled out (per the user, 2026-11-01).
+    if (row.id) {
+      const head = document.createElement('div');
+      head.className = 'row-detail-header';
+      const title = document.createElement('div');
+      title.className = 'row-detail-title';
+      title.textContent = readableId(row.id);
+      const idLine = document.createElement('div');
+      idLine.className = 'row-detail-idline';
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'idchip';
+      chip.dataset.id = row.id;
+      chip.title = 'Copy ' + row.id;
+      chip.innerHTML = '&#127991;&#65039;';
+      const code = document.createElement('code');
+      code.className = 'row-detail-id-text';
+      code.textContent = row.id;
+      idLine.appendChild(chip);
+      idLine.appendChild(code);
+      if (title.textContent) head.appendChild(title);
+      head.appendChild(idLine);
+      modalBody.appendChild(head);
+    }
 
     const tabs = [];
     let detailsMatch = false;
