@@ -307,6 +307,7 @@
   col.c-page { width: 4%; }
   col.c-tamil_fields { width: 0%; }
   col.c-inscription_text { width: 0%; }
+  col.c-english_translation { width: 0%; }
   /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
      text (see id_chip_html()'s own docstring), so a compact fixed-size
      icon button replaces what used to size itself to a 15+ character
@@ -578,7 +579,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-02 07:55</div>
+<div class="generated">Generated 2026-11-04 09:01</div>
 
 <div class="stats">8056 records from 36 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -624,8 +625,8 @@ table itself only shows a few lines of.</div>
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id" data-key="id"><col class="c-serial_no" data-key="serial_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-tamil_fields" data-key="tamil_fields"><col class="c-inscription_text" data-key="inscription_text"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="serial_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Source</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="tamil_fields">Tamil Fields</th><th data-key="inscription_text">Inscription Text</th></tr></thead>
+<colgroup><col class="c-id" data-key="id"><col class="c-serial_no" data-key="serial_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-tamil_fields" data-key="tamil_fields"><col class="c-inscription_text" data-key="inscription_text"><col class="c-english_translation" data-key="english_translation"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="serial_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Source</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="tamil_fields">Tamil Fields</th><th data-key="inscription_text">Inscription Text</th><th data-key="english_translation">English Translation</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -700,13 +701,13 @@ function readableId(id) {
 
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'type', 'volume'];
-const COLUMN_KEYS = ['id', 'serial_no', 'source', 'kind', 'type', 'location', 'dynasty', 'king', 'date', 'language', 'script', 'remarks', 'page', 'tamil_fields', 'inscription_text'];
+const COLUMN_KEYS = ['id', 'serial_no', 'source', 'kind', 'type', 'location', 'dynasty', 'king', 'date', 'language', 'script', 'remarks', 'page', 'tamil_fields', 'inscription_text', 'english_translation'];
 // key -> column header text, for the row-detail popup's own field
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "serial_no": "No.", "source": "Volume", "kind": "Source", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "Page", "tamil_fields": "Tamil Fields", "inscription_text": "Inscription Text"};
-const HIGHLIGHT_COLS = [5, 6, 7, 11];
+const COLUMN_HEADERS = {"id": "ID", "serial_no": "No.", "source": "Volume", "kind": "Source", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "Page", "tamil_fields": "Tamil Fields", "inscription_text": "Inscription Text", "english_translation": "English Translation"};
+const HIGHLIGHT_COLS = [5, 6, 7, 11, 15];
 const REMARKS_COL_IDX = 11;
 // Column visibility/width policy — see Column.default_visible's own
 // docstring. DEFAULT_VISIBLE_KEYS ship visible; any other column
@@ -714,9 +715,9 @@ const REMARKS_COL_IDX = 11;
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "serial_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "kind": 5, "type": 6, "location": 20, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 58, "page": 4, "tamil_fields": 0, "inscription_text": 0};
+const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "kind": 5, "type": 6, "location": 20, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 58, "page": 4, "tamil_fields": 0, "inscription_text": 0, "english_translation": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
-const POPUP_TAB_KEYS = ["tamil_fields", "inscription_text"];
+const POPUP_TAB_KEYS = ["tamil_fields", "inscription_text", "english_translation"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
