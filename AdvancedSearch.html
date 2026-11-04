@@ -343,7 +343,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-04 12:05.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-04 12:34.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -605,7 +605,7 @@ function buildUnionRow(corpusKey, cfg, row, sourceKey) {
   });
   return {
     corpus: corpusKey, corpusLabel: cfg.label, id: row.id,
-    union, cells: row.cells, text: row.text, sourceKey,
+    union, cells: row.cells, text: row.text, sourceKey, spans: row.spans || null,
   };
 }
 
@@ -1032,6 +1032,97 @@ function fieldTerms() {
   return {king: document.getElementById('kingInput').value.trim(),
           place: document.getElementById('placeInput').value.trim()};
 }
+// -- What a filter choice marks, field by field (2026-11-04, per the user) --
+// A dropdown choice or a King/Place box is marked only in the field it was
+// matched against, not wherever the same word occurs in the record.
+const FIELD_OF = {
+  king: /king|reign_of|dynasty/i,
+  place: PLACE_KEY,
+  dynasty: /dynasty|reign_of/i,
+  district: PLACE_KEY,
+  state: PLACE_KEY,
+  language: /language/i,
+};
+function isLocationField(key) { return PLACE_KEY.test(key) || key === 'location'; }
+function fieldMatches(dimOrBox, key) {
+  const re = FIELD_OF[dimOrBox];
+  return re ? (re.test(key) || ((dimOrBox === 'place' || dimOrBox === 'district' || dimOrBox === 'state') && isLocationField(key))) : false;
+}
+// [[dimOrBox, term], ...] for the current search: King/Place boxes, and the
+// text dropdowns in Include mode (a dynasty bucket by its first word).
+let currentFieldTermsByDim = [];
+function fieldTermsByDim(ft, facets) {
+  const out = [];
+  if (ft.king) out.push(['king', ft.king]);
+  if (ft.place) out.push(['place', ft.place]);
+  TEXT_DIMS.filter((d) => facets[d] && facets[d].mode === 'include').forEach((d) => {
+    facets[d].values.filter((v) => !['unknown', 'other'].includes(v))
+      .forEach((v) => out.push([d, d === 'dynasty' ? v.split(' ')[0].split('(')[0] : v]));
+  });
+  return out;
+}
+
+// Century: the words the record's century was worked out from -- the same
+// rules, in the same order, as build_at_a_glance.year_of(): the Date field
+// first, else the first 300 characters of Remarks; the first pattern that
+// matches wins (A.D. year, Saka +78, Vikrama -57, Kollam +825, "Nth century").
+const YEAR_RULES = [
+  [/(\d{3,4})\s*(?:-\d+\s*)?\]?\s*A\.?\s*D\b/i, 0], [/A\.?\s*D\.?\s*(\d{3,4})/i, 0],
+  [/\bSaka\s*\[?(\d{3,4})/i, 78], [/\bVikrama\s*\[?(\d{3,4})/i, -57], [/\bKollam\s*\[?(\d{3,4})/i, 825],
+];
+function yearSource(row) {
+  const texts = [['date', row.text.date || ''], ['remarks', (row.text.remarks || '').slice(0, 300)]];
+  for (const [key, t] of texts) {
+    const f = foldDiacritics(t);
+    if (!f) continue;
+    for (const [re, shift] of YEAR_RULES) {
+      const m = re.exec(f);
+      if (m) {
+        const y = parseInt(m[1], 10) + shift;
+        return (y >= 100 && y <= 1950) ? {key, range: [m.index, m.index + m[0].length], century: String(Math.floor((y - 1) / 100) + 1)} : null;
+      }
+    }
+    const c = /\b(\d{1,2})(?:st|nd|rd|th)\s+century/i.exec(f);
+    if (c) return {key, range: [c.index, c.index + c[0].length], century: c[1]};
+  }
+  return null;
+}
+
+// Type -> the term categories that make it (Sanjay: hero-stone / sati).
+const TYPE_CATEGORY = {'Hero-stone': /^hero_stone/, 'Sati-stone': /^sati_stone/};
+let currentFacets = {};
+function chosenCategoryTest() {
+  const tests = [];
+  const cat = currentFacets.category;
+  if (cat && cat.mode === 'include') tests.push((c) => cat.values.includes(c));
+  const typ = currentFacets.type;
+  if (typ && typ.mode === 'include') typ.values.forEach((v) => { if (TYPE_CATEGORY[v]) tests.push((c) => TYPE_CATEGORY[v].test(c)); });
+  return tests.length ? (c) => tests.some((t) => t(c)) : null;
+}
+
+// Every range to mark in one field of one record.
+function rangesForField(row, key, plainText) {
+  const folded = foldDiacritics(plainText);
+  let ranges = currentSearchTerm ? textRanges(folded, makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode)) : [];
+  currentFieldTermsByDim.forEach(([dim, term]) => {
+    if (fieldMatches(dim, key)) ranges = ranges.concat(textRanges(folded, makeMatcher(foldDiacritics(term), 'embedded')));
+  });
+  const mat = currentFacets.material;
+  if (mat && mat.mode === 'include' && mat.values.includes('Copper plate') && (/kind|remarks/i.test(key) || isLocationField(key))) {
+    ranges = ranges.concat(textRanges(folded, /copper[- ]?plates?/ig));
+  }
+  const cen = currentFacets.century;
+  if (cen && cen.mode === 'include' && (key === 'date' || key === 'remarks')) {
+    const src = yearSource(row);
+    if (src && src.key === key && cen.values.includes(src.century)) ranges.push(src.range);
+  }
+  const catTest = chosenCategoryTest();
+  if (catTest && row.spans && row.spans[key]) {
+    row.spans[key].forEach(([s, e, c]) => { if (catTest(c)) ranges.push([s, e]); });
+  }
+  return ranges;
+}
+
 function rowMatchesFields(row, ft) {
   const has = (vals, term) => vals.some((v) => v && makeMatcher(foldDiacritics(term), 'embedded').test(foldDiacritics(v)));
   if (ft.king && !has([row.union.king, row.text.king, row.text.reign_of, row.text.dynasty], ft.king)) return false;
@@ -1154,6 +1245,8 @@ async function runSearchInner(myGen) {
   const useFacets = Object.keys(facets).length > 0;
   const ft = fieldTerms();
   currentFieldTerms = [ft.king, ft.place].filter(Boolean).concat(facetTerms(facets));
+  currentFieldTermsByDim = fieldTermsByDim(ft, facets);
+  currentFacets = facets;
   currentSearchTerm = keyword;
   currentSearchMode = mode;
   trackSearch(corpora, range, keyword, mode, facets, ft);
@@ -1191,10 +1284,15 @@ async function runSearchInner(myGen) {
     perCorpus.forEach(({ corpus, cfg, dataDir, wanted }) => {
       wanted.forEach((entry) => {
         const facetJob = useFacets ? loadFacetFile(corpus, entry.file) : Promise.resolve(null);
+        // the term spans live in the Sanjay supplement (<corpus>/<chunk>.json
+        // next to this page): fetched only while a Category/Type is chosen
+        const wantSpans = FACETS_OVERLAY && (facets.category || facets.type);
+        const suppJob = wantSpans ? fetchJson(corpus + '/' + entry.file).catch(() => null) : Promise.resolve(null);
         chunkJobs.push(
-          Promise.all([fetchJson(dataDir + entry.file), facetJob])
-            .then(([chunkRows, facetFile]) => {
+          Promise.all([fetchJson(dataDir + entry.file), facetJob, suppJob])
+            .then(([chunkRows, facetFile, supp]) => {
               if (myGen !== searchGeneration) return;
+              if (supp) chunkRows.forEach((r, i) => { const x = supp[String(i)]; if (x && x.spans) r.spans = x.spans; });
               const kept = useFacets ? filterByFacets(chunkRows, facetFile, facets) : chunkRows;
               const rows = kept.map((row) => buildUnionRow(corpus, cfg, row, entry.key));
               const matched = rows.filter((r) => rowMatchesFields(r, ft) &&
@@ -1285,6 +1383,8 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('kingInput').value = '';
   document.getElementById('placeInput').value = '';
   currentFieldTerms = [];
+  currentFieldTermsByDim = [];
+  currentFacets = {};
   urlFacets = {};
   paintFacetChips();
   history.replaceState(null, '', location.pathname);
@@ -1378,13 +1478,11 @@ function appendNotAvailable(dd) {
 // buildRow()'s own per-column highlighting in inscriptions_table_html.py.
 // Returns whether anything got marked, so the popup can flag the tab
 // holding the match (per the user, 2026-10-24).
-function highlightInto(el, html, plainText) {
-  if (!currentSearchTerm && !currentFieldTerms.length) { el.innerHTML = html; return false; }
-  const folded = foldDiacritics(plainText);
-  const ranges = (currentSearchTerm ? textRanges(folded, makeMatcher(foldDiacritics(currentSearchTerm), currentSearchMode)) : [])
-    .concat(...currentFieldTerms.map((t) => textRanges(folded, makeMatcher(foldDiacritics(t), 'embedded'))));
+function highlightInto(el, html, plainText, row, key) {
+  const ranges = rangesForField(row, key, plainText || '');
+  if (!ranges.length) { el.innerHTML = html; return false; }
   markRanges(el, html, ranges);
-  return ranges.length > 0;
+  return true;
 }
 
 function openRowDetailModal(row) {
@@ -1433,7 +1531,7 @@ function openRowDetailModal(row) {
     dt.textContent = (col.key === 'id' ? 'Unique ID' : col.header) + ':';
     const dd = document.createElement('div');
     dd.className = 'row-detail-value';
-    if (html) { if (highlightInto(dd, html, row.text[col.key] || '')) detailsMatch = true; } else { appendNotAvailable(dd); }
+    if (html) { if (highlightInto(dd, html, row.text[col.key] || '', row, col.key)) detailsMatch = true; } else { appendNotAvailable(dd); }
     if (col.key === 'id' && row.id) {
       const idText = document.createElement('code');
       idText.className = 'row-detail-id-text';
@@ -1461,7 +1559,7 @@ function openRowDetailModal(row) {
     tmp.innerHTML = row.cells[remarksCol.key];
     const clamp = tmp.querySelector('.remarks-clamp');
     const remarksHtml = clamp ? clamp.innerHTML : tmp.innerHTML;
-    const hit = highlightInto(body, remarksHtml, row.text[remarksCol.key] || '');
+    const hit = highlightInto(body, remarksHtml, row.text[remarksCol.key] || '', row, remarksCol.key);
     tabs.push({key: remarksCol.key, label: remarksCol.header, el: body, hit});
   }
 
@@ -1469,7 +1567,7 @@ function openRowDetailModal(row) {
     const html = row.cells[col.key];
     if (!html) return;
     const body = document.createElement('div');
-    const hit = highlightInto(body, html, row.text[col.key] || '');
+    const hit = highlightInto(body, html, row.text[col.key] || '', row, col.key);
     tabs.push({key: col.key, label: col.header, el: body, hit});
   });
 
