@@ -1,1 +1,1 @@
-{"dims":["type"],"counts":{"type":{"unclassified":30}}}
+{"dims":["type","category"],"counts":{"type":{"unclassified":30},"category":{"none":27,"woman_death_composite":3}}}

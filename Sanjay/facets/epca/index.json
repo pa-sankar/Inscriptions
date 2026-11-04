@@ -1,1 +1,1 @@
-{"dims":["type"],"counts":{"type":{"unclassified":10485,"Hero-stone":900,"Sati-stone":45}}}
+{"dims":["type","category"],"counts":{"type":{"unclassified":10900,"Hero-stone":896,"Sati-stone":44},"category":{"none":10676,"hero_stone_direct":897,"woman_death_composite":68,"memorial_samadhi":28,"memorial_nisidhi":25,"incidental_sati_mention":17,"bhairava_kshetrapala":124,"incidental_hero_death_mention":4,"sati_stone_direct":45,"vadugar":9}}}

@@ -343,7 +343,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-04 11:47.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-04 12:05.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -823,10 +823,11 @@ function facetValueLabel(dim, v) {
 }
 // Every dim but corpus (the checkboxes) gets a dropdown (2026-10-28, per
 // the user); a URL value no dropdown offers ("Not recorded") stays a chip.
-const SELECT_DIMS = ['dynasty', 'district', 'state', 'century', 'language', 'material', 'type'];
+const SELECT_DIMS = ['dynasty', 'district', 'state', 'century', 'language', 'material', 'type', 'category'];
 const SELECT_HINTS = {language: 'The first language the record names.',
   material: 'Copper plate when the record says so; everything else is stone and other.',
-  type: 'Hero-stone / Sati-stone classification.'};
+  type: 'Hero-stone / Sati-stone classification.',
+  category: 'Term categories matched in the record, as on the corpus pages (hero-stone terms, Bhairava / Kshetrapala, Vadugar).'};
 function facetSelect(d) { return document.getElementById('facet_' + d); }
 // Each dropdown's choice as {mode: 'include'|'exclude', values: [...]}.
 // The dropdown picks one value; its checklist popup picks several and
@@ -951,6 +952,12 @@ function filterByFacets(rows, facetFile, facets) {
     if (!(d in facets)) return null;
     const exclude = facets[d].mode === 'exclude';
     const vals = exclude ? facets[d].values.concat(NOT_RECORDED) : facets[d].values;
+    // category holds several values per record ("a|b"): a record matches
+    // when any of its categories is chosen (2026-11-04)
+    if (d === 'category') {
+      return {exclude, set: new Set(facetFile.vocab[i].map((v, j) => [v, j])
+        .filter(([v]) => v.split('|').some((x) => vals.includes(x))).map(([, j]) => j))};
+    }
     return {exclude, set: new Set(vals.map((v) => facetFile.vocab[i].indexOf(v)).filter((j) => j >= 0))};
   });
   return rows.filter((_, ri) => {
@@ -983,7 +990,7 @@ async function loadFacetIndex() {
       fetchJson(base + c + '/index.json').then(add).catch(() => {}))));
   const box = document.getElementById('facetSelects');
   SELECT_DIMS.forEach((d) => {
-    const vals = Object.keys(counts[d] || {}).filter((v) => !['unknown', 'Other', 'other', 'not classified'].includes(v) && !/^[[(]/.test(v));
+    const vals = Object.keys(counts[d] || {}).filter((v) => !['unknown', 'Other', 'other', 'not classified', 'none'].includes(v) && !/^[[(]/.test(v));
     if (!vals.length) return;
     if (d === 'century') vals.sort((a, b) => (a === 'undated') - (b === 'undated') || a - b);
     else vals.sort((a, b) => facetValueLabel(d, a).localeCompare(facetValueLabel(d, b)));
