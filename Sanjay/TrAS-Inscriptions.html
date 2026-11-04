@@ -374,7 +374,14 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem 2rem; box-shadow: var(--shadow);
     text-align: center; font-size: 1rem; color: var(--text);
+    /* One fixed size, per the user 2026-11-04: the "Loading volume X… (N%)"
+       text changes with every chunk, and a box sized to its text jumped
+       about. Wide enough for the longest label in any corpus; a longer one
+       wraps onto the second line kept free for it. */
+    box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
+  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -580,7 +587,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-04 11:27</div>
+<div class="generated">Generated 2026-11-04 13:57</div>
 
 <div class="stats">488 records from 15 volume PDF(s) of the Travancore Archaeological Series. Vol VIII's scan stops at printed p. 29.</div>
 <div class="legend"><strong>No.</strong>: the book's "No. N" in Vols III-VII; in I, II, VIII and IX, which print no inscription numbers, the entry's place in the contents.<br><strong>Register</strong>: the Travancore department's register number and Kollam year ("3 of 1106"). <strong>ARE</strong>: the Madras Epigraphical collection number.<br><strong>Remarks</strong>: the book's translation, or the editor's introduction where the book gives none. Click a row for the introduction, text, footnotes and, marked as AI, an unverified English rendering of script lines made during OCR.</div>

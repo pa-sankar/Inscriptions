@@ -366,7 +366,14 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem 2rem; box-shadow: var(--shadow);
     text-align: center; font-size: 1rem; color: var(--text);
+    /* One fixed size, per the user 2026-11-04: the "Loading volume X… (N%)"
+       text changes with every chunk, and a box sized to its text jumped
+       about. Wide enough for the longest label in any corpus; a longer one
+       wraps onto the second line kept free for it. */
+    box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
+  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -572,7 +579,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-04 11:28</div>
+<div class="generated">Generated 2026-11-04 13:58</div>
 
 <div class="stats">14566 entries from the three volumes of V. Rangacharya, <em>A Topographical List of the Inscriptions of the Madras Presidency</em> (1919).</div>
 <div class="legend"><strong>No.</strong>: the book's own number (it restarts in each district).<br><strong>ARE No.</strong>: the Annual Report number the entry cites, as printed; not yet matched against our ARE records.<br><strong>Remarks</strong>: the entry as printed -- where the stone is, what it records, and the book's references.</div>

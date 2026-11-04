@@ -371,7 +371,14 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem 2rem; box-shadow: var(--shadow);
     text-align: center; font-size: 1rem; color: var(--text);
+    /* One fixed size, per the user 2026-11-04: the "Loading volume X… (N%)"
+       text changes with every chunk, and a box sized to its text jumped
+       about. Wide enough for the longest label in any corpus; a longer one
+       wraps onto the second line kept free for it. */
+    box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
+  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -577,7 +584,7 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-04 11:27</div>
+<div class="generated">Generated 2026-11-04 13:57</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
