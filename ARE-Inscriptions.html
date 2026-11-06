@@ -434,15 +434,7 @@
      no cursor, nothing to hover — so a tap toggles this visible inline
      reveal instead (2026-08-25); the JS below does the toggling, this is
      just its collapsed/expanded look. */
-  .cite-hint {
-    text-decoration: underline dotted var(--text-dim); text-underline-offset: 2px;
-    cursor: help;
-  }
-  .cite-hint-reveal {
-    display: block; margin-top: 0.2rem; font-size: 0.8rem;
-    color: var(--accent-strong); background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 4px; padding: 0.3rem 0.5rem;
-  }
+  .cite-resolved { color: var(--text-dim); }
   /* A "Published in ..." citation this project can actually resolve to
      another record — see remarks_cell_html()'s xref-link spans and
      jumpToKey()/OTHER_CORPUS_URL in the JS. A real <button>, not a
@@ -593,10 +585,10 @@
 </div>
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-06 19:08</div>
+<div class="generated">Generated 2026-11-06 20:45</div>
 
 <div class="stats">56583 records from 66 report(s), 6841 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
-<div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the underlined word carries the full citation as a hover tooltip.</div>
+<div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the work it refers to follows the word, in italics and brackets; that text is ours, not the report's.</div>
 <div class="filters-help">Filters narrow each other as you go — pick a
 Volume and every other filter's list shrinks to only the values that
 actually occur among that Volume's own records (a greyed-out option
@@ -1017,7 +1009,9 @@ function testFrom0(re, text) {
 // boundary) or 'word' (whole word): the three widths every search offers
 // (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
 function makeMatcher(term, mode) {
-  const body = escapeRegex(term);
+  // Per the user, 2026-11-06: * is any run of characters up to a space, ? exactly one.
+  // Everything else stays literal, since the print is full of [ ( . |
+  const body = escapeRegex(term).replace(/\\\*/g, '\\S*').replace(/\\\?/g, '\\S');
   const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
                 : mode === 'partial' ? '\\b(' + body + ')'
                 : '(' + body + ')';
@@ -1975,28 +1969,6 @@ document.addEventListener('click', (e) => {
     setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
   }, { passive: false });
 })();
-
-// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
-// .cite-hint span, and CSS above. `title` gives a real tooltip on a
-// mouse hover already; a touchscreen has no hover at all, so a tap
-// toggles a visible inline line under the word instead — added
-// 2026-08-25, per the user. Delegated on `document` rather than bound
-// per-span, since highlightCell() can rebuild a cell's markup (from its
-// own saved original) on every search, which would otherwise leave a
-// freshly-restored .cite-hint with no listener attached.
-document.addEventListener('click', (e) => {
-  const hint = e.target.closest('.cite-hint');
-  if (!hint) return;
-  const next = hint.nextElementSibling;
-  if (next && next.classList.contains('cite-hint-reveal')) {
-    next.remove();
-    return;
-  }
-  const reveal = document.createElement('span');
-  reveal.className = 'cite-hint-reveal';
-  reveal.textContent = hint.getAttribute('title') || '';
-  hint.insertAdjacentElement('afterend', reveal);
-});
 
 // Remarks-column truncation — see clamp_remarks_html(). Only the
 // "Read more" button's visibility is decided in JS; the clamp itself is

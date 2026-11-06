@@ -344,7 +344,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-06 19:08.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-06 20:46.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -436,10 +436,21 @@
     </ul>
     <h3>5. Search the text</h3>
     <ul>
-      <li><b>Keyword</b> searches every field of the record, including Remarks and its ID; press Enter or
+      <li><b>Keyword</b> searches every field of the record, including Remarks and its ID. <code>*</code> stands for any run of characters up to a space and <code>?</code> for exactly one: <code>Kul?ttu*</code>, <code>are|1956-57|a|*</code>; press Enter or
         <b>Search</b>.</li>
       <li><b>Match</b>: <em>Partial</em> (default) finds words starting with your term; <em>Embedded</em> finds it
         anywhere, even inside a longer word; <em>Full word</em> finds only the exact word.</li>
+    </ul>
+    <h3>Find a record by its unique code</h3>
+    <ul>
+      <li>Every record has a unique code, under its &#127991;&#65039; button and at the top of its popup.
+        Paste it into <b>Keyword</b>: <code>are|1956-57|a|16</code> is Appendix A, No. 16 of the 1956-57 report.
+        Clear any other filters first, or they will narrow the result.</li>
+      <li>Wildcards list a group: <code>are|1956-57|a|*</code> is all of that appendix.
+        <code>are|1956-57|a|1?</code> is Nos. 10 to 19 with <em>Full word</em> match; <em>Partial</em> would add
+        any No. 100 and above.</li>
+      <li>Only <code>*</code> and <code>?</code> are special. Everything else, such as <code>[</code>, <code>(</code>
+        or <code>|</code>, means itself.</li>
     </ul>
     <h3>6. Read the results</h3>
     <ul>
@@ -665,7 +676,9 @@ function foldDiacritics(s) {
 // search feature shouldn't hardcode just "contains" or just "whole
 // word" when a caller may want either boundary behavior, or none.
 function makeMatcher(term, mode) {
-  const body = escapeRegex(term);
+  // Per the user, 2026-11-06: * is any run of characters up to a space, ? exactly one.
+  // Everything else stays literal, since the print is full of [ ( . |
+  const body = escapeRegex(term).replace(/\\\*/g, '\\S*').replace(/\\\?/g, '\\S');
   const pattern = mode === 'full' ? '\\b(' + body + ')\\b'
                 : mode === 'partial' ? '\\b(' + body + ')'
                 : '(' + body + ')';
@@ -1071,12 +1084,17 @@ const YEAR_RULES = [
   [/(\d{3,4})\s*(?:-\d+\s*)?\]?\s*A\.?\s*D\b/i, 0], [/A\.?\s*D\.?\s*(\d{3,4})/i, 0],
   [/\bSaka\s*\[?(\d{3,4})/i, 78], [/\bVikrama\s*\[?(\d{3,4})/i, -57], [/\bKollam\s*\[?(\d{3,4})/i, 825],
 ];
+// EpCa only: build_at_a_glance.EPCA_YEAR_RULES, and the whole translation.
+const EPCA_YEAR_RULES = [[/\bSak[ae][\s-]+\(?(?:years?|era|varsa)?\)?\s*\[?([4-9]\d\d|1\d{3})/i, 78], [/(?<!Vira )\bSamvat\s*\[?(\d{3,4})/i, -57]];
 function yearSource(row) {
-  const texts = [['date', row.text.date || ''], ['remarks', (row.text.remarks || '').slice(0, 300)]];
+  const epca = row.corpus === 'epca';
+  const remarks = row.text.remarks || '';
+  const texts = [['date', row.text.date || ''], ['remarks', epca ? remarks : remarks.slice(0, 300)]];
+  const rules = epca ? YEAR_RULES.concat(EPCA_YEAR_RULES) : YEAR_RULES;
   for (const [key, t] of texts) {
     const f = foldDiacritics(t);
     if (!f) continue;
-    for (const [re, shift] of YEAR_RULES) {
+    for (const [re, shift] of rules) {
       const m = re.exec(f);
       if (m) {
         const y = parseInt(m[1], 10) + shift;

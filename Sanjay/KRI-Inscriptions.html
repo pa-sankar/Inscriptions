@@ -424,15 +424,7 @@
      no cursor, nothing to hover — so a tap toggles this visible inline
      reveal instead (2026-08-25); the JS below does the toggling, this is
      just its collapsed/expanded look. */
-  .cite-hint {
-    text-decoration: underline dotted var(--text-dim); text-underline-offset: 2px;
-    cursor: help;
-  }
-  .cite-hint-reveal {
-    display: block; margin-top: 0.2rem; font-size: 0.8rem;
-    color: var(--accent-strong); background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 4px; padding: 0.3rem 0.5rem;
-  }
+  .cite-resolved { color: var(--text-dim); }
   /* A "Published in ..." citation this project can actually resolve to
      another record — see remarks_cell_html()'s xref-link spans and
      jumpToKey()/OTHER_CORPUS_URL in the JS. A real <button>, not a
@@ -582,7 +574,8 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-05 20:59</div>
+
+<div class="generated">Generated 2026-11-06 20:11</div>
 
 <div class="stats">127 records from 3 volume(s). Remarks is the English commentary printed alongside each inscription; a row's detail popup also carries the original-script text.</div>
 <div class="legend"><strong>Citation</strong>: the book's own "No. N of YYYY-YY." cross-reference to the Annual Report on Epigraphy.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Original Text</strong>: click any row for its full detail popup -- the original-script (or, for some records, Roman-transliterated) verse text, not shown as its own table column to keep the table itself readable.</div>
@@ -1006,7 +999,9 @@ function testFrom0(re, text) {
 // boundary) or 'word' (whole word): the three widths every search offers
 // (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
 function makeMatcher(term, mode) {
-  const body = escapeRegex(term);
+  // Per the user, 2026-11-06: * is any run of characters up to a space, ? exactly one.
+  // Everything else stays literal, since the print is full of [ ( . |
+  const body = escapeRegex(term).replace(/\\\*/g, '\\S*').replace(/\\\?/g, '\\S');
   const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
                 : mode === 'partial' ? '\\b(' + body + ')'
                 : '(' + body + ')';
@@ -1964,28 +1959,6 @@ document.addEventListener('click', (e) => {
     setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
   }, { passive: false });
 })();
-
-// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
-// .cite-hint span, and CSS above. `title` gives a real tooltip on a
-// mouse hover already; a touchscreen has no hover at all, so a tap
-// toggles a visible inline line under the word instead — added
-// 2026-08-25, per the user. Delegated on `document` rather than bound
-// per-span, since highlightCell() can rebuild a cell's markup (from its
-// own saved original) on every search, which would otherwise leave a
-// freshly-restored .cite-hint with no listener attached.
-document.addEventListener('click', (e) => {
-  const hint = e.target.closest('.cite-hint');
-  if (!hint) return;
-  const next = hint.nextElementSibling;
-  if (next && next.classList.contains('cite-hint-reveal')) {
-    next.remove();
-    return;
-  }
-  const reveal = document.createElement('span');
-  reveal.className = 'cite-hint-reveal';
-  reveal.textContent = hint.getAttribute('title') || '';
-  hint.insertAdjacentElement('afterend', reveal);
-});
 
 // Remarks-column truncation — see clamp_remarks_html(). Only the
 // "Read more" button's visibility is decided in JS; the clamp itself is
