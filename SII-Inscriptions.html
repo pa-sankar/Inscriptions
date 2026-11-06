@@ -305,7 +305,7 @@
   col.c-sl_no { width: 6%; }
   col.c-source { width: 9%; }
   col.c-kind { width: 5%; }
-  col.c-location { width: 26%; }
+  col.c-location { width: 31%; }
   col.c-survey_ref { width: 8%; }
   col.c-place { width: 17%; }
   col.c-dynasty { width: 11%; }
@@ -314,7 +314,6 @@
   col.c-remarks { width: 58%; }
   col.c-commentary { width: 0%; }
   col.c-page { width: 5%; }
-  col.c-image { width: 5%; }
   /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
      text (see id_chip_html()'s own docstring), so a compact fixed-size
      icon button replaces what used to size itself to a 15+ character
@@ -592,10 +591,11 @@
   <h1><a href="index.html" class="home-link" title="Home">&#8962;</a> SII Inscriptions</h1>
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
+<div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-05 20:55</div>
+<div class="generated">Generated 2026-11-06 10:59</div>
 
-<div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from. Some records have a page image available to view alongside their transcription.</div>
+<div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The underlined word carries the full citation as a hover tooltip.</div>
 <div class="filters-help">Filters narrow each other as you go — pick a
 Volume and every other filter's list shrinks to only the values that
@@ -639,8 +639,8 @@ table itself only shows a few lines of.</div>
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id" data-key="id"><col class="c-sl_no" data-key="sl_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-location" data-key="location"><col class="c-survey_ref" data-key="survey_ref"><col class="c-place" data-key="place"><col class="c-dynasty" data-key="dynasty"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-remarks" data-key="remarks"><col class="c-commentary" data-key="commentary"><col class="c-page" data-key="page"><col class="c-image" data-key="image"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="sl_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Kind</th><th data-key="location">Location</th><th data-key="survey_ref">Survey Ref</th><th data-key="place">Place/Source</th><th data-key="dynasty">Dynasty/King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="commentary">Commentary</th><th data-key="page">Page</th><th data-key="image">Image</th></tr></thead>
+<colgroup><col class="c-id" data-key="id"><col class="c-sl_no" data-key="sl_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-location" data-key="location"><col class="c-survey_ref" data-key="survey_ref"><col class="c-place" data-key="place"><col class="c-dynasty" data-key="dynasty"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-remarks" data-key="remarks"><col class="c-commentary" data-key="commentary"><col class="c-page" data-key="page"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="sl_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Kind</th><th data-key="location">Location</th><th data-key="survey_ref">Survey Ref</th><th data-key="place">Place/Source</th><th data-key="dynasty">Dynasty/King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="remarks">Remarks</th><th data-key="commentary">Commentary</th><th data-key="page">Page</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -715,12 +715,12 @@ function readableId(id) {
 
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'volume', 'state'];
-const COLUMN_KEYS = ['id', 'sl_no', 'source', 'kind', 'location', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'commentary', 'page', 'image'];
+const COLUMN_KEYS = ['id', 'sl_no', 'source', 'kind', 'location', 'survey_ref', 'place', 'dynasty', 'date', 'language', 'remarks', 'commentary', 'page'];
 // key -> column header text, for the row-detail popup's own field
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "sl_no": "No.", "source": "Volume", "kind": "Kind", "location": "Location", "survey_ref": "Survey Ref", "place": "Place/Source", "dynasty": "Dynasty/King", "date": "Date", "language": "Language", "remarks": "Remarks", "commentary": "Commentary", "page": "Page", "image": "Image"};
+const COLUMN_HEADERS = {"id": "ID", "sl_no": "No.", "source": "Volume", "kind": "Kind", "location": "Location", "survey_ref": "Survey Ref", "place": "Place/Source", "dynasty": "Dynasty/King", "date": "Date", "language": "Language", "remarks": "Remarks", "commentary": "Commentary", "page": "Page"};
 const HIGHLIGHT_COLS = [6, 7, 8, 10];
 const REMARKS_COL_IDX = 10;
 // Column visibility/width policy — see Column.default_visible's own
@@ -729,7 +729,7 @@ const REMARKS_COL_IDX = 10;
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "sl_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 7, "sl_no": 6, "source": 9, "kind": 5, "location": 26, "survey_ref": 8, "place": 17, "dynasty": 11, "date": 8, "language": 6, "remarks": 58, "commentary": 0, "page": 5, "image": 5};
+const BASE_COL_WIDTHS = {"id": 7, "sl_no": 6, "source": 9, "kind": 5, "location": 31, "survey_ref": 8, "place": 17, "dynasty": 11, "date": 8, "language": 6, "remarks": 58, "commentary": 0, "page": 5};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["commentary"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
