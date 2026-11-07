@@ -290,8 +290,8 @@
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="keywordInput">Keyword</label>
-      <div class="hint">Remarks, location, ID and more.</div>
-      <input type="text" id="keywordInput" placeholder="e.g. gotra">
+      <div class="hint">Remarks, location, ID and more. Also in Tamil, Kannada and other scripts.</div>
+      <input type="text" id="keywordInput" placeholder="e.g. gotra, பைரவ, ಭೈರವ">
     </div>
     <div class="ctrl-group">
       <label class="group-label" for="matchModeInput">Match</label>
@@ -344,7 +344,7 @@
     </select>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-06 21:01.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-07 19:10.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -436,6 +436,7 @@
     </ul>
     <h3>5. Search the text</h3>
     <ul>
+      <li><b>Tamil, Kannada and other scripts:</b> type the word in its own script, e.g. <code>பைரவ</code> or <code>ಭೈರವ</code>. It finds text stored in that script only: search <code>Bhairava</code> as well, and each spelling (<code>பைரவ</code>, <code>வைரவ</code>). Embedded also finds longer forms such as <code>பைரவர்</code>. See <a href="HowItWorks.html#searching-in-tamil-and-kannada">How it works</a>.</li>
       <li><b>Keyword</b> searches every field of the record, including Remarks and its ID. <code>*</code> stands for any run of characters up to a space and <code>?</code> for exactly one: <code>Kul?ttu*</code>, <code>are|1956-57|a|*</code>; press Enter or
         <b>Search</b>.</li>
       <li><b>Match</b>: <em>Partial</em> (default) finds words starting with your term; <em>Embedded</em> finds it
@@ -679,10 +680,13 @@ function makeMatcher(term, mode) {
   // Per the user, 2026-11-06: * is any run of characters up to a space, ? exactly one.
   // Everything else stays literal, since the print is full of [ ( . |
   const body = escapeRegex(term).replace(/\\\*/g, '\\S*').replace(/\\\?/g, '\\S');
-  const pattern = mode === 'full' ? '\\b(' + body + ')\\b'
-                : mode === 'partial' ? '\\b(' + body + ')'
+  // A boundary for any script: \b knows only ASCII, so Tamil, Kannada and any
+  // word touching a diacritic never matched (2026-11-07).
+  const before = '(?<![\\p{L}\\p{M}\\p{N}])', after = '(?![\\p{L}\\p{M}\\p{N}])';
+  const pattern = mode === 'full' ? before + '(' + body + ')' + after
+                : mode === 'partial' ? before + '(' + body + ')'
                 : '(' + body + ')';
-  return new RegExp(pattern, 'ig');
+  return new RegExp(pattern, 'igu');
 }
 function textRanges(text, re) {
   const out = [];
