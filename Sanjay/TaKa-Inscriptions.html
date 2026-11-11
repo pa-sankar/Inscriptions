@@ -379,8 +379,13 @@
        wraps onto the second line kept free for it. */
     box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
-  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+  /* Fixed height too (user, 2026-11-11): progress on line one, the volume
+     on line two, each cut with an ellipsis, so no label can resize the box.
+     Plain messages (errors) get the same two lines. */
+  #loadMessage { height: 2.8em; line-height: 1.4em; overflow: hidden;
     font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  #loadMessage.load-error { height: auto; }
+  #loadMessage .load-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -579,7 +584,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-08 07:49</div>
+<div class="generated">Generated 2026-11-11 11:37</div>
 
 <div class="stats">8193 records from 36 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Fields / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1612,6 +1617,7 @@ async function fetchChunkJson(url, modified) {
 async function loadData() {
   document.body.classList.add('loading');
   loadOverlay.hidden = false;
+  loadMessage.classList.remove('load-error');
   loadMessage.textContent = 'Loading data\u2026';
   loadRetryBtn.hidden = true;
   setControlsDisabled(true);
@@ -1639,7 +1645,13 @@ async function loadData() {
     function noteProgress(label) {
       done++;
       const pct = total ? Math.round((done / total) * 100) : 100;
-      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+      // Two fixed lines (user, 2026-11-11): progress first, the unit below.
+      const top = document.createElement('div'), bottom = document.createElement('div');
+      top.className = bottom.className = 'load-line';
+      top.textContent = 'Loading\u2026 (' + pct + '%)';
+      bottom.textContent = CHUNK_LABEL.charAt(0).toUpperCase() + CHUNK_LABEL.slice(1) + ' ' + label;
+      bottom.title = bottom.textContent;
+      loadMessage.replaceChildren(top, bottom);
     }
 
     // One chunk fetched (data + its own matching supplement, if any) at
@@ -1715,6 +1727,7 @@ async function loadData() {
     // stale index) throws the same way the old single-file fetch did —
     // one clear error and a Retry button, never a silently partial
     // table with some chunks missing.
+    loadMessage.classList.add('load-error');  // an error may need more than two lines
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
   }
@@ -1773,7 +1786,14 @@ document.addEventListener('click', (e) => {
   e.preventDefault();
   const key = b.dataset.key;
   if (b.dataset.corpus === CURRENT_CORPUS) {
+    // from inside the row-detail popup ("Also published as"): close it so
+    // the jump lands on the visible table
+    const dlg = document.getElementById('rowDetailModal');
+    if (dlg && !dlg.hidden) dlg.querySelector('#rowDetailModalClose').click();
     jumpToKey(key);
+  } else if (b.dataset.url) {
+    // a link that names its own page (a third corpus's page)
+    location.href = b.dataset.url + '?jump=' + encodeURIComponent(key);
   } else if (OTHER_CORPUS_URL) {
     location.href = OTHER_CORPUS_URL + '?jump=' + encodeURIComponent(key);
   }

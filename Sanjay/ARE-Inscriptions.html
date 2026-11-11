@@ -377,8 +377,13 @@
        wraps onto the second line kept free for it. */
     box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
-  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+  /* Fixed height too (user, 2026-11-11): progress on line one, the volume
+     on line two, each cut with an ellipsis, so no label can resize the box.
+     Plain messages (errors) get the same two lines. */
+  #loadMessage { height: 2.8em; line-height: 1.4em; overflow: hidden;
     font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  #loadMessage.load-error { height: auto; }
+  #loadMessage .load-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -577,7 +582,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-11 08:31</div>
+<div class="generated">Generated 2026-11-11 11:35</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">56583 records from 6841 table pages (580 index pages excluded) across 66 PDFs. 72990 &quot;Do.&quot; cells resolved, 58224 flagged (unresolved or partial — not auto-filled). 30 merged Serial/Findspot cells split, 12 stray Sl.No prefixes stripped, 7897 location prefixes moved to Location, 8 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the work it refers to follows the word, in italics and brackets; that text is ours, not the report's.</div>
@@ -1610,6 +1615,7 @@ async function fetchChunkJson(url, modified) {
 async function loadData() {
   document.body.classList.add('loading');
   loadOverlay.hidden = false;
+  loadMessage.classList.remove('load-error');
   loadMessage.textContent = 'Loading data\u2026';
   loadRetryBtn.hidden = true;
   setControlsDisabled(true);
@@ -1637,7 +1643,13 @@ async function loadData() {
     function noteProgress(label) {
       done++;
       const pct = total ? Math.round((done / total) * 100) : 100;
-      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+      // Two fixed lines (user, 2026-11-11): progress first, the unit below.
+      const top = document.createElement('div'), bottom = document.createElement('div');
+      top.className = bottom.className = 'load-line';
+      top.textContent = 'Loading\u2026 (' + pct + '%)';
+      bottom.textContent = CHUNK_LABEL.charAt(0).toUpperCase() + CHUNK_LABEL.slice(1) + ' ' + label;
+      bottom.title = bottom.textContent;
+      loadMessage.replaceChildren(top, bottom);
     }
 
     // One chunk fetched (data + its own matching supplement, if any) at
@@ -1713,6 +1725,7 @@ async function loadData() {
     // stale index) throws the same way the old single-file fetch did —
     // one clear error and a Retry button, never a silently partial
     // table with some chunks missing.
+    loadMessage.classList.add('load-error');  // an error may need more than two lines
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
   }

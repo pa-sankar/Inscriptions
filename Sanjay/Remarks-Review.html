@@ -371,7 +371,19 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem 2rem; box-shadow: var(--shadow);
     text-align: center; font-size: 1rem; color: var(--text);
+    /* One fixed size, per the user 2026-11-04: the "Loading volume X… (N%)"
+       text changes with every chunk, and a box sized to its text jumped
+       about. Wide enough for the longest label in any corpus; a longer one
+       wraps onto the second line kept free for it. */
+    box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
+  /* Fixed height too (user, 2026-11-11): progress on line one, the volume
+     on line two, each cut with an ellipsis, so no label can resize the box.
+     Plain messages (errors) get the same two lines. */
+  #loadMessage { height: 2.8em; line-height: 1.4em; overflow: hidden;
+    font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  #loadMessage.load-error { height: auto; }
+  #loadMessage .load-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -419,15 +431,7 @@
      no cursor, nothing to hover — so a tap toggles this visible inline
      reveal instead (2026-08-25); the JS below does the toggling, this is
      just its collapsed/expanded look. */
-  .cite-hint {
-    text-decoration: underline dotted var(--text-dim); text-underline-offset: 2px;
-    cursor: help;
-  }
-  .cite-hint-reveal {
-    display: block; margin-top: 0.2rem; font-size: 0.8rem;
-    color: var(--accent-strong); background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 4px; padding: 0.3rem 0.5rem;
-  }
+  .cite-resolved { color: var(--text-dim); }
   /* A "Published in ..." citation this project can actually resolve to
      another record — see remarks_cell_html()'s xref-link spans and
      jumpToKey()/OTHER_CORPUS_URL in the JS. A real <button>, not a
@@ -577,9 +581,10 @@
   
 </div>
 
-<div class="generated">Generated 2026-11-02 12:51</div>
 
-<div class="stats">53 records whose Remarks may belong to another record (ARE 32, EpCa 13, SII 8). Pick a bucket for each in the Review column; “Others” takes a one-line note.</div>
+<div class="generated">Generated 2026-11-11 11:37</div>
+
+<div class="stats">59 records whose Remarks may belong to another record (ARE 32, EpCa 19, SII 8). Pick a bucket for each in the Review column; “Others” takes a one-line note.</div>
 
 <div class="filters-help">Filters narrow each other as you go — pick a
 Volume and every other filter's list shrinks to only the values that
@@ -589,7 +594,9 @@ another filter back out). <strong>Reset</strong> clears every filter and
 the search box back to their starting state.</div>
 <div class="filters-help">Click anywhere on a row to open its full
 details in a popup — including the complete Remarks text, which the
-table itself only shows a few lines of.</div>
+table itself only shows a few lines of.
+<strong>Search in Tamil, Kannada and other scripts</strong> works wherever a record holds text in
+that script. Search each spelling and script separately: பைரவ does not find "Bhairava".</div>
 <div class="controls">
   <div class="filter-dd" data-key="corpus"><button type="button" class="filter-dd-btn" id="corpusFilterBtn">All corpora</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="corpusMode" value="include" checked> Include</label><label><input type="radio" name="corpusMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="ARE"><span>ARE</span></label><label class="filter-dd-opt"><input type="checkbox" value="EpCa"><span>EpCa</span></label><label class="filter-dd-opt"><input type="checkbox" value="SII"><span>SII</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   
@@ -673,7 +680,7 @@ table itself only shows a few lines of.</div>
 <script>
 
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Reports on Indian Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
@@ -982,11 +989,6 @@ function foldDiacritics(s) {
   return out;
 }
 
-// Whole word — \b is ASCII-word-boundary only (a diacritic like "ā" is a
-// non-word character to JS regex without unicode-property-escape
-// machinery, same as a space), which is fine for the plain-ASCII search
-// terms this is meant for ("sati", "hero") — a diacritic-bearing term's
-// word boundaries would be less reliable, not broken outright.
 // makeMatcher() is global ('g'), and .test() on a global regex starts
 // at re.lastIndex and moves it on: reused across rows, a match in
 // one row made the next row's test start part-way into its text and
@@ -1001,11 +1003,16 @@ function testFrom0(re, text) {
 // boundary) or 'word' (whole word): the three widths every search offers
 // (2026-10-20, as on Advanced Search). Terms arrive diacritic-folded.
 function makeMatcher(term, mode) {
-  const body = escapeRegex(term);
-  const pattern = mode === 'word' ? '\\b(' + body + ')\\b'
-                : mode === 'partial' ? '\\b(' + body + ')'
+  // Per the user, 2026-11-06: * is any run of characters up to a space, ? exactly one.
+  // Everything else stays literal, since the print is full of [ ( . |
+  const body = escapeRegex(term).replace(/\\\*/g, '\\S*').replace(/\\\?/g, '\\S');
+  // A boundary for any script: \b knows only ASCII, so Tamil, Kannada and any
+  // word touching a diacritic never matched (2026-11-07).
+  const before = '(?<![\\p{L}\\p{M}\\p{N}])', after = '(?![\\p{L}\\p{M}\\p{N}])';
+  const pattern = mode === 'word' ? before + '(' + body + ')' + after
+                : mode === 'partial' ? before + '(' + body + ')'
                 : '(' + body + ')';
-  return new RegExp(pattern, 'ig');
+  return new RegExp(pattern, 'igu');
 }
 
 // Every [start, end) span of `re` within `text`, in order — the
@@ -1608,6 +1615,7 @@ async function fetchChunkJson(url, modified) {
 async function loadData() {
   document.body.classList.add('loading');
   loadOverlay.hidden = false;
+  loadMessage.classList.remove('load-error');
   loadMessage.textContent = 'Loading data\u2026';
   loadRetryBtn.hidden = true;
   setControlsDisabled(true);
@@ -1635,7 +1643,13 @@ async function loadData() {
     function noteProgress(label) {
       done++;
       const pct = total ? Math.round((done / total) * 100) : 100;
-      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+      // Two fixed lines (user, 2026-11-11): progress first, the unit below.
+      const top = document.createElement('div'), bottom = document.createElement('div');
+      top.className = bottom.className = 'load-line';
+      top.textContent = 'Loading\u2026 (' + pct + '%)';
+      bottom.textContent = CHUNK_LABEL.charAt(0).toUpperCase() + CHUNK_LABEL.slice(1) + ' ' + label;
+      bottom.title = bottom.textContent;
+      loadMessage.replaceChildren(top, bottom);
     }
 
     // One chunk fetched (data + its own matching supplement, if any) at
@@ -1711,6 +1725,7 @@ async function loadData() {
     // stale index) throws the same way the old single-file fetch did —
     // one clear error and a Retry button, never a silently partial
     // table with some chunks missing.
+    loadMessage.classList.add('load-error');  // an error may need more than two lines
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
   }
@@ -1769,7 +1784,14 @@ document.addEventListener('click', (e) => {
   e.preventDefault();
   const key = b.dataset.key;
   if (b.dataset.corpus === CURRENT_CORPUS) {
+    // from inside the row-detail popup ("Also published as"): close it so
+    // the jump lands on the visible table
+    const dlg = document.getElementById('rowDetailModal');
+    if (dlg && !dlg.hidden) dlg.querySelector('#rowDetailModalClose').click();
     jumpToKey(key);
+  } else if (b.dataset.url) {
+    // a link that names its own page (a third corpus's page)
+    location.href = b.dataset.url + '?jump=' + encodeURIComponent(key);
   } else if (OTHER_CORPUS_URL) {
     location.href = OTHER_CORPUS_URL + '?jump=' + encodeURIComponent(key);
   }
@@ -1959,28 +1981,6 @@ document.addEventListener('click', (e) => {
     setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
   }, { passive: false });
 })();
-
-// Resolved-citation tap-to-reveal — see remarks_cell_html()'s
-// .cite-hint span, and CSS above. `title` gives a real tooltip on a
-// mouse hover already; a touchscreen has no hover at all, so a tap
-// toggles a visible inline line under the word instead — added
-// 2026-08-25, per the user. Delegated on `document` rather than bound
-// per-span, since highlightCell() can rebuild a cell's markup (from its
-// own saved original) on every search, which would otherwise leave a
-// freshly-restored .cite-hint with no listener attached.
-document.addEventListener('click', (e) => {
-  const hint = e.target.closest('.cite-hint');
-  if (!hint) return;
-  const next = hint.nextElementSibling;
-  if (next && next.classList.contains('cite-hint-reveal')) {
-    next.remove();
-    return;
-  }
-  const reveal = document.createElement('span');
-  reveal.className = 'cite-hint-reveal';
-  reveal.textContent = hint.getAttribute('title') || '';
-  hint.insertAdjacentElement('afterend', reveal);
-});
 
 // Remarks-column truncation — see clamp_remarks_html(). Only the
 // "Read more" button's visibility is decided in JS; the clamp itself is
@@ -2336,7 +2336,7 @@ function updateRemarksClamp(cell) {
 (function () {
   const KEY = "remarksReview.v1";
   const BUCKETS = [["other_record", "Remarks belong to another record"], ["grant_on_hero_stone", "Grant on a hero stone (correct)"], ["type_wrong", "Type is wrong"], ["not_sure", "Not sure"], ["others", "Others (note)"]];
-  const SUGGEST = {"epca|XVI|29": "others", "are|1906-10|b|182": "grant_on_hero_stone", "are|1911-14|d|1351": "grant_on_hero_stone", "are|1918-21|b|538": "grant_on_hero_stone", "are|1918-21|d|3": "grant_on_hero_stone", "are|1918-21|d|27": "grant_on_hero_stone", "are|1918-21|d|35": "grant_on_hero_stone", "are|1918-21|e|76": "grant_on_hero_stone", "are|1923-24|b|228": "grant_on_hero_stone", "are|1925-26|c|412": "grant_on_hero_stone", "are|1926-27|f|170": "grant_on_hero_stone", "are|1926-27|f|188": "grant_on_hero_stone", "are|1930-31|b|366": "grant_on_hero_stone", "are|1932-33|d|71": "grant_on_hero_stone", "are|1978-79|b|152": "grant_on_hero_stone", "are|1979-80|b|126": "grant_on_hero_stone", "are|1984-85|b|38": "grant_on_hero_stone", "are|1984-85|b|49": "grant_on_hero_stone", "are|1984-85|b|101": "grant_on_hero_stone", "sii|xl||369": "grant_on_hero_stone", "sii|xv|ii|576": "grant_on_hero_stone", "sii|xv|ii|638": "grant_on_hero_stone", "sii|xviii||323": "grant_on_hero_stone", "sii|xviii||367": "grant_on_hero_stone", "sii|xviii||371": "grant_on_hero_stone", "sii|xx||121": "grant_on_hero_stone", "sii|xxii|ii|430": "grant_on_hero_stone", "epca|IV|332": "grant_on_hero_stone", "epca|IX|351": "grant_on_hero_stone", "epca|IX|479": "grant_on_hero_stone", "epca|VII|354": "grant_on_hero_stone", "epca|VIII|158": "grant_on_hero_stone", "epca|VIII|390": "grant_on_hero_stone", "epca|VIII|504": "grant_on_hero_stone", "epca|VIII|523": "grant_on_hero_stone", "epca|X|1156": "grant_on_hero_stone", "epca|XII|199": "grant_on_hero_stone", "epca|XII|215": "grant_on_hero_stone", "epca|XII|440": "grant_on_hero_stone", "are|1933-34|e|23": "grant_on_hero_stone", "are|1933-34|e|76": "grant_on_hero_stone", "are|1935-38|b|205": "grant_on_hero_stone", "are|1939-44|b|1046": "grant_on_hero_stone", "are|1939-44|e|83": "grant_on_hero_stone", "are|1939-44|e|85": "grant_on_hero_stone", "are|1945-46|b|292": "grant_on_hero_stone", "are|1945-46|b|301": "grant_on_hero_stone", "are|1949-50|b|70": "grant_on_hero_stone", "are|1957-58|b|297": "grant_on_hero_stone", "are|1959-60|b|423": "grant_on_hero_stone", "are|1963-64|b|370": "grant_on_hero_stone", "are|1964-65|b|401": "grant_on_hero_stone", "are|1980-81|b|138": "grant_on_hero_stone"};
+  const SUGGEST = {"are|1906-10|b|182": "grant_on_hero_stone", "are|1918-21|b|538": "grant_on_hero_stone", "are|1918-21|d|3": "grant_on_hero_stone", "are|1918-21|d|27": "grant_on_hero_stone", "are|1918-21|d|35": "grant_on_hero_stone", "are|1918-21|e|76": "grant_on_hero_stone", "are|1925-26|c|412": "grant_on_hero_stone", "are|1926-27|f|170": "grant_on_hero_stone", "are|1926-27|f|188": "grant_on_hero_stone", "are|1930-31|b|366": "grant_on_hero_stone", "are|1932-33|d|71": "grant_on_hero_stone", "are|1978-79|b|152": "grant_on_hero_stone", "are|1979-80|b|126": "grant_on_hero_stone", "are|1984-85|b|38": "grant_on_hero_stone", "are|1984-85|b|49": "grant_on_hero_stone", "are|1984-85|b|101": "grant_on_hero_stone", "sii|xl||369": "grant_on_hero_stone", "sii|xv|ii|576": "grant_on_hero_stone", "sii|xv|ii|638": "grant_on_hero_stone", "sii|xviii||323": "grant_on_hero_stone", "sii|xviii||367": "grant_on_hero_stone", "sii|xviii||371": "grant_on_hero_stone", "sii|xx||121": "grant_on_hero_stone", "sii|xxii|ii|430": "grant_on_hero_stone", "are|1933-34|e|23": "grant_on_hero_stone", "are|1933-34|e|76": "grant_on_hero_stone", "are|1935-38|b|205": "grant_on_hero_stone", "are|1939-44|b|1046": "grant_on_hero_stone", "are|1939-44|e|83": "grant_on_hero_stone", "are|1939-44|e|85": "grant_on_hero_stone", "are|1945-46|b|292": "grant_on_hero_stone", "are|1945-46|b|301": "grant_on_hero_stone", "are|1949-50|b|70": "grant_on_hero_stone", "are|1957-58|b|297": "grant_on_hero_stone", "are|1959-60|b|423": "grant_on_hero_stone", "are|1963-64|b|370": "grant_on_hero_stone", "are|1964-65|b|401": "grant_on_hero_stone", "are|1980-81|b|138": "grant_on_hero_stone"};
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } };
   const save = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} };
   function fill(span) {

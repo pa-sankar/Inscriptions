@@ -385,8 +385,13 @@
        wraps onto the second line kept free for it. */
     box-sizing: border-box; width: min(30rem, calc(100vw - 32px));
   }
-  #loadMessage { min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+  /* Fixed height too (user, 2026-11-11): progress on line one, the volume
+     on line two, each cut with an ellipsis, so no label can resize the box.
+     Plain messages (errors) get the same two lines. */
+  #loadMessage { height: 2.8em; line-height: 1.4em; overflow: hidden;
     font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  #loadMessage.load-error { height: auto; }
+  #loadMessage .load-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #loadRetryBtn {
     margin-top: 0.75rem; padding: 0.4rem 1rem; cursor: pointer;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
@@ -585,7 +590,7 @@
 </div>
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-11 11:19</div>
+<div class="generated">Generated 2026-11-11 11:36</div>
 
 <div class="stats">11681 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the English transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>English Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the English transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -1618,6 +1623,7 @@ async function fetchChunkJson(url, modified) {
 async function loadData() {
   document.body.classList.add('loading');
   loadOverlay.hidden = false;
+  loadMessage.classList.remove('load-error');
   loadMessage.textContent = 'Loading data\u2026';
   loadRetryBtn.hidden = true;
   setControlsDisabled(true);
@@ -1645,7 +1651,13 @@ async function loadData() {
     function noteProgress(label) {
       done++;
       const pct = total ? Math.round((done / total) * 100) : 100;
-      loadMessage.textContent = 'Loading ' + CHUNK_LABEL + ' ' + label + '\u2026 (' + pct + '%)';
+      // Two fixed lines (user, 2026-11-11): progress first, the unit below.
+      const top = document.createElement('div'), bottom = document.createElement('div');
+      top.className = bottom.className = 'load-line';
+      top.textContent = 'Loading\u2026 (' + pct + '%)';
+      bottom.textContent = CHUNK_LABEL.charAt(0).toUpperCase() + CHUNK_LABEL.slice(1) + ' ' + label;
+      bottom.title = bottom.textContent;
+      loadMessage.replaceChildren(top, bottom);
     }
 
     // One chunk fetched (data + its own matching supplement, if any) at
@@ -1721,6 +1733,7 @@ async function loadData() {
     // stale index) throws the same way the old single-file fetch did —
     // one clear error and a Retry button, never a silently partial
     // table with some chunks missing.
+    loadMessage.classList.add('load-error');  // an error may need more than two lines
     loadMessage.textContent = 'Could not load data: ' + err.message;
     loadRetryBtn.hidden = false;
   }
