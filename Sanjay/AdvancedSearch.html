@@ -264,7 +264,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="home-link"><a href="index.html">&larr; Sanjay review index</a></div>
+  <div class="home-link"><a href="index.html" class="home-link" title="Home"><img src="../images/home-icon.png" alt="Home" width="36" height="36" style="vertical-align:middle;border-radius:50%"> Sanjay review index</a></div>
   <h1>Advanced Search</h1>
   <div class="sub-head">Cross-corpus search across South Indian Inscriptions, Annual Report on Epigraphy, Epigraphia Carnatica, Tamil Nadu Inscriptions, Epigraphia Telanganica, Epigraphia Andhrica, Karnatak Inscriptions, Travancore Archaeological Series.</div>
   
@@ -342,7 +342,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-11-11 13:56 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-11-11 19:25 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -1228,6 +1228,9 @@ function paintSearchModal() {
 }
 async function runSearch() {
   const myGen = ++searchGeneration;
+  // emptied before the dialog's first paint, so it starts at 0 rather than
+  // the previous search's count
+  currentResults = [];
   setSearchBusy(true);
   paintCriteria();
   try {

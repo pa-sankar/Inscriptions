@@ -267,7 +267,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="home-link"><a href="index.html">&larr; Home</a></div>
+  <div class="home-link"><a href="index.html" class="home-link" title="Home"><img src="images/home-icon.png" alt="Home" width="36" height="36" style="vertical-align:middle;border-radius:50%"> Home</a></div>
   <h1>Advanced Search</h1>
   <div class="sub-head">Cross-corpus search across South Indian Inscriptions, Annual Report on Epigraphy, Epigraphia Carnatica.</div>
   <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
@@ -345,7 +345,7 @@
     </table>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-11 13:56.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-11 19:25.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -1231,6 +1231,9 @@ function paintSearchModal() {
 }
 async function runSearch() {
   const myGen = ++searchGeneration;
+  // emptied before the dialog's first paint, so it starts at 0 rather than
+  // the previous search's count
+  currentResults = [];
   setSearchBusy(true);
   paintCriteria();
   try {
