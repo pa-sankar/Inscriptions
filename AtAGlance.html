@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>At a Glance — Project InscriptionSearch</title>
+<meta name="description" content="The inscription corpora on this site, counted by century, state, district, dynasty and kind.">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TXX3D8HF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-TXX3D8HF', {'page_group': 'public'});
+</script>
+<style>
+  :root {
+    --bg: #f6f2e9; --surface: #ffffff; --surface-2: #efe9da;
+    --text: #2b2a24; --text-dim: #6b6759; --border: #ddd4bd;
+    --accent: #5f7a5a; --accent-strong: #3f5a3c; --bar: #5f7a5a; --bar-muted: #c9c1aa;
+    --track: #efe9da; --heat-0: #eef2ec; --heat-1: #2f4a2c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+      --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+      --accent: #8caa84; --accent-strong: #a9c6a1; --bar: #8caa84; --bar-muted: #5b574a;
+      --track: #2c2a21; --heat-0: #2a2c24; --heat-1: #b9d6b0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b16; --surface: #24231c; --surface-2: #2c2a21;
+    --text: #ece7d8; --text-dim: #a29d8b; --border: #45422f;
+    --accent: #8caa84; --accent-strong: #a9c6a1; --bar: #8caa84; --bar-muted: #5b574a;
+    --track: #2c2a21; --heat-0: #2a2c24; --heat-1: #b9d6b0;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg);
+         color: var(--text); font-size: 14.5px; line-height: 1.5; }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 26px 16px 60px; }
+  a { color: var(--accent-strong); }
+  h1 { margin: 6px 0 2px; font-size: 26px; }
+  .sub-head { color: var(--text-dim); margin: 4px 0; }
+  .note { font-size: 12.5px; color: var(--text-dim); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; align-items: center; }
+  .chip { border: 1px solid var(--border); background: var(--surface); color: var(--text);
+          border-radius: 999px; padding: 4px 12px; cursor: pointer; font: inherit; font-size: 13px; }
+  .chip[aria-pressed="true"] { background: var(--accent-strong); color: var(--surface); border-color: var(--accent-strong); }
+  .chip.link { background: none; border-style: dashed; }
+  .howto { margin: 12px 0 4px; padding: 10px 14px; border-left: 4px solid var(--accent-strong);
+           background: var(--surface-2); border-radius: 6px; font-size: 14px; line-height: 1.5; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 12.5px; color: var(--text-dim); }
+  h2 { font-size: 18px; margin: 26px 0 8px; }
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 14px; }
+  figure.chart { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+  figure.chart.wide { grid-column: 1 / -1; }
+  .fhead { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  figure h3 { margin: 0; font-size: 15px; }
+  .tbtn { font: inherit; font-size: 12px; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; padding: 1px 8px; cursor: pointer; }
+  figure p.note { margin: 2px 0 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  .bar-label { font-size: 12px; fill: var(--text); }
+  .bar-val { font-size: 11.5px; fill: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .bar-track { fill: var(--track); }
+  rect.bar { fill: var(--bar); } rect.bar.muted { fill: var(--bar-muted); }
+  g.hit:hover rect.bar { fill: var(--accent-strong); }
+  [data-href] { cursor: pointer; } table.heat td[data-href]:hover { outline: 2px solid var(--accent-strong); }
+  table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  table.data td, table.data th { border-bottom: 1px solid var(--border); padding: 3px 6px; text-align: left; }
+  table.data td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .grid-wrap { overflow-x: auto; }
+  table.heat { border-collapse: separate; border-spacing: 2px; font-size: 11.5px; }
+  table.heat th { font-weight: 600; color: var(--text-dim); padding: 2px 4px; white-space: nowrap; }
+  table.heat td { min-width: 34px; height: 24px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  #tip { position: fixed; pointer-events: none; background: var(--text); color: var(--bg); font-size: 12px;
+         padding: 4px 8px; border-radius: 6px; display: none; z-index: 9; }
+  .method li { margin: 3px 0; }
+  .xctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; margin: 4px 0 10px; }
+  .xctl select { font: inherit; font-size: 13px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; max-width: 16rem; }
+  .xchip { font: inherit; font-size: 12.5px; border: 1px solid var(--accent); background: var(--surface); color: var(--accent-strong); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+  .help-btn { font: inherit; font-size: 12.5px; cursor: pointer; border-radius: 999px; padding: 1px 10px;
+              border: 1px solid var(--accent-strong); background: var(--surface); color: var(--accent-strong); }
+  .xhelp { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center;
+           justify-content: center; z-index: 20; padding: 1.5rem; }
+  .xhelp[hidden] { display: none; }
+  .xhelp-box { background: var(--surface); color: var(--text); border-radius: 10px; max-width: 42rem; width: 100%;
+               max-height: 85vh; overflow-y: auto; padding: 1.4rem 1.6rem; position: relative; font-size: 14px; line-height: 1.55; }
+  .xhelp-box h2 { margin: 0 0 .5rem; } .xhelp-box h3 { margin: 1rem 0 .3rem; font-size: 15px; }
+  .xhelp-close { position: absolute; top: .4rem; right: .7rem; font-size: 1.4rem; background: none; border: none;
+                 cursor: pointer; color: var(--text-dim); }
+  .xchip:hover { background: var(--accent); color: var(--surface); }
+  footer { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html">&larr; Home</a>
+  <h1>At a Glance</h1>
+  <div class="sub-head">84,138 records across 3 corpora: what the published record covers, by century, place, dynasty and kind.</div>
+  <div class="sub-head note">Switch corpora on and off to see each one's share.</div>
+  <div class="howto" role="note">
+    <b>Every bar is a link.</b> Click or tap any bar (or a table row, or a cell in the corpus &times; century
+    grid) to open <a href="AdvancedSearch.html">Advanced Search</a> already filtered to exactly those
+    inscriptions, with the same corpora selected, so its result count matches the number on the bar.
+    From there you can narrow further with a keyword or the other filters, and open any record for its full
+    text. Hover a bar to see its count first. Want a chart of your own? Jump to <a href="#explore">Explore</a>.
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Corpora counted"></div>
+  <div class="kpis" id="kpis"></div>
+  <h2>At a glance</h2>
+  <div class="charts" id="charts"></div>
+  <h2 id="explore">Explore</h2>
+  <p class="note">Build your own chart: choose what to count by, add any filters, then click a bar to list
+    those records in Advanced Search. Follows the corpus buttons above.
+    <button type="button" class="help-btn" id="xHelpOpen">How to make a custom chart</button></p>
+  <div class="xhelp" id="xHelp" hidden><div class="xhelp-box" role="dialog" aria-labelledby="xHelpTitle">
+    <button type="button" class="xhelp-close" id="xHelpClose" aria-label="Close">&times;</button>
+    <h2 id="xHelpTitle">How to make a custom chart</h2>
+    <p>Explore answers questions like <em>&ldquo;in which centuries are the Hoysa&#7735;a records?&rdquo;</em> or
+      <em>&ldquo;which dynasties left the most records in Tamil Nadu?&rdquo;</em></p>
+    <h3>1. Choose what to count by</h3>
+    <p><b>Count records by</b> sets the bars: Century, Dynasty, District, State, Language, Material, Type or
+      Corpus. Century bars run in time order; the others run from most to fewest records.</p>
+    <h3>2. Add filters</h3>
+    <p><b>+ add filter</b> picks a category, then a value. Each value shows how many records it would leave,
+      given the filters you already have. Add as many as you like &mdash; a record must match all of them.
+      Remove one with its &times;; <b>reset</b> clears them all.</p>
+    <h3>3. Read the chart</h3>
+    <ul>
+      <li>Hover a bar for its number and share; <b>click it</b> to open exactly those records in Advanced Search.</li>
+      <li>Long lists show the top 25 and group the rest as <b>Others</b>; <b>Table</b> lists every value.</li>
+      <li>Grey bars (Undated, Not recorded) are records the source gives no value for; they are counted, not hidden.</li>
+      <li>The corpus buttons at the top of the page apply here too.</li>
+    </ul>
+    <h3>4. Share it</h3>
+    <p>The page address keeps your chart, e.g. <code>AtAGlance.html?by=century&amp;dynasty=Hoysa&#7735;a</code>;
+      copy it to send someone the same chart.</p>
+    <h3>Worth knowing</h3>
+    <p>These count what survives and was published, not what was carved, and they inherit each source&rsquo;s
+      gaps: see &ldquo;How these are counted&rdquo; below for how centuries and dynasties are worked out.
+      Centuries before the 7th often come from misread or regnal dates; check a record before citing it.</p>
+  </div></div>
+  <div class="xctl">Count records by <select id="xBy" aria-label="Count by"></select>
+    <span id="xFilters"></span>
+    <select id="xAddDim" aria-label="Add a filter"><option value="">+ add filter&hellip;</option></select>
+    <select id="xAddVal" aria-label="Filter value" hidden></select>
+    <a href="#" id="xReset" class="note">reset</a></div>
+  <figure class="chart wide"><div class="fhead"><h3 id="xTitle"></h3><button class="tbtn" id="xTable">Table</button></div>
+    <p class="note" id="xNote"></p><div id="xChart"><p class="note">Loading&hellip;</p></div></figure>
+  <h2>How these are counted</h2>
+  <ul class="method note">
+    <li><b>Source:</b> the records published on this site's corpus pages, as they stand at build time. A record printed in two corpora (an ARE summary later published in full in SII or Epigraphia Carnatica) is counted in each. TN Inscriptions are the Tamil Nadu State Department of Archaeology's numbered and district volumes together with the Inscriptions of the Pudukkottai State.</li>
+    <li><b>Century:</b> the first A.D. year in the Date field, or else in the first 300 characters of Remarks; Śaka years +78, Vikrama −57, Kollam +825, "Nth century" as its middle. EpCa also reads "Sake" and "Samvat" years and looks through the whole translation. Regnal years are not converted, so they count as Undated.</li>
+    <li><b>State:</b> as shown on the corpus pages; Epigraphia Carnatica and Karnatak Inscriptions are Karnataka, TN Inscriptions Tamil Nadu. <b>District:</b> as printed (mostly colonial-era names, lightly merged: Tanjore → Thanjavur and similar); Epigraphia Carnatica by volume.</li>
+    <li><b>Dynasty:</b> the printed dynasty grouped by keyword (all Chōḷa forms together, Vijayanagara's four houses together). SII often prints the king instead; well-known Chōḷa and Pāṇḍya kings are mapped to their dynasty.</li>
+    <li><b>Copper plate:</b> ARE's Copper Plate section, or "copper plate" in the place or the start of Remarks. <b>Hero-stone / Sati-stone:</b> the hero-stone word-list classification shown in each corpus page's Type column (Sanjay pages for SII and ARE).</li>
+    <li><b>Undated, Unknown and Not recorded</b> mean the value has not been read from the record yet, or the book does not state it. They do not mean the inscription has none. Much of Epigraphia Carnatica's dynasty field is still blank, so compare series with care.</li>
+    <li>These are counts of what survives and was published, not of what was carved: a district looks dense where a survey was thorough.</li>
+  </ul>
+  <footer>Project InscriptionSearch. Generated 2026-11-11 11:14.</footer>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const DATA = {"totals":{"sii":15874,"are":56583,"epca":11681},"dims":{"century":{"sii":{"undated":8736,"15":507,"3":14,"16":1296,"14":447,"17":317,"10":808,"13":1244,"12":1208,"2":8,"11":721,"9":183,"8":98,"18":167,"7":39,"19":71,"6":7,"20":1,"4":1,"5":1},"are":{"undated":29877,"15":2530,"16":4605,"6":109,"14":1705,"17":3158,"13":2567,"2":287,"12":2576,"18":2672,"19":2716,"5":95,"3":297,"11":1312,"9":404,"20":308,"10":760,"7":181,"8":272,"4":53,"1":99},"epca":{"5":15,"9":154,"10":338,"13":1055,"14":679,"16":973,"17":655,"18":380,"19":228,"11":536,"12":1023,"7":39,"undated":4940,"8":100,"15":548,"6":5,"3":1,"4":9,"2":3}},"state":{"sii":{"Tamil Nadu":7700,"unknown":1364,"Andhra Pradesh":3989,"Karnataka":2601,"Kerala":28,"Odisha":170,"Telangana":7,"Puducherry":6,"Chhattisgarh":8,"Maharashtra":1},"are":{"unknown":14283,"Tamil Nadu":12087,"Andhra Pradesh":5048,"Karnataka":5410,"Kerala":335,"Odisha":540,"Puducherry":63,"Maharashtra":2557,"Telangana":768,"Madhya Pradesh":4314,"Uttar Pradesh":2627,"West Bengal":281,"Bihar":743,"Gujarat":2365,"Rajasthan":3877,"Goa":106,"Tripura":23,"Delhi":329,"Jharkhand":38,"Assam":14,"Chhattisgarh":140,"Punjab":62,"Uttarakhand":110,"Himachal Pradesh":62,"Jammu and Kashmir":121,"Haryana":254,"Chandigarh":26},"epca":{"Karnataka":11681}},"district":{"sii":{"unknown":3137,"Chengalpattu":795,"Bellary":444,"Anantapur":309,"Chittoor":362,"North Arcot":627,"Tiruchirappalli":1399,"Thanjavur":1388,"Coimbatore":340,"Salem":222,"South Arcot":891,"Guntur":824,"Kistna":195,"Godavari":200,"Madurai":260,"Ramnad":200,"Tirunelveli":577,"Malabar":22,"Belgaum":43,"Ganjam":29,"Visakhapatnam":74,"South Kanara":341,"Shimoga":16,"Hassan":6,"Madras":32,"Cuddapah":677,"Kurnool":367,"Bangalore":4,"Kolar":2,"West Godavari":91,"East Godavari":37,"Krishna":90,"Dharwar":998,"Bijapur":559,"Nellore":26,"North Kanara":35,"Arcot":2,"Visakhappatnam":2,"Ramanathpuram":1,"Kanara":1,"Chittor":3,"Villupuram":1,"Pudukkottai":198,"Kanchipuram":2,"Kanyakumari":1,"Tiruvannamalai":1,"Rangareddy":1,"Bombay":1,"Prakasam":10,"Nalgonda":3,"Tiruttani":9,"Coorg":14,"Vizagapatnam":1,"Selam":1,"Kadapa":3},"are":{"unknown":21394,"Bellary":336,"South Arcot":1677,"Anantapur":633,"Ganjam":164,"Tirunelveli":1906,"Tiruchirappalli":1249,"Gannavaram Kistna":1,"North Arcot":940,"Chingleput Taluk And":25,"Chengalpattu":846,"Madurai":688,"Thanjavur":1421,"Kistna":82,"Guntur":776,"Nouth Arcot":23,"Nellore Taluk Ard":2,"Onitor":104,"Visakhapatnam":176,"Ramnad":784,"Coimbatore":382,"Nellore":262,"Kurnool":520,"Malabar":45,"Chittoor":186,"Salem":236,"Godavari":19,"Cuddapah":738,"South Kanara":358,"East Godavari":96,"Dharwar":865,"Bijapur":415,"Belgaum":325,"North Kanara":220,"West Godavari":143,"Sholapur":163,"Krishna":103,"Nagpur":148,"Jubbulpore":7,"Bilaspur":50,"Dhabad":74,"Karimnagar":94,"Saugor":5,"Satara":128,"Puri":310,"Garhwal":4,"West Khandesh":25,"Kolhapur":130,"Monghyr":84,"Thana":74,"Jabalpur":248,"Nowgong":82,"Sagar":52,"Madras":39,"Lucknow":152,"Srikakulam":120,"Dacca":4,"Faridpur":2,"Par-Ganas":1,"Tippera":5,"Bombay":246,"Warangal":98,"Bhilsa":35,"Arcot":182,"Kanara":10,"Nilgiris":106,"Bharatpur":81,"Bhilwara":179,"Jaipur":39,"Jhalawar":6,"Jodhpur":168,"Kotah":150,"Da":17,"Patna":175,"Rohtak":13,"Alwar":21,"Udaipur":77,"Agra":145,"Aligarh":43,"Etah":53,"Etawah":41,"Moradabad":35,"Vindhya":2,"Amreli":61,"Shimoga":16,"Bhagalpur":132,"Hazaribagh":38,"Baroda":54,"Raichur":672,"Kadur":10,"Kamrup":3,"Midnapore":13,"Shahabad":52,"Akola":113,"Dhab":6,"Mandsaur":204,"Ratlam":6,"Shivpuri":234,"Damoh":81,"Raigarh":3,"Raipur":110,"Surguja":24,"Saurashtra Rajkot":4,"Sorath":12,"Banaras":40,"Bareilly":3,"Mathura":119,"Ahmedabad":175,"Mandu Dhar":1,"Cambay":65,"Osmanabad":222,"Chittorgarh":383,"Gorakhpur":8,"Jhansi":97,"Bengal West Burdwan":21,"Hooghly":21,"Malda":27,"Murshidabad":58,"Kamarupa":1,"Rajshahi":2,"Jhang":1,"Bir":35,"Bidar":189,"Gulbarga":456,"Tumkur":1,"Bikaner":57,"Mahbubnagar":141,"Ahmednagar":184,"Khandesh":1,"Ghazipur":63,"Nasik":10,"Sabarkantha":97,"Sehore":92,"Dhenkanal":3,"Jalore":53,"Gaya":44,"Poona":309,"Kolar":35,"Balasore":9,"Ajmer Taluk Ajmer":54,"Satna":35,"Allahabad":245,"Almora":77,"Kanpur":2,"Unchagaon. Sitapur":1,"Mainpuri":33,"Hyderabad":158,"Aurangabad":226,"Nimar":4,"Kanyakumari":100,"Parbhani":37,"Hardoi":8,"Jaunpur":110,"Akyab":3,"Dungarpur":48,"Adilabad":1,"Nizamabad":24,"Gauhati":6,"Broach":41,"Kaira":74,"Kolaba":25,"Rajkot":152,"Kozhikode":56,"Palakkad":4,"Thrissur":14,"Chhatarpur":59,"Raisen":302,"Kotangudi":41,"Sikar":27,"Sirohi":342,"Sitapur":18,"Varanasi":146,"Banda":44,"Etha":5,"Farrukhabad":6,"Fatehpur":1,"Hamirpur":35,"Mirzapur":131,"Panchmahals":31,"Ratnagiri":21,"Azamgarh":48,"Ballia":15,"Alappuzha":112,"Medak":66,"Muzaffarpur":1,"Palamau":2,"Banaskantha":46,"Bhavnagar":155,"Kollam":8,"Gwalior":29,"Chanda":10,"Nagaur":327,"Shahdol":76,"Saran":6,"Junagadh":151,"Tonk":24,"Badaun":30,"Nalgonda":128,"Ranchi":7,"Kutch":25,"Dhulia":13,"Nanded":61,"Chikmagalur":24,"Mehsana":180,"Vidisha":1008,"Morena":152,"Jaisalmer":62,"Bastar":5,"Durg":10,"Panna":36,"Kushana Mathura":1,"Ambala":52,"Bulandshahr":37,"Mandi":17,"Datia":103,"Goona":22,"Rewa":40,"Tikamgarh":50,"Ujjain":4,"Bilaspur Tahsil And":3,"Surat":112,"Meerut":9,"Khammam":12,"Junagadh Taluk And":1,"Chamba":13,"Kannur":41,"Rajgarh":21,"Tiruvannamalai Taluk North Arcot":10,"Bangalore":42,"Nimar East":55,"Shajapur":18,"Ajmer":111,"Sambalpur":1,"West Dinajpur":4,"Burdwan":3,"Singhbhum":1,"Ladakh":1,"Ernakulam":2,"East Nimar":41,"Dewas":58,"Indore":144,"Amravati":49,"Buldhana":46,"Yeotmal":7,"Greater Bombay":13,"Hwamza Prome":2,"Kottayam":20,"Pali":92,"Guna":171,"Tiruchendur Taluk Tirunelveli":1,"Muzaffarnagar":41,"Rae Barely":8,"Barmer":30,"Chamoli":34,"Betul":2,"Dhar":172,"Hoshangabad":2,"Darrang":1,"Banswara":101,"Dharmapuri":185,"Jalgaon":78,"Gujrat Ahmadabad":31,"Jamnagar":7,"Berasia":14,"Jammu":33,"Jhamoli":5,"Surendranagar":22,"Kangra":32,"Unnao":34,"Malappuram":7,"Thiruvananthapuram":4,"Bhandara":1,"Chhindwara":1,"Calcutta":22,"Navsari":1,"Gurgaon":86,"Bengal West Hooghly":1,"Hissar":54,"Mymensingh":1,"Golpara":2,"Sangli":3,"Gaya Tahsil And":1,"Birbhum":18,"Mahendragarh":125,"Kathua":9,"Ahmedabad Tahsil And":3,"Sawai Madhopur":92,"Karnal":25,"Hassan":116,"Pudukkottai":51,"Anantnag":38,"Srinagar":73,"Near The":21,"Dehradun":4,"Cuttack":24,"Warngal":1,"Begusarai":5,"Vadodara":33,"Bijnor":67,"Saharanpur":80,"Prakasam":8,"Nalanda":63,"Sanchor":12,"State Bijapur":27,"Raj Kot":3,"Bhuvanesvar":12,"Shahjahanpur":19,"Jind Tahsil And":1,"Sirsa Tahsil And":1,"Nainital":1,"Mathura Tahsil And":17,"Katra Mathura Tahsil And":1,"Sultanpur":4,"Diu Div":6,"Jaisalmer Taluk And":1,"Karanataka Bijapur":25,"Vizianagaram":6,"Rohtas":1,"Mandya":31,"Dholpur":10,"Bankura":1,"Kheda":124,"Mehsana Tahsil And":3,"Contd. Tumkur":1,"Darbhanga":5,"Bharuch":53,"Thatta":24,"Dharmapuri Taluk And":4,"Valsad":20,"West Nimar":12,"Kamarajar":97,"Nadia":1,"Silchar":3,"Vaishali":7,"Amaravati":1,"Wardha":1,"Beed":33,"Latur":2,"Pune":6,"Bundi":6,"Raigad":1,"Sibsagar":1,"Bhiwani":2,"Faridabad":3,"Chitradurga":21,"Anna":67,"North Arcot Ambedkar":27,"Saharsa":2,"Jalpaiguri":11,"Villupuram":2,"Jalna":10,"Bahraich":13,"Gonda":5,"Sitamarhi":1,"Wayanad":5,"Gurdaspur":5,"Rampur":25},"epca":{"Coorg":75,"Hassan":1879,"Mysore":3140,"Kadur":981,"Shimoga":1672,"Bangalore":1035,"Kolar":1376,"Chitradurga":596,"Tumkur":927}},"dynasty":{"sii":{"Pallava":92,"unknown":8685,"other":2065,"Vijayanagara":910,"Chōḷa":2500,"Sambuvarāya":13,"Bāṇa":11,"Chāḷukya of Kalyāṇa":361,"Nolamba":3,"Chāḷukya of Bādāmi":5,"Rāṣṭrakūṭa":26,"Hoysaḷa":38,"Pāṇḍya":557,"Yādava (Seuṇa)":14,"Eastern Chāḷukya":29,"Chāḷukya (unspecified)":36,"Kākatīya":188,"Reḍḍi":51,"Nāyaka":47,"Telugu Chōḍa":48,"Vaidumba":23,"Eastern Gaṅga":72,"Gajapati":17,"Deccan sultanates":40,"Mughal":2,"Kadamba":7,"Kalachuri":6,"East India Company":5,"Chēra":7,"Sētupati":3,"Gaṅga":5,"Kōṭa":5,"Kongu Chōḷa":3},"are":{"Pallava":441,"Chāḷukya (unspecified)":198,"other":3077,"unknown":31009,"Vijayanagara":3730,"Pāṇḍya":3250,"Gaṅga":132,"Nāyaka":170,"Chēra":34,"Chōḷa":7195,"Kākatīya":332,"Telugu Chōḍa":127,"Reḍḍi":51,"Kōṭa":30,"Vaidumba":36,"Rāṣṭrakūṭa":280,"Gajapati":37,"Hoysaḷa":413,"Bāṇa":35,"Eastern Chāḷukya":128,"Sētupati":60,"Marāṭhā":38,"Maurya":37,"Chāḷukya of Kalyāṇa":1331,"Nolamba":15,"Yādava (Seuṇa)":397,"Kalachuri":313,"Kadamba":169,"Deccan sultanates":614,"Sambuvarāya":42,"Eastern Gaṅga":162,"Gupta":36,"Mysore (Woḍeyar)":68,"Kongu Chōḷa":2,"Ikṣvāku":47,"Āḷupa":33,"Mughal":980,"Keḷadi":21,"Chaulukya (Gujarat)":47,"Chāḷukya of Bādāmi":41,"Chandēlla":60,"Pāla":38,"Chāhamāna":213,"Paramāra":118,"Delhi sultanate":286,"Kuṣāṇa":33,"Gāhaḍavāla":71,"Pratīhāra":35,"Śuṅga":3,"Guhila":117,"Maukhari":39,"Maitraka":51,"Later Gupta":5,"Kongu Pāṇḍya":1,"Kongu rulers":235,"Āsaf Jāhī":60,"Bundēlā":40,"Holkar":14,"East India Company":6},"epca":{"Gaṅga":86,"unknown":10011,"Hoysaḷa":592,"other":151,"Chōḷa":120,"Kadamba":46,"Vijayanagara":253,"Chāḷukya (unspecified)":208,"Rāṣṭrakūṭa":5,"Yādava (Seuṇa)":68,"Nolamba":19,"Mysore (Woḍeyar)":2,"Kalachuri":39,"Pallava":40,"Keḷadi":31,"Vaidumba":2,"Bāṇa":7,"Kākatīya":1}},"language":{"sii":{"Sanskrit":630,"unknown":3650,"Tamil":6500,"Kannada":2285,"Telugu":2763,"Persian":1,"Hindi":6,"Odia":3,"Arabic":1,"Marathi":17,"Prakrit":18},"are":{"Sanskrit":7609,"Tamil":18154,"Other":1491,"Telugu":4304,"Kannada":6039,"Prakrit":1318,"unknown":4316,"Pali":14,"Persian":4777,"Odia":65,"Hindi":47,"Marathi":140,"English":91,"Dutch":6,"Arabic":4383,"Malayalam":52,"Urdu":349,"Portuguese":51,"Tulu":6,"Latin":8,"Hebrew":12,"Local dialect":3268,"Bengali":18,"Tibetan":15,"Pahlavi":8,"Gujarati":12,"Rajasthani":3,"Greek":2,"Assamese":3,"Burmese":2,"Apabhramsa":6,"Armenian":9,"Ahom":1,"French":4},"epca":{"Kannada":5066,"unknown":5737,"Sanskrit":274,"Tamil":477,"Marathi":18,"Hindi":16,"Telugu":71,"Urdu":1,"Persian":14,"Arabic":5,"Prakrit":2}},"material":{"sii":{"Stone and other":15854,"Copper plate":20},"are":{"Copper plate":1950,"Stone and other":54633},"epca":{"Copper plate":315,"Stone and other":11366}},"type":{"sii":{"not classified":15874},"are":{"not classified":56583},"epca":{"unclassified":10689,"Hero-stone":946,"Sati-stone":46}}}};
+const ORDER = ["sii", "are", "epca"];
+const NAMES = {"sii": "SII", "are": "ARE", "epca": "EC"};  // data key -> short name (EC, TN Inscriptions ...)
+const FULL = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica"};    // data key -> full title
+const on = new Set(ORDER);
+const fmt = n => n.toLocaleString('en-IN');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ord = c => { const n = +c, s = (n % 100 >= 10 && n % 100 <= 20) ? 'th' : ({1:'st',2:'nd',3:'rd'}[n % 10] || 'th'); return n + s + ' c.'; };
+
+function sum(dim) {
+  const m = new Map();
+  for (const c of on) for (const [k, v] of Object.entries((DATA.dims[dim] || {})[c] || {})) m.set(k, (m.get(k) || 0) + v);
+  return m;
+}
+function total() { let n = 0; for (const c of on) n += DATA.totals[c] || 0; return n; }
+
+const CHARTS = [
+  {id: 'century', title: 'By century', wide: true,
+   note: () => `Records with a convertible date. ${fmt(sum('century').get('undated') || 0)} undated records are not drawn (they are in the table). Before the 7th century, read a record before citing it: some years are misreads.`,
+   rows: () => { const m = sum('century'); const keys = [...m.keys()].filter(k => k !== 'undated').sort((a, b) => a - b);
+     const r = keys.map(k => ({key: k, label: ord(k), value: m.get(k)})); if (m.get('undated')) r.push({key: 'undated', label: 'Undated', value: m.get('undated'), muted: true, tableOnly: true}); return r; }},
+  {id: 'state', title: 'By state', note: 'Modern state; Unknown where the page does not give one.',
+   rows: () => topRows(sum('state'), 14, {unknown: 'Unknown'})},
+  {id: 'district', title: 'Top 20 districts', note: 'District as printed; records without one are not shown.',
+   rows: () => topRows(sum('district'), 20, {}, ['unknown'])},
+  {id: 'dynasty', title: 'Top 15 dynasties', note: 'Grouped by keyword; records with no dynasty, or one outside the groups, are not shown.',
+   rows: () => topRows(sum('dynasty'), 15, {}, ['unknown', 'other'])},
+  {id: 'language', title: 'By language', note: 'First language named (ARE, TN Inscriptions, Epigraphia Telanganica; Epigraphia Andhrica read from the article text); SII and Epigraphia Carnatica do not give one.',
+   rows: () => topRows(sum('language'), 12, {unknown: 'Not recorded'})},
+  {id: 'material', title: 'Copper plates', note: 'See "How these are counted" below.',
+   rows: () => topRows(sum('material'), 4, {})},
+  {id: 'type', title: 'Hero-stones and sati-stones', note: 'Word-list classification of each record, as in the Type column.',
+   rows: () => topRows(sum('type'), 6, {'not classified': 'Not classified yet', unclassified: 'Other records'})},
+];
+function topRows(m, n, rename, drop) {
+  drop = drop || [];
+  const muted = new Set(['unknown', 'not classified', 'unclassified']);
+  const rows = [...m.entries()].filter(([k]) => !drop.includes(k))
+    .map(([k, v]) => ({key: k, label: rename[k] || k, value: v, muted: muted.has(k)}));
+  const main = rows.filter(r => !r.muted).sort((a, b) => b.value - a.value).slice(0, n);
+  return main.concat(rows.filter(r => r.muted));
+}
+
+// A bar or heat cell -> Advanced Search, filtered to exactly the records it
+// counts (same buckets, read from the facet files this page's build writes).
+function searchUrl(dim, key, corpora) {
+  const p = new URLSearchParams();
+  p.set('corpus', (corpora || [...on]).join(','));
+  if (dim) p.set(dim, key);
+  return 'AdvancedSearch.html?' + p.toString();
+}
+function barChart(rows, title, wide, dim) {
+  rows = rows.filter(r => r.value > 0 && !r.tableOnly);
+  if (!rows.length) return '<p class="note">Nothing in the selected corpora.</p>';
+  const W = wide ? 1280 : 560, lh = 24, lw = wide ? 90 : 150, H = rows.length * lh + 4, track = W - lw - 70;
+  const max = Math.max(1, ...rows.map(r => r.value)), all = rows.reduce((a, r) => a + r.value, 0);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">` + rows.map((r, i) => {
+    const y = i * lh + 2, bw = Math.max(2, track * r.value / max);
+    const tip = `${r.label}: ${fmt(r.value)} (${(100 * r.value / all).toFixed(1)}%)`;
+    const href = r.href !== undefined ? r.href : searchUrl(dim, r.key);
+    return `<g class="hit"${href ? ` data-href="${esc(href)}"` : ''} data-tip="${esc(href ? tip + ' — click to list them' : tip)}"><rect x="0" y="${y}" width="${W}" height="${lh}" fill="transparent"/>` +
+      `<text class="bar-label" x="${lw - 8}" y="${y + 15}" text-anchor="end">${esc(r.label.length > 22 ? r.label.slice(0, 21) + '…' : r.label)}</text>` +
+      `<rect class="bar-track" x="${lw}" y="${y + 5}" width="${track}" height="12" rx="4"/>` +
+      `<rect class="bar${r.muted ? ' muted' : ''}" x="${lw}" y="${y + 5}" width="${bw.toFixed(1)}" height="12" rx="4"/>` +
+      `<text class="bar-val" x="${(lw + bw + 6).toFixed(1)}" y="${y + 15}">${fmt(r.value)}</text></g>`;
+  }).join('') + '</svg>';
+}
+function table(rows, dim) {
+  const all = rows.reduce((a, r) => a + r.value, 0);
+  return '<table class="data"><tr><th>Value</th><th>Records</th><th>%</th></tr>' + rows.map(r =>
+    `<tr><td>${(h => h ? `<a href="${esc(h)}">${esc(r.label)}</a>` : esc(r.label))(r.href !== undefined ? r.href : searchUrl(dim, r.key))}</td><td class="n">${fmt(r.value)}</td><td class="n">${(100 * r.value / all).toFixed(1)}</td></tr>`).join('') + '</table>';
+}
+const asTable = new Set();
+function heatGrid() {
+  const cs = new Set(); for (const c of ORDER) for (const k of Object.keys(DATA.dims.century[c] || {})) if (k !== 'undated') cs.add(+k);
+  const cents = [...cs].sort((a, b) => a - b); let max = 1;
+  for (const c of ORDER) for (const k of cents) max = Math.max(max, (DATA.dims.century[c] || {})[k] || 0);
+  const mix = v => v ? `color-mix(in oklab, var(--heat-1) ${Math.round(12 + 88 * Math.sqrt(v / max))}%, var(--heat-0))` : 'transparent';
+  let h = '<div class="grid-wrap"><table class="heat"><tr><th></th>' + cents.map(c => `<th>${ord(c).replace(' c.', '')}</th>`).join('') + '<th>Undated</th></tr>';
+  for (const c of ORDER) {
+    const d = DATA.dims.century[c] || {};
+    h += `<tr style="opacity:${on.has(c) ? 1 : .35}"><th style="text-align:right" title="${esc(FULL[c])}">${esc(NAMES[c])}</th>` + cents.map(k => {
+      const v = d[k] || 0, dark = v && Math.sqrt(v / max) > .72;
+      return `<td${v ? ` data-href="${esc(searchUrl('century', String(k), [c]))}"` : ''} data-tip="${esc(FULL[c])}, ${ord(k)}: ${fmt(v)}" style="background:${mix(v)};color:${dark ? 'var(--bg)' : 'var(--text-dim)'}">${v ? fmt(v) : ''}</td>`;
+    }).join('') + `<td data-href="${esc(searchUrl('century', 'undated', [c]))}" data-tip="${esc(FULL[c])}, undated: ${fmt(d.undated || 0)}" style="color:var(--text-dim)">${fmt(d.undated || 0)}</td></tr>`;
+  }
+  return h + '</table></div>';
+}
+
+function render() {
+  const n = total(), cen = sum('century'), st = sum('state'), mat = sum('material'), ty = sum('type');
+  const dated = n - (cen.get('undated') || 0), withState = n - (st.get('unknown') || 0);
+  document.getElementById('kpis').innerHTML = [
+    ['Records', fmt(n)], ['Corpora', on.size],
+    ['Dated', fmt(dated) + ` <small>(${n ? Math.round(100 * dated / n) : 0}%)</small>`],
+    ['With a state', fmt(withState) + ` <small>(${n ? Math.round(100 * withState / n) : 0}%)</small>`],
+    ['Copper plates', fmt(mat.get('Copper plate') || 0)],
+    ['Hero-stones', fmt(ty.get('Hero-stone') || 0)]]
+    .map(([k, v]) => `<div class="kpi"><b>${v}</b><span>${k}</span></div>`).join('');
+  document.getElementById('charts').innerHTML = CHARTS.map(c => {
+    const rows = c.rows();
+    return `<figure class="chart${c.wide ? ' wide' : ''}"><div class="fhead"><h3>${esc(c.title)}</h3>` +
+      `<button class="tbtn" data-t="${c.id}">${asTable.has(c.id) ? 'Chart' : 'Table'}</button></div>` +
+      `<p class="note">${esc(typeof c.note === 'function' ? c.note() : c.note)}</p>${asTable.has(c.id) ? table(rows, c.id) : barChart(rows, c.title, c.wide && innerWidth > 900, c.id)}</figure>`;
+  }).join('') + `<figure class="chart wide"><div class="fhead"><h3>Corpus × century</h3></div>` +
+    `<p class="note">Which centuries each corpus covers (all corpora shown; switched-off ones are faded).</p>${heatGrid()}</figure>`;
+  if (window.renderExplore) renderExplore();
+}
+
+const chips = document.getElementById('chips');
+chips.innerHTML = '<span class="note">Corpora:</span>' + ORDER.map(c =>
+  `<button class="chip" aria-pressed="true" data-c="${esc(c)}" title="${esc(FULL[c])}: ${fmt(DATA.totals[c] || 0)} records">${esc(FULL[c])}</button>`).join('') +
+  '<button class="chip link" data-all="1">All</button>';
+chips.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.all) { ORDER.forEach(c => on.add(c)); }
+  else { const c = b.dataset.c; if (on.has(c) && on.size > 1) on.delete(c); else on.add(c); }
+  chips.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', on.has(x.dataset.c)));
+  render();
+});
+document.getElementById('charts').addEventListener('click', e => {
+  const h = e.target.closest('[data-href]');
+  if (h && !e.target.closest('a')) { location.href = h.dataset.href; return; }
+  const b = e.target.closest('.tbtn'); if (!b) return;
+  asTable.has(b.dataset.t) ? asTable.delete(b.dataset.t) : asTable.add(b.dataset.t); render();
+});
+const tip = document.getElementById('tip');
+document.addEventListener('mousemove', e => {
+  const t = e.target.closest('[data-tip]');
+  if (!t) { tip.style.display = 'none'; return; }
+  tip.textContent = t.dataset.tip; tip.style.display = 'block';
+  tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY + 14) + 'px';
+});
+
+// -- Explore (see EXPLORE_HTML in build_at_a_glance.py) --
+const XNAMES = {corpus: 'Corpus', century: 'Century', state: 'State', district: 'District', dynasty: 'Dynasty',
+                language: 'Language', material: 'Material', type: 'Type'};
+const XMUTED = {unknown: 'Not recorded', undated: 'Undated', other: 'Other dynasty', 'not classified': 'Not classified yet',
+                unclassified: 'Other records'};
+const XTOP = 25;
+let X = null, xBy = 'century', xFilt = {}, xTable = false;
+const xLabel = (d, v) => d === 'corpus' ? (FULL[v] || v) : XMUTED[v] || (d === 'century' ? ord(v) : v);
+function xCount(by, skip) {   // by-value -> count, over rows matching every filter but `skip`
+  const m = new Map(), bi = X.dims.indexOf(by), ci = X.dims.indexOf('corpus');
+  const fs = Object.entries(xFilt).filter(([d]) => d !== skip)
+    .map(([d, v]) => [X.dims.indexOf(d), X.vocab[X.dims.indexOf(d)].indexOf(v)]);
+  for (const row of X.rows) {
+    if (!on.has(X.vocab[ci][row[ci]]) || !fs.every(([i, j]) => row[i] === j)) continue;
+    const k = X.vocab[bi][row[bi]]; m.set(k, (m.get(k) || 0) + row[row.length - 1]);
+  }
+  return m;
+}
+function xHref(extra) {
+  const f = Object.assign({}, xFilt, extra), p = new URLSearchParams();
+  p.set('corpus', f.corpus ? f.corpus : [...on].join(',')); delete f.corpus;
+  Object.entries(f).forEach(([d, v]) => p.set(d, v));
+  return 'AdvancedSearch.html?' + p.toString();
+}
+// Google Analytics: which custom charts get made (2026-10-28, per the
+// user). One event per chart change; register explore_* as custom
+// dimensions in GA to report on them.
+function xTrack() {
+  if (typeof gtag !== 'function') return;
+  const ev = {explore_by: xBy, explore_filters: Object.keys(xFilt).join(',') || 'none'};
+  Object.entries(xFilt).forEach(([d, v]) => { ev['filter_' + d] = v; });
+  gtag('event', 'explore_chart', ev);
+}
+function xSyncUrl() {
+  xTrack();
+  const p = new URLSearchParams(); p.set('by', xBy); Object.entries(xFilt).forEach(([d, v]) => p.set(d, v));
+  history.replaceState(null, '', location.pathname + '?' + p.toString() + location.hash);
+}
+function renderExplore() {
+  if (!X) return;
+  const m = xCount(xBy, xBy);
+  let rows = [...m.entries()].map(([k, v]) => ({key: k, label: xLabel(xBy, k), value: v, muted: k in XMUTED,
+                                                 href: xHref({[xBy]: k})}));
+  const muted = rows.filter(r => r.muted);
+  rows = rows.filter(r => !r.muted);
+  if (xBy === 'century') rows.sort((a, b) => a.key - b.key); else rows.sort((a, b) => b.value - a.value);
+  let note = '';
+  if (!xTable && xBy !== 'century' && rows.length > XTOP) {
+    const rest = rows.slice(XTOP), n = rest.reduce((a, r) => a + r.value, 0);
+    rows = rows.slice(0, XTOP).concat([{key: '', label: `Others (${rest.length})`, value: n, muted: true, href: null}]);
+    note = `Top ${XTOP}; the other ${rest.length} are grouped as Others (Table lists all). `;
+  }
+  rows = rows.concat(muted);
+  const total = rows.reduce((a, r) => a + r.value, 0);
+  const fl = Object.entries(xFilt).map(([d, v]) => `${XNAMES[d]} ${xLabel(d, v)}`).join(', ');
+  document.getElementById('xTitle').textContent = `By ${XNAMES[xBy].toLowerCase()}` + (fl ? ` — ${fl}` : '');
+  document.getElementById('xNote').textContent = `${fmt(total)} records. ` + note +
+    (muted.length ? 'Greyed bars are records without this value.' : '');
+  document.getElementById('xChart').innerHTML = total
+    ? (xTable ? table(rows, xBy) : barChart(rows, '', innerWidth > 900, xBy))
+    : '<p class="note">No records match.</p>';
+  document.getElementById('xTable').textContent = xTable ? 'Chart' : 'Table';
+  document.getElementById('xFilters').innerHTML = Object.entries(xFilt).map(([d, v]) =>
+    `<button class="xchip" data-d="${esc(d)}" title="Remove this filter">${esc(XNAMES[d] + ': ' + xLabel(d, v))} ×</button>`).join(' ') +
+    (Object.keys(xFilt).length ? '' : '<span class="note">(no filters)</span>');
+  document.getElementById('xAddDim').innerHTML = '<option value="">+ add filter…</option>' +
+    X.dims.filter(d => d !== xBy && !(d in xFilt)).map(d => `<option value="${d}">${XNAMES[d]}</option>`).join('');
+  document.getElementById('xAddVal').hidden = true;
+}
+function xShowValues(d) {   // live counts: rows matching the other filters
+  const m = xCount(d, d), sel = document.getElementById('xAddVal');
+  const vals = [...m.entries()].filter(([k, n]) => n > 0 && !(k in XMUTED) && !/^[\[(]/.test(k));
+  vals.sort(d === 'century' ? ((a, b) => a[0] - b[0]) : ((a, b) => xLabel(d, a[0]).localeCompare(xLabel(d, b[0]))));
+  sel.innerHTML = `<option value="">${XNAMES[d]}…</option>` +
+    vals.map(([k, n]) => `<option value="${esc(k)}">${esc(xLabel(d, k))} (${fmt(n)})</option>`).join('');
+  sel.dataset.d = d; sel.hidden = false; sel.focus();
+}
+(async () => {
+  try { X = await (await fetch("AtAGlance-explore.json")).json(); }
+  catch (e) { document.getElementById('xChart').innerHTML = '<p class="note">Could not load the Explore data.</p>'; return; }
+  const p = new URLSearchParams(location.search);
+  if (X.dims.includes(p.get('by'))) xBy = p.get('by');
+  X.dims.forEach(d => { if (p.get(d) && d !== xBy && X.vocab[X.dims.indexOf(d)].includes(p.get(d))) xFilt[d] = p.get(d); });
+  const by = document.getElementById('xBy');
+  by.innerHTML = X.dims.map(d => `<option value="${d}"${d === xBy ? ' selected' : ''}>${XNAMES[d]}</option>`).join('');
+  by.addEventListener('change', e => { xBy = e.target.value; delete xFilt[xBy]; xSyncUrl(); renderExplore(); });
+  document.getElementById('xAddDim').addEventListener('change', e => { if (e.target.value) xShowValues(e.target.value); });
+  document.getElementById('xAddVal').addEventListener('change', e => {
+    if (!e.target.value) return; xFilt[e.target.dataset.d] = e.target.value; xSyncUrl(); renderExplore(); });
+  document.getElementById('xFilters').addEventListener('click', e => {
+    const b = e.target.closest('.xchip'); if (!b) return; delete xFilt[b.dataset.d]; xSyncUrl(); renderExplore(); });
+  document.getElementById('xReset').addEventListener('click', e => {
+    e.preventDefault(); xBy = 'century'; xFilt = {}; by.value = xBy; xSyncUrl(); renderExplore(); });
+  document.getElementById('xTable').addEventListener('click', () => { xTable = !xTable; renderExplore(); });
+  document.getElementById('xChart').addEventListener('click', e => {
+    const h = e.target.closest('[data-href]'); if (h && !e.target.closest('a')) location.href = h.dataset.href; });
+  renderExplore();
+  const help = document.getElementById('xHelp');
+  document.getElementById('xHelpOpen').addEventListener('click', () => {
+    help.hidden = false; if (typeof gtag === 'function') gtag('event', 'help_open', {page_help: 'explore'}); });
+  document.getElementById('xHelpClose').addEventListener('click', () => { help.hidden = true; });
+  help.addEventListener('click', e => { if (e.target === help) help.hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') help.hidden = true; });
+})();
+
+render();
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 150); });
+</script>
+<button type="button" id="backToTop" aria-label="Back to top" title="Back to top">&#8593;</button>
+<style>
+  #backToTop { position: fixed; right: 18px; bottom: 18px; z-index: 900; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(0,0,0,.15); background: #3f5a3c; color: #fff;
+    font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #backToTop.show { opacity: .9; pointer-events: auto; }
+  #backToTop:hover, #backToTop:focus-visible { opacity: 1; }
+  @media print { #backToTop { display: none; } }
+</style>
+<script>
+(function () {
+  var b = document.getElementById('backToTop');
+  function upd() { b.classList.toggle('show', window.scrollY > window.innerHeight); }
+  window.addEventListener('scroll', upd, {passive: true}); upd();
+  b.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
+})();
+</script>
+</body>
+</html>

@@ -2,30 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/SII-Inscriptions.html</loc>
-    <lastmod>2026-10-19</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/ARE-Inscriptions.html</loc>
-    <lastmod>2026-10-19</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/AdvancedSearch.html</loc>
-    <lastmod>2026-10-19</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/Sources.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/HowItWorks.html</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-11-11</lastmod>
   </url>
   <url>
     <loc>https://pa-sankar.github.io/Inscriptions/ReleaseNotes.html</loc>
-    <lastmod>2026-09-28</lastmod>
+    <lastmod>2026-11-11</lastmod>
+  </url>
+  <url>
+    <loc>https://pa-sankar.github.io/Inscriptions/EpCa-Inscriptions.html</loc>
+    <lastmod>2026-11-11</lastmod>
+  </url>
+  <url>
+    <loc>https://pa-sankar.github.io/Inscriptions/AtAGlance.html</loc>
+    <lastmod>2026-11-11</lastmod>
   </url>
 </urlset>
