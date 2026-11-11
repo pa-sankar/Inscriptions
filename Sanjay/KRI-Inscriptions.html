@@ -580,7 +580,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-11 11:37</div>
+<div class="generated">Generated 2026-11-11 12:01</div>
 
 <div class="stats">127 records from 3 volume(s). Remarks is the English commentary printed alongside each inscription; a row's detail popup also carries the original-script text.</div>
 <div class="legend"><strong>Citation</strong>: the book's own "No. N of YYYY-YY." cross-reference to the Annual Report on Epigraphy.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>Original Text</strong>: click any row for its full detail popup -- the original-script (or, for some records, Roman-transliterated) verse text, not shown as its own table column to keep the table itself readable.</div>
@@ -1515,7 +1515,10 @@ function dirOf(url) {
 }
 
 async function fetchJson(url) {
-  const resp = await fetch(url);
+  // cache:'no-cache': the browser asks the server every time (a cheap 304 when
+  // unchanged), so a rebuilt index or chunk is never hidden behind an old copy
+  // (user saw SII's old "p17" pages after a rebuild, 2026-11-11).
+  const resp = await fetch(url, {cache: 'no-cache'});
   if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
   return resp.json();
 }

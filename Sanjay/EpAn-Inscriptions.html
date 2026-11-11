@@ -578,7 +578,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-11 11:37</div>
+<div class="generated">Generated 2026-11-11 12:01</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -1513,7 +1513,10 @@ function dirOf(url) {
 }
 
 async function fetchJson(url) {
-  const resp = await fetch(url);
+  // cache:'no-cache': the browser asks the server every time (a cheap 304 when
+  // unchanged), so a rebuilt index or chunk is never hidden behind an old copy
+  // (user saw SII's old "p17" pages after a rebuild, 2026-11-11).
+  const resp = await fetch(url, {cache: 'no-cache'});
   if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
   return resp.json();
 }

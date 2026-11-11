@@ -160,7 +160,7 @@
     <li><b>Undated, Unknown and Not recorded</b> mean the value has not been read from the record yet, or the book does not state it. They do not mean the inscription has none. Much of Epigraphia Carnatica's dynasty field is still blank, so compare series with care.</li>
     <li>These are counts of what survives and was published, not of what was carved: a district looks dense where a survey was thorough.</li>
   </ul>
-  <footer>Project InscriptionSearch. Generated 2026-11-11 11:14.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-11 12:02.</footer>
 </div>
 <div id="tip" role="tooltip"></div>
 <script>
@@ -376,7 +376,7 @@ function xShowValues(d) {   // live counts: rows matching the other filters
   sel.dataset.d = d; sel.hidden = false; sel.focus();
 }
 (async () => {
-  try { X = await (await fetch("AtAGlance-explore.json")).json(); }
+  try { X = await (await fetch("AtAGlance-explore.json", {cache: 'no-cache'})).json(); }
   catch (e) { document.getElementById('xChart').innerHTML = '<p class="note">Could not load the Explore data.</p>'; return; }
   const p = new URLSearchParams(location.search);
   if (X.dims.includes(p.get('by'))) xBy = p.get('by');

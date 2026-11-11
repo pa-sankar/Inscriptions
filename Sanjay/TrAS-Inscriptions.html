@@ -585,7 +585,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-11 11:37</div>
+<div class="generated">Generated 2026-11-11 12:02</div>
 
 <div class="stats">488 records from 15 volume PDF(s) of the Travancore Archaeological Series. Vol VIII's scan stops at printed p. 29.</div>
 <div class="legend"><strong>No.</strong>: the book's "No. N" in Vols III-VII; in I, II, VIII and IX, which print no inscription numbers, the entry's place in the contents.<br><strong>Register</strong>: the Travancore department's register number and Kollam year ("3 of 1106"). <strong>ARE</strong>: the Madras Epigraphical collection number.<br><strong>Remarks</strong>: the book's translation, or the editor's introduction where the book gives none. Click a row for the introduction, text, footnotes and, marked as AI, an unverified English rendering of script lines made during OCR.</div>
@@ -1520,7 +1520,10 @@ function dirOf(url) {
 }
 
 async function fetchJson(url) {
-  const resp = await fetch(url);
+  // cache:'no-cache': the browser asks the server every time (a cheap 304 when
+  // unchanged), so a rebuilt index or chunk is never hidden behind an old copy
+  // (user saw SII's old "p17" pages after a rebuild, 2026-11-11).
+  const resp = await fetch(url, {cache: 'no-cache'});
   if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + url);
   return resp.json();
 }
