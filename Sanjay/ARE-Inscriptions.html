@@ -582,7 +582,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-12 09:00</div>
+<div class="generated">Generated 2026-11-12 19:44</div>
 <div class="whats-new"><strong>What's new:</strong> filters are now multi-select (checkbox lists with an Include/Exclude toggle) and narrow each other as you pick values; a "Blank / not available" option appears wherever a field is genuinely missing on some records; the ID column now shows a tag icon (hover or tap it for the full ID — copy-to-clipboard still works the same way); and only a curated set of columns shows by default, with Remarks given at least half the table's width and any column you filter on shown automatically. Not yet on the public page pending review.</div>
 <div class="stats">56583 records from 6841 table pages (580 index pages excluded) across 66 PDFs. 72990 &quot;Do.&quot; cells resolved, 58224 flagged (unresolved or partial — not auto-filled). 30 merged Serial/Findspot cells split, 12 stray Sl.No prefixes stripped, 7897 location prefixes moved to Location, 8 Date/Language swaps recovered. Not the final are.sqlite-backed view — a proof pass, see the script's own docstring. See <a href="../Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the work it refers to follows the word, in italics and brackets; that text is ours, not the report's.</div>
@@ -718,7 +718,7 @@ function internalId(id) {
   return p.join('|');
 }
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
