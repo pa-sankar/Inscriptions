@@ -582,7 +582,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-11 19:25</div>
+<div class="generated">Generated 2026-11-12 06:38</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -679,6 +679,44 @@ that script. Search each spelling and script separately: பைரவ does not f
 </div>
 <script>
 
+const SHOWN_ID_PREFIX = {"epca": "ec"};
+// the ID as the site shows it ("epca|I|45" -> "ec|I|45")
+function shownId(id) {
+  const p = (id || '').split('|');
+  if (SHOWN_ID_PREFIX[p[0]]) p[0] = SHOWN_ID_PREFIX[p[0]];
+  return p.join('|');
+}
+// every form of an ID that free-text search should find (per the user,
+// 2026-11-12): internal, shown, and both with the volume (and SII's
+// part) in Arabic numerals, so "ec|1|" and "sii|31|" find Roman volumes
+function idSearchText(id) {
+  const roman = (s) => {
+    const m = /^([ivxlc]+)(.*)$/i.exec(s || '');
+    if (!m) return s;
+    const V = {i: 1, v: 5, x: 10, l: 50, c: 100};
+    const r = m[1].toLowerCase();
+    let n = 0;
+    for (let k = 0; k < r.length; k++) {
+      const a = V[r[k]], b = V[r[k + 1]] || 0;
+      n += a < b ? -a : a;
+    }
+    return n + m[2];
+  };
+  const arabic = (s) => {
+    const p = s.split('|');
+    if (p.length > 2) p[1] = roman(p[1]);
+    if (p[0] === 'sii' && p.length > 3 && p[2]) p[2] = roman(p[2]);
+    return p.join('|');
+  };
+  const shown = shownId(id);
+  return [id, shown, arabic(id), arabic(shown)].join(' ');
+}
+// a shown ID (or a pasted internal one) back to the internal key
+function internalId(id) {
+  const p = (id || '').split('|');
+  for (const [k, v] of Object.entries(SHOWN_ID_PREFIX)) if (p[0].toLowerCase() === v) p[0] = k;
+  return p.join('|');
+}
 function readableId(id) {
   const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
@@ -1172,7 +1210,7 @@ function render() {
         // search must find a record by its own ID even with no
         // dedicated ID filter, same as Advanced Search's own
         // rowMatchesKeyword() already does.
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + idSearchText(row.id || '');
         textMatch = testFrom0(re, foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
@@ -1721,7 +1759,7 @@ async function loadData() {
     // works, and keeps the public/Sanjay data-fetch boundary exactly as
     // it already is. Handled only after the real render() above, so the
     // jump lands on a fully-painted, unfiltered table.
-    const jumpKey = new URLSearchParams(location.search).get('jump');
+    const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
@@ -2116,12 +2154,12 @@ function updateRemarksClamp(cell) {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'idchip';
-      chip.dataset.id = row.id;
-      chip.title = 'Copy ' + row.id;
+      chip.dataset.id = shownId(row.id);
+      chip.title = 'Copy ' + shownId(row.id);
       chip.innerHTML = '&#127991;&#65039;';
       const code = document.createElement('code');
       code.className = 'row-detail-id-text';
-      code.textContent = row.id;
+      code.textContent = shownId(row.id);
       idLine.appendChild(chip);
       idLine.appendChild(code);
       if (title.textContent) head.appendChild(title);
@@ -2162,7 +2200,7 @@ function updateRemarksClamp(cell) {
       if (key === 'id' && row.id) {
         const idText = document.createElement('code');
         idText.className = 'row-detail-id-text';
-        idText.textContent = row.id;
+        idText.textContent = shownId(row.id);
         dd.appendChild(idText);
       }
       field.appendChild(dt);

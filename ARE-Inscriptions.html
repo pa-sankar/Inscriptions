@@ -595,7 +595,7 @@
 </div>
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-11 20:05</div>
+<div class="generated">Generated 2026-11-12 06:36</div>
 
 <div class="stats">56583 records from 66 report(s), 6841 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the work it refers to follows the word, in italics and brackets; that text is ours, not the report's.</div>
@@ -692,6 +692,44 @@ that script. Search each spelling and script separately: பைரவ does not f
 </div>
 <script>
 
+const SHOWN_ID_PREFIX = {"epca": "ec"};
+// the ID as the site shows it ("epca|I|45" -> "ec|I|45")
+function shownId(id) {
+  const p = (id || '').split('|');
+  if (SHOWN_ID_PREFIX[p[0]]) p[0] = SHOWN_ID_PREFIX[p[0]];
+  return p.join('|');
+}
+// every form of an ID that free-text search should find (per the user,
+// 2026-11-12): internal, shown, and both with the volume (and SII's
+// part) in Arabic numerals, so "ec|1|" and "sii|31|" find Roman volumes
+function idSearchText(id) {
+  const roman = (s) => {
+    const m = /^([ivxlc]+)(.*)$/i.exec(s || '');
+    if (!m) return s;
+    const V = {i: 1, v: 5, x: 10, l: 50, c: 100};
+    const r = m[1].toLowerCase();
+    let n = 0;
+    for (let k = 0; k < r.length; k++) {
+      const a = V[r[k]], b = V[r[k + 1]] || 0;
+      n += a < b ? -a : a;
+    }
+    return n + m[2];
+  };
+  const arabic = (s) => {
+    const p = s.split('|');
+    if (p.length > 2) p[1] = roman(p[1]);
+    if (p[0] === 'sii' && p.length > 3 && p[2]) p[2] = roman(p[2]);
+    return p.join('|');
+  };
+  const shown = shownId(id);
+  return [id, shown, arabic(id), arabic(shown)].join(' ');
+}
+// a shown ID (or a pasted internal one) back to the internal key
+function internalId(id) {
+  const p = (id || '').split('|');
+  for (const [k, v] of Object.entries(SHOWN_ID_PREFIX)) if (p[0].toLowerCase() === v) p[0] = k;
+  return p.join('|');
+}
 function readableId(id) {
   const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
@@ -1185,7 +1223,7 @@ function render() {
         // search must find a record by its own ID even with no
         // dedicated ID filter, same as Advanced Search's own
         // rowMatchesKeyword() already does.
-        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + (row.id || '');
+        const all = COLUMN_KEYS.map((k) => row.text[k] || '').join(' ') + ' ' + idSearchText(row.id || '');
         textMatch = testFrom0(re, foldDiacritics(all));
       } else {
         const key = scope.slice('col-'.length);
@@ -1734,7 +1772,7 @@ async function loadData() {
     // works, and keeps the public/Sanjay data-fetch boundary exactly as
     // it already is. Handled only after the real render() above, so the
     // jump lands on a fully-painted, unfiltered table.
-    const jumpKey = new URLSearchParams(location.search).get('jump');
+    const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
@@ -2129,12 +2167,12 @@ function updateRemarksClamp(cell) {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'idchip';
-      chip.dataset.id = row.id;
-      chip.title = 'Copy ' + row.id;
+      chip.dataset.id = shownId(row.id);
+      chip.title = 'Copy ' + shownId(row.id);
       chip.innerHTML = '&#127991;&#65039;';
       const code = document.createElement('code');
       code.className = 'row-detail-id-text';
-      code.textContent = row.id;
+      code.textContent = shownId(row.id);
       idLine.appendChild(chip);
       idLine.appendChild(code);
       if (title.textContent) head.appendChild(title);
@@ -2175,7 +2213,7 @@ function updateRemarksClamp(cell) {
       if (key === 'id' && row.id) {
         const idText = document.createElement('code');
         idText.className = 'row-detail-id-text';
-        idText.textContent = row.id;
+        idText.textContent = shownId(row.id);
         dd.appendChild(idText);
       }
       field.appendChild(dt);

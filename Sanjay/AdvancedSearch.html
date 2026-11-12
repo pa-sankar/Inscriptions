@@ -342,7 +342,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-11-11 20:07 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-11-12 06:34 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -477,6 +477,44 @@
 
 <script>
 
+const SHOWN_ID_PREFIX = {"epca": "ec"};
+// the ID as the site shows it ("epca|I|45" -> "ec|I|45")
+function shownId(id) {
+  const p = (id || '').split('|');
+  if (SHOWN_ID_PREFIX[p[0]]) p[0] = SHOWN_ID_PREFIX[p[0]];
+  return p.join('|');
+}
+// every form of an ID that free-text search should find (per the user,
+// 2026-11-12): internal, shown, and both with the volume (and SII's
+// part) in Arabic numerals, so "ec|1|" and "sii|31|" find Roman volumes
+function idSearchText(id) {
+  const roman = (s) => {
+    const m = /^([ivxlc]+)(.*)$/i.exec(s || '');
+    if (!m) return s;
+    const V = {i: 1, v: 5, x: 10, l: 50, c: 100};
+    const r = m[1].toLowerCase();
+    let n = 0;
+    for (let k = 0; k < r.length; k++) {
+      const a = V[r[k]], b = V[r[k + 1]] || 0;
+      n += a < b ? -a : a;
+    }
+    return n + m[2];
+  };
+  const arabic = (s) => {
+    const p = s.split('|');
+    if (p.length > 2) p[1] = roman(p[1]);
+    if (p[0] === 'sii' && p.length > 3 && p[2]) p[2] = roman(p[2]);
+    return p.join('|');
+  };
+  const shown = shownId(id);
+  return [id, shown, arabic(id), arabic(shown)].join(' ');
+}
+// a shown ID (or a pasted internal one) back to the internal key
+function internalId(id) {
+  const p = (id || '').split('|');
+  for (const [k, v] of Object.entries(SHOWN_ID_PREFIX)) if (p[0].toLowerCase() === v) p[0] = k;
+  return p.join('|');
+}
 function readableId(id) {
   const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
@@ -755,7 +793,7 @@ let currentFieldTerms = [];
 function rowMatchesKeyword(row, term, mode) {
   if (!term) return true;
   const folded = foldDiacritics(term);
-  if (row.id && makeMatcher(folded, mode).test(foldDiacritics(row.id))) return true;
+  if (row.id && makeMatcher(folded, mode).test(foldDiacritics(idSearchText(row.id)))) return true;
   return Object.values(row.text).some((v) => v && makeMatcher(folded, mode).test(foldDiacritics(v)));
 }
 
@@ -1528,12 +1566,12 @@ function openRowDetailModal(row) {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'idchip';
-      chip.dataset.id = row.id;
-      chip.title = 'Copy ' + row.id;
+      chip.dataset.id = shownId(row.id);
+      chip.title = 'Copy ' + shownId(row.id);
       chip.innerHTML = '&#127991;&#65039;';
       const code = document.createElement('code');
       code.className = 'row-detail-id-text';
-      code.textContent = row.id;
+      code.textContent = shownId(row.id);
       idLine.appendChild(chip);
       idLine.appendChild(code);
       if (title.textContent) head.appendChild(title);
@@ -1562,7 +1600,7 @@ function openRowDetailModal(row) {
     if (col.key === 'id' && row.id) {
       const idText = document.createElement('code');
       idText.className = 'row-detail-id-text';
-      idText.textContent = row.id;
+      idText.textContent = shownId(row.id);
       dd.appendChild(idText);
     }
     field.appendChild(dt);
