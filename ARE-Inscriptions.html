@@ -150,6 +150,11 @@
     color: var(--text); line-height: 1.6;
   }
   .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  #keySetBanner button {
+    margin-left: 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer;
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent-strong); padding: 0.1rem 0.5rem;
+  }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -595,7 +600,7 @@
 </div>
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-12 19:44</div>
+<div class="generated">Generated 2026-11-13 10:16</div>
 
 <div class="stats">56583 records from 66 report(s), 6841 table pages read. See <a href="Sources.html#are">Sources</a> for where each report came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location): plain text is <span class="v-direct">as printed</span> — the page's own district/taluk heading. Italic amber text is <span class="v-derived">derived</span> — split out of the Place/Source text itself, where the page had no separate heading. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the report printed it. Location is the district/taluk it belongs to. Example: Place/Source might read "On a stone in front of the Anjaneya temple at Havinahalu-Virapura." while Location shows "Bellary district, Bellary taluk" — Place/Source says what the report printed, Location says the administrative area it's in.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks are being resolved to their full citation, report by report — work in progress, most records don't have this yet. Where resolved, the work it refers to follows the word, in italics and brackets; that text is ours, not the report's.</div>
@@ -627,6 +632,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <button type="button" id="resetBtn">Reset</button>
 </div>
 <div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div id="keySetBanner" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -801,6 +807,10 @@ const CHUNK_LABEL = "year";
 // See render_inscriptions_table's own enable_chunk_cache docstring --
 // SII's Sanjay page only, for now.
 const CHUNK_CACHE_ENABLED = false;
+// ?keys=a,b,c: only those records (see render_inscriptions_table's
+// enable_keys_param docstring). null = no key set, every row eligible.
+const KEYS_PARAM_ENABLED = false;
+let KEY_SET = null;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1215,6 +1225,7 @@ function render() {
   const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
+    if (KEY_SET && !KEY_SET.has(row.id || '')) continue;
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
@@ -1520,6 +1531,7 @@ if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop)
 prevPage.addEventListener('click', () => { currentPage--; render(); });
 nextPage.addEventListener('click', () => { currentPage++; render(); });
 resetBtn.addEventListener('click', () => {
+  clearKeySet();
   q.value = '';
   activeTerm = '';
   FILTER_KEYS.forEach((k) => {
@@ -1774,6 +1786,7 @@ async function loadData() {
     // jump lands on a fully-painted, unfiltered table.
     const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
+    else applyKeysParam();
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
     // stale index) throws the same way the old single-file fetch did —
@@ -1795,9 +1808,51 @@ loadData();
 // or cross-page depending on which corpus it names.
 let STABLE_KEY_INDEX = new Map();
 
+// ?keys=a,b,c&from=...: show only those records, with a banner saying
+// which and a way back to the whole table. Keys this page does not hold
+// are dropped; if none is held the param is ignored.
+function applyKeysParam() {
+  if (!KEYS_PARAM_ENABLED) return;
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('keys');
+  if (!raw) return;
+  const keys = raw.split(',').map((k) => internalId(k.trim())).filter((k) => STABLE_KEY_INDEX.has(k));
+  if (!keys.length) return;
+  KEY_SET = new Set(keys);
+  const banner = document.getElementById('keySetBanner');
+  banner.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Showing ' + keys.length + ' record' + (keys.length === 1 ? '' : 's');
+  banner.appendChild(strong);
+  const from = params.get('from');
+  if (from) banner.appendChild(document.createTextNode(' — ' + from));
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Show all records';
+  all.addEventListener('click', () => { clearKeySet(); currentPage = 1; render(); });
+  banner.appendChild(all);
+  banner.hidden = false;
+  currentPage = 1;
+  render();
+}
+
+function clearKeySet() {
+  if (!KEY_SET) return;
+  KEY_SET = null;
+  document.getElementById('keySetBanner').hidden = true;
+  // drop the param so a reload shows the whole table
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('keys');
+    url.searchParams.delete('from');
+    history.replaceState(null, '', url);
+  } catch (e) { /* file:// in some browsers: the table is right, only the address bar keeps the param */ }
+}
+
 function jumpToKey(key) {
   const idx = STABLE_KEY_INDEX.get(key);
   if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  clearKeySet();
   // Clear every filter so the target can't be hidden by whatever view
   // state the reader was in — a citation jump is "take me to this
   // record", not "take me to this record if it happens to still match
@@ -2334,8 +2389,9 @@ function updateRemarksClamp(cell) {
   tbody.addEventListener('click', (e) => {
     // A row's own interactive elements (idchip, page-img-btn,
     // remarks-more-btn, xref-link) are all <button>s with their own
-    // handlers -- let those run instead of also opening this popup.
-    if (e.target.closest('button')) return;
+    // handlers, and a link (xref-count) navigates -- let those run
+    // instead of also opening this popup.
+    if (e.target.closest('button, a')) return;
     // Don't hijack a text selection someone just finished dragging out
     // of a cell to copy -- a real click leaves nothing selected.
     if (window.getSelection().toString()) return;

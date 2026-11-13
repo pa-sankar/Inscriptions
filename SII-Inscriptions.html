@@ -150,6 +150,11 @@
     color: var(--text); line-height: 1.6;
   }
   .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  #keySetBanner button {
+    margin-left: 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer;
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent-strong); padding: 0.1rem 0.5rem;
+  }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -595,7 +600,7 @@
 </div>
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-12 09:02</div>
+<div class="generated">Generated 2026-11-13 14:25</div>
 
 <div class="stats">15874 records from 45 volume(s)/part(s) at 100% Gen-2 OCR. See <a href="Sources.html#sii">Sources</a> for where each volume came from.</div>
 <div class="legend"><strong>Reading the colors</strong> (Location, Dynasty): plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved some other way (map-matching, an index cross-reference) rather than printed at that exact spot. Hover either to see exactly where it came from.<br><strong>Location vs. Place/Source</strong>: Place/Source is the find-spot exactly as the volume printed it — often structural ("ON THE SOUTH WALL OF THE SAME TEMPLE"), not geographic. Location is the actual place on a map that find-spot resolves to. Example: a record's Place/Source might read "SAME TALUK" (referring back to an earlier record's find-spot) while its Location resolves to "NARASAPUR TALUK, KISTNA DISTRICT" — Place/Source says what the volume printed, Location says where that actually is.<br><strong>Citations</strong>: "Ibid."-style cross-references in Remarks have been resolved to their full citation — 99% of records that mention one (260 of 263, as of this build); the rest cite a different publication entirely (e.g. "A.R.Ep., 1914" or "Ind. Ant., Vol. XIX"), not another SII record, so there is nothing here for them to resolve to. The work it refers to follows the word, in italics and brackets; that text is ours, not the volume's.</div>
@@ -611,7 +616,7 @@ table itself only shows a few lines of.
 <strong>Search in Tamil, Kannada and other scripts</strong> works wherever a record holds text in
 that script. Search each spelling and script separately: பைரவ does not find "Bhairava".</div>
 <div class="controls">
-  <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (15874)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-hint">Numbers match Roman numerals too: 2 finds II, XII, XX, XXXII…</div><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I (1)"><span>I (1) — 110 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt I (2)"><span>II Pt I (2) — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt II (2)"><span>II Pt II (2) — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I (3)"><span>III Pt I (3) — 40 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II (3)"><span>III Pt II (3) — 24 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt III (3)"><span>III Pt III (3) — 108 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV (4)"><span>IV (4) — 950 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V (5)"><span>V (5) — 1139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI (6)"><span>VI (6) — 646 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII (7)"><span>VII (7) — 816 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII (8)"><span>VIII (8) — 567 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt I (9)"><span>IX Pt I (9) — 340 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt II (9)"><span>IX Pt II (9) — 235 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X (10)"><span>X (10) — 691 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt I (11)"><span>XI Pt I (11) — 116 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt II (11)"><span>XI Pt II (11) — 92 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII Pt I (12)"><span>XII Pt I (12) — 256 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIII (13)"><span>XIII (13) — 343 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV (14)"><span>XIV (14) — 236 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV Pt II (15)"><span>XV Pt II (15) — 476 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI (16)"><span>XVI (16) — 270 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVII (17)"><span>XVII (17) — 632 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII (18)"><span>XVIII (18) — 421 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIX (19)"><span>XIX (19) — 426 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XX (20)"><span>XX (20) — 381 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt I (22)"><span>XXII Pt I (22) — 293 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt II (22)"><span>XXII Pt II (22) — 139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIII (23)"><span>XXIII (23) — 528 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIV (24)"><span>XXIV (24) — 548 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVI (26)"><span>XXVI (26) — 690 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVII (27)"><span>XXVII (27) — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVIII (28)"><span>XXVIII (28) — 308 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXX (30)"><span>XXX (30) — 258 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXI (31)"><span>XXXI (31) — 359 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt I (32)"><span>XXXII Pt I (32) — 74 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt II (32)"><span>XXXII Pt II (32) — 227 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIII (33)"><span>XXXIII (33) — 216 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIV (34)"><span>XXXIV (34) — 401 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXV (35)"><span>XXXV (35) — 194 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVI (36)"><span>XXXVI (36) — 229 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVII (37)"><span>XXXVII (37) — 459 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVIII (38)"><span>XXXVIII (38) — 513 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XL (40)"><span>XL (40) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XLI (41)"><span>XLI (41) — 418 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (3989)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chhattisgarh"><span>Chhattisgarh (8)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (2602)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (28)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (170)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (6)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (7697)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (7)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="also"><button type="button" class="filter-dd-btn" id="alsoFilterBtn">Also published: all</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="alsoMode" value="include" checked> Include</label><label><input type="radio" name="alsoMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Also in another book we hold"><span>Also in another book we hold (2724)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Only in this book"><span>Only in this book (13150)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+  <div class="filter-dd" data-key="kind"><button type="button" class="filter-dd-btn" id="kindFilterBtn">All kinds</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="kindMode" value="include" checked> Include</label><label><input type="radio" name="kindMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Stone and Other Materials"><span>Stone and Other Materials (15874)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-hint">Numbers match Roman numerals too: 2 finds II, XII, XX, XXXII…</div><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I (1)"><span>I (1) — 110 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt I (2)"><span>II Pt I (2) — 20 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II Pt II (2)"><span>II Pt II (2) — 32 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt I (3)"><span>III Pt I (3) — 40 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt II (3)"><span>III Pt II (3) — 24 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III Pt III (3)"><span>III Pt III (3) — 108 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV (4)"><span>IV (4) — 950 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V (5)"><span>V (5) — 1139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI (6)"><span>VI (6) — 646 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII (7)"><span>VII (7) — 816 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII (8)"><span>VIII (8) — 567 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt I (9)"><span>IX Pt I (9) — 340 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX Pt II (9)"><span>IX Pt II (9) — 235 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X (10)"><span>X (10) — 691 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt I (11)"><span>XI Pt I (11) — 116 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI Pt II (11)"><span>XI Pt II (11) — 92 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII Pt I (12)"><span>XII Pt I (12) — 256 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIII (13)"><span>XIII (13) — 343 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV (14)"><span>XIV (14) — 236 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV Pt II (15)"><span>XV Pt II (15) — 476 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI (16)"><span>XVI (16) — 270 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVII (17)"><span>XVII (17) — 632 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII (18)"><span>XVIII (18) — 421 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIX (19)"><span>XIX (19) — 426 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XX (20)"><span>XX (20) — 381 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt I (22)"><span>XXII Pt I (22) — 293 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXII Pt II (22)"><span>XXII Pt II (22) — 139 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIII (23)"><span>XXIII (23) — 528 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXIV (24)"><span>XXIV (24) — 548 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVI (26)"><span>XXVI (26) — 690 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVII (27)"><span>XXVII (27) — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXVIII (28)"><span>XXVIII (28) — 308 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXX (30)"><span>XXX (30) — 258 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXI (31)"><span>XXXI (31) — 359 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt I (32)"><span>XXXII Pt I (32) — 74 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXII Pt II (32)"><span>XXXII Pt II (32) — 227 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIII (33)"><span>XXXIII (33) — 216 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXIV (34)"><span>XXXIV (34) — 401 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXV (35)"><span>XXXV (35) — 194 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVI (36)"><span>XXXVI (36) — 229 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVII (37)"><span>XXXVII (37) — 459 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XXXVIII (38)"><span>XXXVIII (38) — 513 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XL (40)"><span>XL (40) — 237 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XLI (41)"><span>XLI (41) — 418 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="state"><button type="button" class="filter-dd-btn" id="stateFilterBtn">All states</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="stateMode" value="include" checked> Include</label><label><input type="radio" name="stateMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Andhra Pradesh"><span>Andhra Pradesh (4073)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Chhattisgarh"><span>Chhattisgarh (8)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Karnataka"><span>Karnataka (2656)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kerala"><span>Kerala (29)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Maharashtra"><span>Maharashtra (1)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Odisha"><span>Odisha (251)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Puducherry"><span>Puducherry (26)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil Nadu"><span>Tamil Nadu (8014)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telangana"><span>Telangana (7)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="also"><button type="button" class="filter-dd-btn" id="alsoFilterBtn">Also published: all</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="alsoMode" value="include" checked> Include</label><label><input type="radio" name="alsoMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Also in another book we hold"><span>Also in another book we hold (2760)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Only in this book"><span>Only in this book (13114)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   
   <select id="searchScope">
     <option value="all">Search: all columns</option>
@@ -627,6 +632,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <button type="button" id="resetBtn">Reset</button>
 </div>
 <div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div id="keySetBanner" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -731,7 +737,7 @@ function internalId(id) {
   return p.join('|');
 }
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
@@ -801,6 +807,10 @@ const CHUNK_LABEL = "volume";
 // See render_inscriptions_table's own enable_chunk_cache docstring --
 // SII's Sanjay page only, for now.
 const CHUNK_CACHE_ENABLED = true;
+// ?keys=a,b,c: only those records (see render_inscriptions_table's
+// enable_keys_param docstring). null = no key set, every row eligible.
+const KEYS_PARAM_ENABLED = false;
+let KEY_SET = null;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1215,6 +1225,7 @@ function render() {
   const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
+    if (KEY_SET && !KEY_SET.has(row.id || '')) continue;
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
@@ -1520,6 +1531,7 @@ if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop)
 prevPage.addEventListener('click', () => { currentPage--; render(); });
 nextPage.addEventListener('click', () => { currentPage++; render(); });
 resetBtn.addEventListener('click', () => {
+  clearKeySet();
   q.value = '';
   activeTerm = '';
   FILTER_KEYS.forEach((k) => {
@@ -1774,6 +1786,7 @@ async function loadData() {
     // jump lands on a fully-painted, unfiltered table.
     const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
+    else applyKeysParam();
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
     // stale index) throws the same way the old single-file fetch did —
@@ -1795,9 +1808,51 @@ loadData();
 // or cross-page depending on which corpus it names.
 let STABLE_KEY_INDEX = new Map();
 
+// ?keys=a,b,c&from=...: show only those records, with a banner saying
+// which and a way back to the whole table. Keys this page does not hold
+// are dropped; if none is held the param is ignored.
+function applyKeysParam() {
+  if (!KEYS_PARAM_ENABLED) return;
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('keys');
+  if (!raw) return;
+  const keys = raw.split(',').map((k) => internalId(k.trim())).filter((k) => STABLE_KEY_INDEX.has(k));
+  if (!keys.length) return;
+  KEY_SET = new Set(keys);
+  const banner = document.getElementById('keySetBanner');
+  banner.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Showing ' + keys.length + ' record' + (keys.length === 1 ? '' : 's');
+  banner.appendChild(strong);
+  const from = params.get('from');
+  if (from) banner.appendChild(document.createTextNode(' — ' + from));
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Show all records';
+  all.addEventListener('click', () => { clearKeySet(); currentPage = 1; render(); });
+  banner.appendChild(all);
+  banner.hidden = false;
+  currentPage = 1;
+  render();
+}
+
+function clearKeySet() {
+  if (!KEY_SET) return;
+  KEY_SET = null;
+  document.getElementById('keySetBanner').hidden = true;
+  // drop the param so a reload shows the whole table
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('keys');
+    url.searchParams.delete('from');
+    history.replaceState(null, '', url);
+  } catch (e) { /* file:// in some browsers: the table is right, only the address bar keeps the param */ }
+}
+
 function jumpToKey(key) {
   const idx = STABLE_KEY_INDEX.get(key);
   if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  clearKeySet();
   // Clear every filter so the target can't be hidden by whatever view
   // state the reader was in — a citation jump is "take me to this
   // record", not "take me to this record if it happens to still match
@@ -2334,8 +2389,9 @@ function updateRemarksClamp(cell) {
   tbody.addEventListener('click', (e) => {
     // A row's own interactive elements (idchip, page-img-btn,
     // remarks-more-btn, xref-link) are all <button>s with their own
-    // handlers -- let those run instead of also opening this popup.
-    if (e.target.closest('button')) return;
+    // handlers, and a link (xref-count) navigates -- let those run
+    // instead of also opening this popup.
+    if (e.target.closest('button, a')) return;
     // Don't hijack a text selection someone just finished dragging out
     // of a cell to copy -- a real click leaves nothing selected.
     if (window.getSelection().toString()) return;
