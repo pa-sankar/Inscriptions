@@ -355,7 +355,7 @@
     </table>
   </div>
 
-  <footer>Project InscriptionSearch. Generated 2026-11-12 06:34.</footer>
+  <footer>Project InscriptionSearch. Generated 2026-11-15 15:51.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -529,7 +529,7 @@ function internalId(id) {
   return p.join('|');
 }
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "vijayanagara": "Vijayanagara Inscriptions", "nellore": "Nellore Inscriptions", "gujarat": "Gujarat Inscriptions", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
