@@ -91,6 +91,7 @@
   .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
   .home-link:hover { color: var(--accent); }
   .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  .site-nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin:2px 0 10px;font-size:.95rem}.site-nav a{color:var(--accent-strong,#7a3e12);text-decoration:none}.site-nav a:hover{text-decoration:underline}.site-nav .current{font-weight:600;color:inherit}
   /* Public pages only (see render_inscriptions_table's own subscribe_url
      docstring) -- a solid button, not a plain link, since this is a call
      to action rather than in-site navigation. */
@@ -150,6 +151,11 @@
     color: var(--text); line-height: 1.6;
   }
   .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  #keySetBanner button {
+    margin-left: 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer;
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent-strong); padding: 0.1rem 0.5rem;
+  }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -592,9 +598,10 @@
   <h1><a href="index.html" class="home-link" title="Home"><img src="images/home-icon.png" alt="Home" width="36" height="36" style="vertical-align:middle;border-radius:50%"></a> Epigraphia Carnatica</h1>
   <a href="https://forms.gle/wBaX1GV6FXheZdQU8" target="_blank" rel="noopener" class="subscribe-btn" id="subscribeLink">Subscribe</a>
 </div>
+
 <div class="source-notice" role="note" style="margin:1rem 0;padding:1rem 1.25rem;border:2px solid #b7791f;border-radius:6px;background:#fff4d6;color:#4a3500;font-size:1.1rem;line-height:1.5"><strong>Please verify before you quote.</strong> We make our best effort, using AI, to read (OCR) and translate these volumes and to carry details across related records so that the collection can be searched. Mistakes may still remain. Please check the actual inscription reference from the source directly before using the data from the site.</div>
 <div class="adv-search-note">Looking across more than one collection? <a href="AdvancedSearch.html">Advanced Search</a> searches every corpus on this site together, on one page.</div>
-<div class="generated">Generated 2026-11-12 19:46</div>
+<div class="generated">Generated 2026-11-15 11:39</div>
 
 <div class="stats">11681 records from 16 volume(s). Remarks is the English translation; a row's detail popup also carries the English transliteration and the original Kannada text, when the volume printed them.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — resolved from an earlier record's own find-spot (the book's own reference isn't self-contained, e.g. "To the north of No. 129 in the same place"); or, where the volume prints no find-spot, the taluk of the volume section the record is printed in, and the village an AI model read from the heading of its translation.<br><strong>Dynasty, King, Date</strong> (hidden by default; switch on under Columns): where the volume prints none, read by an AI model from the record&#x27;s own translation, with the quoted words checked, and shown as derived.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>English Transliteration / Kannada Original</strong>: click any row for its full detail popup, which includes the English transliteration and the original Kannada text — not shown as their own table columns to keep the table itself readable.</div>
@@ -610,7 +617,7 @@ table itself only shows a few lines of.
 <strong>Search in Tamil, Kannada and other scripts</strong> works wherever a record holds text in
 that script. Search each spelling and script separately: பைரவ does not find "Bhairava".</div>
 <div class="controls">
-  <div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Hero-stone"><span>Hero-stone (946)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (113)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sati-stone"><span>Sati-stone (46)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (10576)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-hint">Numbers match Roman numerals too: 2 finds II, XII, XX, XXXII…</div><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I"><span>I — 75 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X"><span>X — 1376 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II"><span>II — 553 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV"><span>IV — 922 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX"><span>IX — 1035 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI"><span>VI — 981 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI"><span>XI — 596 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV"><span>XV — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III"><span>III — 1373 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII"><span>VII — 601 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII"><span>XII — 656 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV"><span>XIV — 845 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI"><span>XVI — 271 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII"><span>VIII — 992 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII"><span>XVIII — 79 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V_ptII"><span>V — 910 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="language"><button type="button" class="filter-dd-btn" id="languageFilterBtn">All languages</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="languageMode" value="include" checked> Include</label><label><input type="radio" name="languageMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Arabic"><span>Arabic (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hindi"><span>Hindi (16)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada"><span>Kannada (5265)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Marathi"><span>Marathi (18)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian"><span>Persian (23)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prakrit"><span>Prakrit (2)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit"><span>Sanskrit (1006)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (505)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telugu"><span>Telugu (82)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu"><span>Urdu (2)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
+  <div class="filter-dd" data-key="type"><button type="button" class="filter-dd-btn" id="typeFilterBtn">All types</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="typeMode" value="include" checked> Include</label><label><input type="radio" name="typeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Hero-stone"><span>Hero-stone (967)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Incidental mention"><span>Incidental mention (117)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sati-stone"><span>Sati-stone (46)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Unclassified"><span>Unclassified (10551)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="volume"><button type="button" class="filter-dd-btn" id="volumeFilterBtn">All volumes</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="volumeMode" value="include" checked> Include</label><label><input type="radio" name="volumeMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-hint">Numbers match Roman numerals too: 2 finds II, XII, XX, XXXII…</div><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="I"><span>I — 75 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="X"><span>X — 1376 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="II"><span>II — 553 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IV"><span>IV — 922 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="IX"><span>IX — 1035 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VI"><span>VI — 981 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XI"><span>XI — 596 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XV"><span>XV — 416 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="III"><span>III — 1373 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VII"><span>VII — 601 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XII"><span>XII — 656 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XIV"><span>XIV — 845 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVI"><span>XVI — 271 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="VIII"><span>VIII — 992 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="XVIII"><span>XVIII — 79 record(s)</span></label><label class="filter-dd-opt"><input type="checkbox" value="V_ptII"><span>V — 910 record(s)</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div><div class="filter-dd" data-key="language"><button type="button" class="filter-dd-btn" id="languageFilterBtn">All languages</button><div class="filter-dd-panel" hidden><div class="filter-dd-mode" role="radiogroup"><label><input type="radio" name="languageMode" value="include" checked> Include</label><label><input type="radio" name="languageMode" value="exclude"> Exclude</label></div><input type="search" class="filter-dd-search" placeholder="Type to narrow this list…" title="Shows only the options containing what you type"><div class="filter-dd-options"><label class="filter-dd-opt"><input type="checkbox" value="Arabic"><span>Arabic (5)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Hindi"><span>Hindi (16)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Kannada"><span>Kannada (5265)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Marathi"><span>Marathi (18)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Persian"><span>Persian (23)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Prakrit"><span>Prakrit (2)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Sanskrit"><span>Sanskrit (1006)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Tamil"><span>Tamil (505)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Telugu"><span>Telugu (82)</span></label><label class="filter-dd-opt"><input type="checkbox" value="Urdu"><span>Urdu (2)</span></label><label class="filter-dd-opt filter-dd-opt-blank"><input type="checkbox" value="[[blank]]"><span>Blank / not available</span></label></div><div class="filter-dd-actions"><button type="button" class="filter-dd-clear">Clear</button></div></div></div>
   
   <select id="searchScope">
     <option value="all">Search: all columns</option>
@@ -626,6 +633,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <button type="button" id="resetBtn">Reset</button>
 </div>
 <div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div id="keySetBanner" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -800,6 +808,10 @@ const CHUNK_LABEL = "volume";
 // See render_inscriptions_table's own enable_chunk_cache docstring --
 // SII's Sanjay page only, for now.
 const CHUNK_CACHE_ENABLED = true;
+// ?keys=a,b,c: only those records (see render_inscriptions_table's
+// enable_keys_param docstring). null = no key set, every row eligible.
+const KEYS_PARAM_ENABLED = false;
+let KEY_SET = null;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1214,6 +1226,7 @@ function render() {
   const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
+    if (KEY_SET && !KEY_SET.has(row.id || '')) continue;
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
@@ -1519,6 +1532,7 @@ if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop)
 prevPage.addEventListener('click', () => { currentPage--; render(); });
 nextPage.addEventListener('click', () => { currentPage++; render(); });
 resetBtn.addEventListener('click', () => {
+  clearKeySet();
   q.value = '';
   activeTerm = '';
   FILTER_KEYS.forEach((k) => {
@@ -1773,6 +1787,7 @@ async function loadData() {
     // jump lands on a fully-painted, unfiltered table.
     const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
+    else applyKeysParam();
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
     // stale index) throws the same way the old single-file fetch did —
@@ -1794,9 +1809,51 @@ loadData();
 // or cross-page depending on which corpus it names.
 let STABLE_KEY_INDEX = new Map();
 
+// ?keys=a,b,c&from=...: show only those records, with a banner saying
+// which and a way back to the whole table. Keys this page does not hold
+// are dropped; if none is held the param is ignored.
+function applyKeysParam() {
+  if (!KEYS_PARAM_ENABLED) return;
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('keys');
+  if (!raw) return;
+  const keys = raw.split(',').map((k) => internalId(k.trim())).filter((k) => STABLE_KEY_INDEX.has(k));
+  if (!keys.length) return;
+  KEY_SET = new Set(keys);
+  const banner = document.getElementById('keySetBanner');
+  banner.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Showing ' + keys.length + ' record' + (keys.length === 1 ? '' : 's');
+  banner.appendChild(strong);
+  const from = params.get('from');
+  if (from) banner.appendChild(document.createTextNode(' — ' + from));
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Show all records';
+  all.addEventListener('click', () => { clearKeySet(); currentPage = 1; render(); });
+  banner.appendChild(all);
+  banner.hidden = false;
+  currentPage = 1;
+  render();
+}
+
+function clearKeySet() {
+  if (!KEY_SET) return;
+  KEY_SET = null;
+  document.getElementById('keySetBanner').hidden = true;
+  // drop the param so a reload shows the whole table
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('keys');
+    url.searchParams.delete('from');
+    history.replaceState(null, '', url);
+  } catch (e) { /* file:// in some browsers: the table is right, only the address bar keeps the param */ }
+}
+
 function jumpToKey(key) {
   const idx = STABLE_KEY_INDEX.get(key);
   if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  clearKeySet();
   // Clear every filter so the target can't be hidden by whatever view
   // state the reader was in — a citation jump is "take me to this
   // record", not "take me to this record if it happens to still match
@@ -2333,8 +2390,9 @@ function updateRemarksClamp(cell) {
   tbody.addEventListener('click', (e) => {
     // A row's own interactive elements (idchip, page-img-btn,
     // remarks-more-btn, xref-link) are all <button>s with their own
-    // handlers -- let those run instead of also opening this popup.
-    if (e.target.closest('button')) return;
+    // handlers, and a link (xref-count) navigates -- let those run
+    // instead of also opening this popup.
+    if (e.target.closest('button, a')) return;
     // Don't hijack a text selection someone just finished dragging out
     // of a cell to copy -- a real click leaves nothing selected.
     if (window.getSelection().toString()) return;

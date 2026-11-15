@@ -137,6 +137,11 @@
     color: var(--text); line-height: 1.6;
   }
   .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  #keySetBanner button {
+    margin-left: 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer;
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent-strong); padding: 0.1rem 0.5rem;
+  }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -585,7 +590,7 @@
 </div>
 
 
-<div class="generated">Generated 2026-11-12 09:02</div>
+<div class="generated">Generated 2026-11-13 16:22</div>
 
 <div class="stats">488 records from 15 volume PDF(s) of the Travancore Archaeological Series. Vol VIII's scan stops at printed p. 29.</div>
 <div class="legend"><strong>No.</strong>: the book's "No. N" in Vols III-VII; in I, II, VIII and IX, which print no inscription numbers, the entry's place in the contents.<br><strong>Register</strong>: the Travancore department's register number and Kollam year ("3 of 1106"). <strong>ARE</strong>: the Madras Epigraphical collection number.<br><strong>Remarks</strong>: the book's translation, or the editor's introduction where the book gives none. Click a row for the introduction, text, footnotes and, marked as AI, an unverified English rendering of script lines made during OCR.</div>
@@ -617,6 +622,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <button type="button" id="resetBtn">Reset</button>
 </div>
 <div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div id="keySetBanner" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -721,7 +727,7 @@ function internalId(id) {
   return p.join('|');
 }
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
@@ -791,6 +797,10 @@ const CHUNK_LABEL = "volume";
 // See render_inscriptions_table's own enable_chunk_cache docstring --
 // SII's Sanjay page only, for now.
 const CHUNK_CACHE_ENABLED = false;
+// ?keys=a,b,c: only those records (see render_inscriptions_table's
+// enable_keys_param docstring). null = no key set, every row eligible.
+const KEYS_PARAM_ENABLED = false;
+let KEY_SET = null;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1205,6 +1215,7 @@ function render() {
   const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
+    if (KEY_SET && !KEY_SET.has(row.id || '')) continue;
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
@@ -1510,6 +1521,7 @@ if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop)
 prevPage.addEventListener('click', () => { currentPage--; render(); });
 nextPage.addEventListener('click', () => { currentPage++; render(); });
 resetBtn.addEventListener('click', () => {
+  clearKeySet();
   q.value = '';
   activeTerm = '';
   FILTER_KEYS.forEach((k) => {
@@ -1764,6 +1776,7 @@ async function loadData() {
     // jump lands on a fully-painted, unfiltered table.
     const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
+    else applyKeysParam();
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
     // stale index) throws the same way the old single-file fetch did —
@@ -1785,9 +1798,51 @@ loadData();
 // or cross-page depending on which corpus it names.
 let STABLE_KEY_INDEX = new Map();
 
+// ?keys=a,b,c&from=...: show only those records, with a banner saying
+// which and a way back to the whole table. Keys this page does not hold
+// are dropped; if none is held the param is ignored.
+function applyKeysParam() {
+  if (!KEYS_PARAM_ENABLED) return;
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('keys');
+  if (!raw) return;
+  const keys = raw.split(',').map((k) => internalId(k.trim())).filter((k) => STABLE_KEY_INDEX.has(k));
+  if (!keys.length) return;
+  KEY_SET = new Set(keys);
+  const banner = document.getElementById('keySetBanner');
+  banner.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Showing ' + keys.length + ' record' + (keys.length === 1 ? '' : 's');
+  banner.appendChild(strong);
+  const from = params.get('from');
+  if (from) banner.appendChild(document.createTextNode(' — ' + from));
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Show all records';
+  all.addEventListener('click', () => { clearKeySet(); currentPage = 1; render(); });
+  banner.appendChild(all);
+  banner.hidden = false;
+  currentPage = 1;
+  render();
+}
+
+function clearKeySet() {
+  if (!KEY_SET) return;
+  KEY_SET = null;
+  document.getElementById('keySetBanner').hidden = true;
+  // drop the param so a reload shows the whole table
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('keys');
+    url.searchParams.delete('from');
+    history.replaceState(null, '', url);
+  } catch (e) { /* file:// in some browsers: the table is right, only the address bar keeps the param */ }
+}
+
 function jumpToKey(key) {
   const idx = STABLE_KEY_INDEX.get(key);
   if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  clearKeySet();
   // Clear every filter so the target can't be hidden by whatever view
   // state the reader was in — a citation jump is "take me to this
   // record", not "take me to this record if it happens to still match
@@ -2324,8 +2379,9 @@ function updateRemarksClamp(cell) {
   tbody.addEventListener('click', (e) => {
     // A row's own interactive elements (idchip, page-img-btn,
     // remarks-more-btn, xref-link) are all <button>s with their own
-    // handlers -- let those run instead of also opening this popup.
-    if (e.target.closest('button')) return;
+    // handlers, and a link (xref-count) navigates -- let those run
+    // instead of also opening this popup.
+    if (e.target.closest('button, a')) return;
     // Don't hijack a text selection someone just finished dragging out
     // of a cell to copy -- a real click leaves nothing selected.
     if (window.getSelection().toString()) return;

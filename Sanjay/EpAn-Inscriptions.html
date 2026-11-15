@@ -78,6 +78,7 @@
   .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
   .home-link:hover { color: var(--accent); }
   .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  .site-nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin:2px 0 10px;font-size:.95rem}.site-nav a{color:var(--accent-strong,#7a3e12);text-decoration:none}.site-nav a:hover{text-decoration:underline}.site-nav .current{font-weight:600;color:inherit}
   /* Public pages only (see render_inscriptions_table's own subscribe_url
      docstring) -- a solid button, not a plain link, since this is a call
      to action rather than in-site navigation. */
@@ -137,6 +138,11 @@
     color: var(--text); line-height: 1.6;
   }
   .active-filters-summary strong { color: var(--text-dim); font-weight: 600; }
+  #keySetBanner button {
+    margin-left: 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer;
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent-strong); padding: 0.1rem 0.5rem;
+  }
   .controls { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   input[type=search] {
     padding: 8px 13px; width: 20rem; background: var(--surface); border: 1px solid var(--border);
@@ -576,9 +582,10 @@
   <h1><a href="index.html" class="home-link" title="Home"><img src="../images/home-icon.png" alt="Home" width="36" height="36" style="vertical-align:middle;border-radius:50%"></a> Epigraphia Andhrica (articles)</h1>
   
 </div>
+<nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#epan">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-12 19:46</div>
+<div class="generated">Generated 2026-11-15 11:40</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -610,6 +617,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <button type="button" id="resetBtn">Reset</button>
 </div>
 <div id="activeFiltersSummary" class="active-filters-summary" hidden></div>
+<div id="keySetBanner" class="active-filters-summary" hidden></div>
 <div class="count">
   <span id="count"></span>
   <span class="pager">
@@ -784,6 +792,10 @@ const CHUNK_LABEL = "volume";
 // See render_inscriptions_table's own enable_chunk_cache docstring --
 // SII's Sanjay page only, for now.
 const CHUNK_CACHE_ENABLED = false;
+// ?keys=a,b,c: only those records (see render_inscriptions_table's
+// enable_keys_param docstring). null = no key set, every row eligible.
+const KEYS_PARAM_ENABLED = false;
+let KEY_SET = null;
 // Cross-reference jump target (see remarks_cell_html's xref-link spans
 // and jumpToKey()/OTHER_CORPUS_URL usage below) — CURRENT_CORPUS says
 // which corpus THIS page's own rows belong to ('sii'/'are'), so a click
@@ -1198,6 +1210,7 @@ function render() {
   const re = term ? makeMatcher(foldDiacritics(term), whole) : null;
   const matches = [];
   for (const row of ROWS) {
+    if (KEY_SET && !KEY_SET.has(row.id || '')) continue;
     let textMatch = true;
     if (re) {
       if (scope === 'all') {
@@ -1503,6 +1516,7 @@ if (categoryFilterEl) categoryFilterEl.addEventListener('change', renderFromTop)
 prevPage.addEventListener('click', () => { currentPage--; render(); });
 nextPage.addEventListener('click', () => { currentPage++; render(); });
 resetBtn.addEventListener('click', () => {
+  clearKeySet();
   q.value = '';
   activeTerm = '';
   FILTER_KEYS.forEach((k) => {
@@ -1757,6 +1771,7 @@ async function loadData() {
     // jump lands on a fully-painted, unfiltered table.
     const jumpKey = internalId(new URLSearchParams(location.search).get('jump') || '') || null;
     if (jumpKey) jumpToKey(jumpKey);
+    else applyKeysParam();
   } catch (err) {
     // Any one chunk's fetch failing (a flaky connection, a 404 from a
     // stale index) throws the same way the old single-file fetch did —
@@ -1778,9 +1793,51 @@ loadData();
 // or cross-page depending on which corpus it names.
 let STABLE_KEY_INDEX = new Map();
 
+// ?keys=a,b,c&from=...: show only those records, with a banner saying
+// which and a way back to the whole table. Keys this page does not hold
+// are dropped; if none is held the param is ignored.
+function applyKeysParam() {
+  if (!KEYS_PARAM_ENABLED) return;
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('keys');
+  if (!raw) return;
+  const keys = raw.split(',').map((k) => internalId(k.trim())).filter((k) => STABLE_KEY_INDEX.has(k));
+  if (!keys.length) return;
+  KEY_SET = new Set(keys);
+  const banner = document.getElementById('keySetBanner');
+  banner.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Showing ' + keys.length + ' record' + (keys.length === 1 ? '' : 's');
+  banner.appendChild(strong);
+  const from = params.get('from');
+  if (from) banner.appendChild(document.createTextNode(' — ' + from));
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Show all records';
+  all.addEventListener('click', () => { clearKeySet(); currentPage = 1; render(); });
+  banner.appendChild(all);
+  banner.hidden = false;
+  currentPage = 1;
+  render();
+}
+
+function clearKeySet() {
+  if (!KEY_SET) return;
+  KEY_SET = null;
+  document.getElementById('keySetBanner').hidden = true;
+  // drop the param so a reload shows the whole table
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('keys');
+    url.searchParams.delete('from');
+    history.replaceState(null, '', url);
+  } catch (e) { /* file:// in some browsers: the table is right, only the address bar keeps the param */ }
+}
+
 function jumpToKey(key) {
   const idx = STABLE_KEY_INDEX.get(key);
   if (idx === undefined) return; // server only ever links a key it confirmed exists; a miss here means stale/bad data, not a real link to chase
+  clearKeySet();
   // Clear every filter so the target can't be hidden by whatever view
   // state the reader was in — a citation jump is "take me to this
   // record", not "take me to this record if it happens to still match
@@ -2317,8 +2374,9 @@ function updateRemarksClamp(cell) {
   tbody.addEventListener('click', (e) => {
     // A row's own interactive elements (idchip, page-img-btn,
     // remarks-more-btn, xref-link) are all <button>s with their own
-    // handlers -- let those run instead of also opening this popup.
-    if (e.target.closest('button')) return;
+    // handlers, and a link (xref-count) navigates -- let those run
+    // instead of also opening this popup.
+    if (e.target.closest('button, a')) return;
     // Don't hijack a text selection someone just finished dragging out
     // of a cell to copy -- a real click leaves nothing selected.
     if (window.getSelection().toString()) return;
