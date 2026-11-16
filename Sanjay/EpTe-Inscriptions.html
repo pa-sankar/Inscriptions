@@ -78,6 +78,7 @@
   .home-link { text-decoration: none; color: var(--accent-strong); margin-right: 0.3rem; }
   .home-link:hover { color: var(--accent); }
   .cross-link { font-size: 1.2rem; color: var(--accent-strong); }
+  .site-nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin:2px 0 10px;font-size:.95rem}.site-nav a{color:var(--accent-strong,#7a3e12);text-decoration:none}.site-nav a:hover{text-decoration:underline}.site-nav .current{font-weight:600;color:inherit}
   /* Public pages only (see render_inscriptions_table's own subscribe_url
      docstring) -- a solid button, not a plain link, since this is a call
      to action rather than in-site navigation. */
@@ -585,9 +586,10 @@
   <h1><a href="index.html" class="home-link" title="Home"><img src="../images/home-icon.png" alt="Home" width="36" height="36" style="vertical-align:middle;border-radius:50%"></a> Epigraphia Telanganica</h1>
   
 </div>
+<nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#epte">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-13 16:22</div>
+<div class="generated">Generated 2026-11-16 15:20</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -724,7 +726,7 @@ function internalId(id) {
   return p.join('|');
 }
 function readableId(id) {
-  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
+  const NAMES = {"sii": "South Indian Inscriptions", "are": "Annual Report on Epigraphy", "epca": "Epigraphia Carnatica", "taka": "Tamil Nadu Inscriptions", "epte": "Epigraphia Telanganica", "epan": "Epigraphia Andhrica", "kri": "Karnatak Inscriptions", "tras": "Travancore Archaeological Series", "mar": "Annual Report of the Mysore Archaeological Department", "mtl": "A Topographical List of the Inscriptions of the Madras Presidency", "misc": "Miscellaneous Inscription Publications", "vijayanagara": "Vijayanagara Inscriptions", "nellore": "Nellore Inscriptions", "gujarat": "Gujarat Inscriptions", "dika": "Tamil Nadu Inscriptions (District series)", "ips": "Inscriptions of the Pudukkottai State"};
   const p = (id || '').split('|');
   const name = NAMES[p[0]];
   if (!name) return '';
