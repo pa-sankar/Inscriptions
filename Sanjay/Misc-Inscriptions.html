@@ -593,7 +593,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-17 17:15</div>
+<div class="generated">Generated 2026-11-19 19:35</div>
 
 <div class="stats">2253 entries from smaller publications: <em>Antiquities of Chamba State I (J. Ph. Vogel)</em>, 47; <em>Corpus of Śāradā Inscriptions of Kashmir (B. K. Kaul Deambi)</em>, 37; <em>Inscriptions in the Central Provinces and Berar (Hira Lal)</em>, 312; <em>Inscriptions of Orissa (S. N. Rajaguru)</em>, 1102; <em>Mathura Inscriptions (Heinrich Lüders)</em>, 181; <em>Rajasthan ke Abhilekh (Mangilal Vyas, Hindi)</em>, 574.</div>
 <div class="legend"><strong>Series</strong>: the book the entry comes from; this page gathers several smaller publications.<br><strong>No.</strong>: the book's own number (Vijayanagara Inscriptions: KN for Karnataka, Vols. II-III; AP for Andhra Pradesh, Vol. IV).<br><strong>Dynasty / King</strong>: as printed; the Dynasty filter uses one spelling per house (Vijayanagara: Saṅgama, Sāḷuva, Tuḷuva, Āraviḍu). Square brackets in the book mark an inferred dynasty and king.<br><strong>Reference</strong>: the earlier publication the entry cites (EC, ARIE, SII ...), as printed; not yet matched against our records.<br><strong>Remarks</strong>: the book's summary of the record, as printed; for an edition (Nellore), the editors' introduction, or the translation when there is none. The popup's other tabs hold the translation, the original text and the notes. Where the summary is printed in another language (Rajasthan ke Abhilekh: Hindi), the <em>English Summary (AI translation)</em> tab holds an English version an AI model wrote; it is not in the book.</div>
@@ -773,6 +773,7 @@ const DEFAULT_VISIBLE_KEYS = new Set(["id", "number", "location", "language", "d
 const BASE_COL_WIDTHS = {"id": 7, "number": 6, "series": 10, "source": 5, "type": 6, "location": 16, "language": 7, "dynasty": 7, "king": 9, "date": 12, "reference": 10, "object": 12, "remarks": 48, "page": 4, "translation": 0, "ai_translation": 0, "text_original": 0, "notes": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["translation", "ai_translation", "text_original", "notes"];
+const POPUP_HIDDEN_KEYS = [];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
@@ -2234,7 +2235,7 @@ function updateRemarksClamp(cell) {
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
     COLUMN_KEYS.forEach((key) => {
-      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key) || POPUP_HIDDEN_KEYS.includes(key)) return;
       const html = row.cells[key];
       const field = document.createElement('div');
       field.className = 'row-detail-field';
@@ -2280,7 +2281,7 @@ function updateRemarksClamp(cell) {
     // bigger ask (a click) for the same non-answer, so it's omitted
     // entirely here instead. One shared change, both audiences (Sanjay and
     // public both run this same shell) -- not a per-corpus setting.
-    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+    if (REMARKS_KEY && row.cells[REMARKS_KEY] && !POPUP_HIDDEN_KEYS.includes(REMARKS_KEY)) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
       // row.text's offsets start with the clamped text, so they line up
