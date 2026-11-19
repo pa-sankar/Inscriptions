@@ -589,7 +589,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#epte">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-16 15:20</div>
+<div class="generated">Generated 2026-11-19 19:34</div>
 
 <div class="stats">1916 records from 4 volume(s). Remarks shows the primary reference's own narrative; a row's detail popup lists every cited reference in full.</div>
 <div class="legend"><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified.<br><strong>All References</strong>: click any row for its full detail popup, which lists every publication this inscription is cited in (not just the primary one Remarks shows), plus the inscription's own text when printed.</div>
@@ -769,6 +769,7 @@ const DEFAULT_VISIBLE_KEYS = new Set(["id", "serial_no", "source", "location", "
 const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "type": 6, "location": 20, "dynasty": 8, "reign_of": 8, "date": 6, "language": 8, "script": 6, "remarks": 58, "page": 4, "references": 0, "inscription_text": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["references", "inscription_text"];
+const POPUP_HIDDEN_KEYS = [];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
@@ -2230,7 +2231,7 @@ function updateRemarksClamp(cell) {
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
     COLUMN_KEYS.forEach((key) => {
-      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key) || POPUP_HIDDEN_KEYS.includes(key)) return;
       const html = row.cells[key];
       const field = document.createElement('div');
       field.className = 'row-detail-field';
@@ -2276,7 +2277,7 @@ function updateRemarksClamp(cell) {
     // bigger ask (a click) for the same non-answer, so it's omitted
     // entirely here instead. One shared change, both audiences (Sanjay and
     // public both run this same shell) -- not a per-corpus setting.
-    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+    if (REMARKS_KEY && row.cells[REMARKS_KEY] && !POPUP_HIDDEN_KEYS.includes(REMARKS_KEY)) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
       // row.text's offsets start with the clamped text, so they line up
