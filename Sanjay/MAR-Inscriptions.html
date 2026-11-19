@@ -597,7 +597,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#mar">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-17 15:47</div>
+<div class="generated">Generated 2026-11-19 19:35</div>
 
 <div class="stats">2875 records (1939 inscriptions, 936 report paragraphs) from 30 volume PDF(s) of the Annual Report of the Mysore Archaeological Department, 1901-1956. Other scans of the same years are listed in Sources and not parsed. First parse (2026-11-16), not yet checked against the scans.</div>
 <div class="legend"><strong>Inscription</strong> (reports 1923-1956): a numbered entry of the report's Inscriptions part, under its District and Taluk; click it for the text, transliteration and note. <strong>Report paragraph</strong> (reports 1901-1922): a numbered paragraph of Part II, "Progress of Archaeological Research", where those reports discuss the year's new inscriptions by dynasty and king.<br><strong>Remarks</strong>: the book's translation, or its note where it prints none; for a paragraph, the paragraph. Read by OCR (Surya); Kannada script lines are about 90% accurate, English near-exact.</div>
@@ -777,6 +777,7 @@ const DEFAULT_VISIBLE_KEYS = new Set(["id", "number", "source", "district", "tal
 const BASE_COL_WIDTHS = {"id": 7, "number": 5, "source": 7, "year": 5, "kind": 7, "district": 8, "taluk": 8, "heading": 22, "dynasty": 7, "king": 9, "date": 10, "type": 6, "language": 8, "script": 6, "size": 6, "remarks": 50, "page": 4, "printed": 4, "note": 0, "text_original": 0, "transliteration": 0, "footnotes": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
 const POPUP_TAB_KEYS = ["note", "text_original", "transliteration", "footnotes"];
+const POPUP_HIDDEN_KEYS = [];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
@@ -2238,7 +2239,7 @@ function updateRemarksClamp(cell) {
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
     COLUMN_KEYS.forEach((key) => {
-      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key) || POPUP_HIDDEN_KEYS.includes(key)) return;
       const html = row.cells[key];
       const field = document.createElement('div');
       field.className = 'row-detail-field';
@@ -2284,7 +2285,7 @@ function updateRemarksClamp(cell) {
     // bigger ask (a click) for the same non-answer, so it's omitted
     // entirely here instead. One shared change, both audiences (Sanjay and
     // public both run this same shell) -- not a per-corpus setting.
-    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+    if (REMARKS_KEY && row.cells[REMARKS_KEY] && !POPUP_HIDDEN_KEYS.includes(REMARKS_KEY)) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
       // row.text's offsets start with the clamped text, so they line up
