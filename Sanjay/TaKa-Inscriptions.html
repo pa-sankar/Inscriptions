@@ -311,11 +311,10 @@
   col.c-script { width: 6%; }
   col.c-remarks { width: 58%; }
   col.c-page { width: 4%; }
-  col.c-tamil_fields { width: 0%; }
+  col.c-summary_printed_english { width: 0%; }
+  col.c-summary_tamil { width: 0%; }
   col.c-inscription_text { width: 0%; }
   col.c-english_translation { width: 0%; }
-  col.c-summary_tamil { width: 0%; }
-  col.c-summary_printed_english { width: 0%; }
   /* Click-to-copy ID chip — a fixed glyph now, not the literal stable_key
      text (see id_chip_html()'s own docstring), so a compact fixed-size
      icon button replaces what used to size itself to a 15+ character
@@ -593,7 +592,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#taka">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-18 17:18</div>
+<div class="generated">Generated 2026-11-19 14:12</div>
 
 <div class="stats">10383 records from 57 volume(s). Tamil-language metadata fields are translated to English here; the inscription's own text (when printed) is kept verbatim in its original script — see a row's detail popup for both.</div>
 <div class="legend"><strong>Location</strong>: plain text is <span class="v-direct">as printed</span> in the volume; italic amber text is <span class="v-derived">derived</span> — inherited from an earlier record where the book itself said "Same village"/"Same Taluk"/etc. rather than repeating the name.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified — see <a href="index.html">Sanjay index</a> for the terminology this is matched against.<br><strong>Tamil Remarks / Inscription Text</strong>: click any row for its full detail popup, which includes the original Tamil-language field table and (when the book printed it) the inscription's own verbatim text — not shown as their own table columns to keep the table itself readable.</div>
@@ -613,7 +612,7 @@ that script. Search each spelling and script separately: பைரவ does not f
   <select id="categoryFilter" title="Highlights this category's matched terms in every visible row, in addition to filtering to rows that matched it"><option value="">All categories</option><option value="hero_stone_direct">hero_stone_direct (131)</option><option value="vaduka_tamil">vaduka_tamil (116)</option><option value="vadugar">vadugar (66)</option><option value="bhairava_kshetrapala">bhairava_kshetrapala (60)</option><option value="ramanuja">ramanuja (56)</option><option value="woman_death_composite">woman_death_composite (10)</option><option value="incidental_hero_death_mention">incidental_hero_death_mention (5)</option><option value="shankara">shankara (5)</option><option value="incidental_sati_mention">incidental_sati_mention (5)</option><option value="memorial_samadhi">memorial_samadhi (4)</option><option value="memorial_shrine">memorial_shrine (1)</option></select>
   <select id="searchScope">
     <option value="all">Search: all columns</option>
-    <option value="col-location">Search: Location only</option><option value="col-remarks">Search: English Remarks only</option>
+    <option value="col-location">Search: Location only</option><option value="col-remarks">Search: Remarks only</option>
   </select>
   <select id="matchMode" title="Embedded: anywhere, even inside a word. Word start: 'mahavra' finds 'mahavratin' but not 'samahavraja'. Whole word: the exact word only.">
     <option value="contains">Embedded (anywhere)</option>
@@ -642,8 +641,8 @@ that script. Search each spelling and script separately: பைரவ does not f
 </div>
 <div class="table-scroll">
 <table id="t">
-<colgroup><col class="c-id" data-key="id"><col class="c-serial_no" data-key="serial_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-tamil_fields" data-key="tamil_fields"><col class="c-inscription_text" data-key="inscription_text"><col class="c-english_translation" data-key="english_translation"><col class="c-summary_tamil" data-key="summary_tamil"><col class="c-summary_printed_english" data-key="summary_printed_english"></colgroup>
-<thead><tr><th data-key="id">ID</th><th data-key="serial_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Source</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">English Remarks</th><th data-key="page">Page</th><th data-key="tamil_fields">Tamil Remarks</th><th data-key="inscription_text">Inscription Text</th><th data-key="english_translation">English Translation</th><th data-key="summary_tamil">Tamil Summary (original + AI English)</th><th data-key="summary_printed_english">English Summary (printed)</th></tr></thead>
+<colgroup><col class="c-id" data-key="id"><col class="c-serial_no" data-key="serial_no"><col class="c-source" data-key="source"><col class="c-kind" data-key="kind"><col class="c-type" data-key="type"><col class="c-location" data-key="location"><col class="c-dynasty" data-key="dynasty"><col class="c-king" data-key="king"><col class="c-date" data-key="date"><col class="c-language" data-key="language"><col class="c-script" data-key="script"><col class="c-remarks" data-key="remarks"><col class="c-page" data-key="page"><col class="c-summary_printed_english" data-key="summary_printed_english"><col class="c-summary_tamil" data-key="summary_tamil"><col class="c-inscription_text" data-key="inscription_text"><col class="c-english_translation" data-key="english_translation"></colgroup>
+<thead><tr><th data-key="id">ID</th><th data-key="serial_no">No.</th><th data-key="source">Volume</th><th data-key="kind">Source</th><th data-key="type">Type</th><th data-key="location">Location</th><th data-key="dynasty">Dynasty</th><th data-key="king">King</th><th data-key="date">Date</th><th data-key="language">Language</th><th data-key="script">Script</th><th data-key="remarks">Remarks</th><th data-key="page">Page</th><th data-key="summary_printed_english">English Remarks</th><th data-key="summary_tamil">Tamil Remarks</th><th data-key="inscription_text">Inscription Text</th><th data-key="english_translation">English Translation</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -756,13 +755,13 @@ function readableId(id) {
 
 const BLANK_FILTER_VALUE = "[[blank]]";
 const FILTER_KEYS = ['kind', 'type', 'volume'];
-const COLUMN_KEYS = ['id', 'serial_no', 'source', 'kind', 'type', 'location', 'dynasty', 'king', 'date', 'language', 'script', 'remarks', 'page', 'tamil_fields', 'inscription_text', 'english_translation', 'summary_tamil', 'summary_printed_english'];
+const COLUMN_KEYS = ['id', 'serial_no', 'source', 'kind', 'type', 'location', 'dynasty', 'king', 'date', 'language', 'script', 'remarks', 'page', 'summary_printed_english', 'summary_tamil', 'inscription_text', 'english_translation'];
 // key -> column header text, for the row-detail popup's own field
 // labels (openRowDetailModal() below) — "id" is special-cased there to
 // "Unique ID" per the user, 2026-09-28; everything else uses the same
 // header text the table column itself shows.
-const COLUMN_HEADERS = {"id": "ID", "serial_no": "No.", "source": "Volume", "kind": "Source", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "script": "Script", "remarks": "English Remarks", "page": "Page", "tamil_fields": "Tamil Remarks", "inscription_text": "Inscription Text", "english_translation": "English Translation", "summary_tamil": "Tamil Summary (original + AI English)", "summary_printed_english": "English Summary (printed)"};
-const HIGHLIGHT_COLS = [5, 6, 7, 11, 15, 16, 17];
+const COLUMN_HEADERS = {"id": "ID", "serial_no": "No.", "source": "Volume", "kind": "Source", "type": "Type", "location": "Location", "dynasty": "Dynasty", "king": "King", "date": "Date", "language": "Language", "script": "Script", "remarks": "Remarks", "page": "Page", "summary_printed_english": "English Remarks", "summary_tamil": "Tamil Remarks", "inscription_text": "Inscription Text", "english_translation": "English Translation"};
+const HIGHLIGHT_COLS = [5, 6, 7, 11, 13, 14, 16];
 const REMARKS_COL_IDX = 11;
 // Column visibility/width policy — see Column.default_visible's own
 // docstring. DEFAULT_VISIBLE_KEYS ship visible; any other column
@@ -770,9 +769,10 @@ const REMARKS_COL_IDX = 11;
 // <col> and only reappears while its own Filter (matched by key) has an
 // active selection — see updateColumnVisibility() below.
 const DEFAULT_VISIBLE_KEYS = new Set(["id", "serial_no", "source", "location", "remarks"]);
-const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "kind": 5, "type": 6, "location": 20, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 58, "page": 4, "tamil_fields": 0, "inscription_text": 0, "english_translation": 0, "summary_tamil": 0, "summary_printed_english": 0};
+const BASE_COL_WIDTHS = {"id": 7, "serial_no": 6, "source": 9, "kind": 5, "type": 6, "location": 20, "dynasty": 8, "king": 8, "date": 6, "language": 5, "script": 6, "remarks": 58, "page": 4, "summary_printed_english": 0, "summary_tamil": 0, "inscription_text": 0, "english_translation": 0};
 // Column.popup_tab's own keys — see openRowDetailModal() below.
-const POPUP_TAB_KEYS = ["tamil_fields", "inscription_text", "english_translation", "summary_tamil", "summary_printed_english"];
+const POPUP_TAB_KEYS = ["summary_printed_english", "summary_tamil", "inscription_text", "english_translation"];
+const POPUP_HIDDEN_KEYS = ["remarks"];
 const REMARKS_KEY = REMARKS_COL_IDX >= 0 ? COLUMN_KEYS[REMARKS_COL_IDX] : null;
 const REMARKS_MIN_PCT = 50;
 // The set of column keys actually shown right now — recomputed by
@@ -2234,7 +2234,7 @@ function updateRemarksClamp(cell) {
     const factsGrid = document.createElement('div');
     factsGrid.className = 'row-detail-facts';
     COLUMN_KEYS.forEach((key) => {
-      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key)) return;
+      if (key === REMARKS_KEY || POPUP_TAB_KEYS.includes(key) || POPUP_HIDDEN_KEYS.includes(key)) return;
       const html = row.cells[key];
       const field = document.createElement('div');
       field.className = 'row-detail-field';
@@ -2280,7 +2280,7 @@ function updateRemarksClamp(cell) {
     // bigger ask (a click) for the same non-answer, so it's omitted
     // entirely here instead. One shared change, both audiences (Sanjay and
     // public both run this same shell) -- not a per-corpus setting.
-    if (REMARKS_KEY && row.cells[REMARKS_KEY]) {
+    if (REMARKS_KEY && row.cells[REMARKS_KEY] && !POPUP_HIDDEN_KEYS.includes(REMARKS_KEY)) {
       const body = document.createElement('div');
       body.className = 'row-detail-remarks-body';
       // row.text's offsets start with the clamped text, so they line up
