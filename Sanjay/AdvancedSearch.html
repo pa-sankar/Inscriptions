@@ -108,6 +108,28 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .partial-note { color: var(--accent-copper-strong); font-weight: 600; }
   button#clearBtn { background: none; color: var(--text-dim); border-color: var(--border); }
+  .save-btn {
+    padding: 0.5rem 0.9rem; border-radius: 7px; border: 1px solid var(--accent-strong); background: var(--surface);
+    color: var(--accent-strong); cursor: pointer; font: inherit; font-size: 13.5px;
+  }
+  .save-btn:hover { background: var(--surface-2); }
+  .save-btn[hidden] { display: none; }
+  .saved-note { font-size: 12.5px; color: var(--text-dim); align-self: center; }
+  .saved-box { max-width: 38rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .saved-box h2 { margin: 0; font-size: 1.1rem; }
+  .saved-list { max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .saved-item {
+    display: flex; gap: 0.6rem; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+  }
+  .saved-item .saved-name { font-weight: 600; overflow-wrap: anywhere; }
+  .saved-item .saved-meta { font-size: 12px; color: var(--text-dim); }
+  .saved-item .saved-acts { display: flex; gap: 0.4rem; }
+  .saved-item button {
+    padding: 0.25rem 0.7rem; border-radius: 7px; border: 1px solid var(--border); background: none;
+    color: var(--text); cursor: pointer; font: inherit; font-size: 12.5px;
+  }
+  .saved-item button.saved-open { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
   .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.35; }
   .select-row { display: flex; gap: 4px; }
   .select-row select { flex: 1; }
@@ -313,6 +335,10 @@
     <div class="ctrl-group ctrl-wide ctrl-buttons">
       <button type="button" id="searchBtn">Search</button>
       <button type="button" id="clearBtn">Clear</button>
+      <button type="button" class="save-btn" id="saveSearchBtn" title="Keep this search and its results in this browser">Save search</button>
+      <button type="button" class="save-btn" id="savedListBtn" title="Open a search saved in this browser">Saved searches</button>
+      <button type="button" class="save-btn" id="copyLinkBtn" title="Copy a link that opens this search">Copy link</button>
+      <span class="saved-note" id="savedNote" role="status"></span>
     </div>
   </div>
 
@@ -342,7 +368,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-11-19 18:13 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-11-26 19:43 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -369,6 +395,21 @@
     <div class="multi-actions">
       <button type="button" id="multiNone">Untick all</button>
       <button type="button" id="multiApply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="row-detail-overlay" id="savedModal" hidden>
+  <div class="row-detail-box saved-box" role="dialog" aria-labelledby="savedTitle">
+    <button type="button" class="row-detail-close" id="savedClose" aria-label="Close">&times;</button>
+    <h2 id="savedTitle">Saved searches</h2>
+    <div class="hint">Kept in this browser on this computer only; clearing the browser&rsquo;s site data removes
+      them. Export writes them to a file that Import reads in another browser or computer.</div>
+    <div class="saved-list" id="savedList"></div>
+    <div class="multi-actions">
+      <button type="button" id="savedExport">Export</button>
+      <button type="button" id="savedImport">Import</button>
+      <input type="file" id="savedImportFile" accept=".json,application/json" hidden>
     </div>
   </div>
 </div>
@@ -459,6 +500,15 @@
       <li><b>Clear</b> resets everything. The page&rsquo;s address can carry filters, which is how a click on an
         At a Glance chart opens a ready-made search.</li>
     </ul>
+    <h3>7. Keep or share a search</h3>
+    <ul>
+      <li>After each search the page&rsquo;s address holds it: bookmark it, or <b>Copy link</b> and send it, and the
+        link opens the same search.</li>
+      <li><b>Save search</b> keeps the search and its results (up to 5,000) in this browser, under a name you
+        choose. <b>Saved searches</b> lists them: <b>Open</b> shows the results at once, without searching
+        again. If a corpus has been updated since, it says so; search again for the current results.</li>
+      <li>Saved searches stay in this browser on this computer. <b>Export</b> and <b>Import</b> move them to another.</li>
+    </ul>
     <h3>Examples</h3>
     <ul>
       <li>Hoysa&#7735;a copper plates: Dynasty <i>Hoysa&#7735;a</i>, Material <i>Copper plate</i>.</li>
@@ -540,7 +590,7 @@ function readableId(id) {
   return out.join(', ');
 }
 
-const CORPUS_CONFIG = {"sii": {"label": "SII", "fullName": "South Indian Inscriptions", "dataUrl": "../data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "sl_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Kind", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false, "popup_hidden": false}, {"key": "also", "header": "Also published as", "popup_tab": false, "popup_hidden": false}, {"key": "place", "header": "Place/Source", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "image", "header": "Image", "popup_tab": false, "popup_hidden": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "fullName": "Annual Report on Epigraphy", "dataUrl": "../data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "sl_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Year", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Kind", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "place", "header": "Place/Source", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "also", "header": "Also published as", "popup_tab": false, "popup_hidden": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epca": {"label": "EC", "fullName": "Epigraphia Carnatica", "dataUrl": "../data/epca/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "inscription_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "text_roman", "header": "English Transliteration", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Kannada Original", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "inscription_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "taka": {"label": "TN Inscriptions", "fullName": "Tamil Nadu Inscriptions", "dataUrl": "../data/taka/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "serial_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Source", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": true}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "summary_printed_english", "header": "English Remarks", "popup_tab": true, "popup_hidden": false}, {"key": "summary_tamil", "header": "Tamil Remarks", "popup_tab": true, "popup_hidden": false}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true, "popup_hidden": false}, {"key": "english_translation", "header": "English Translation", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epte": {"label": "ET", "fullName": "Epigraphia Telanganica", "dataUrl": "../data/epte/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "serial_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "reign_of", "header": "Reign Of", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "references", "header": "All References", "popup_tab": true, "popup_hidden": false}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": null, "king": "reign_of", "date": "date", "remarks": "remarks", "page": "page"}}, "epan": {"label": "EA", "fullName": "Epigraphia Andhrica", "dataUrl": "../data/epan/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "article_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "title", "header": "Title", "popup_tab": false, "popup_hidden": false}, {"key": "author", "header": "Author", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Excerpt", "popup_tab": false, "popup_hidden": false}, {"key": "full_text", "header": "Full Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "article_no", "source": "source", "kind": null, "type": "type", "location": null, "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}, "kri": {"label": "KI", "fullName": "Karnatak Inscriptions", "dataUrl": "../data/kri/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "citation", "header": "Citation", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "citation", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "tras": {"label": "TAS", "fullName": "Travancore Archaeological Series", "dataUrl": "../data/tras/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "heading", "header": "Heading", "popup_tab": false, "popup_hidden": false}, {"key": "group", "header": "Group", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "register", "header": "Register", "popup_tab": false, "popup_hidden": false}, {"key": "are_ref", "header": "ARE", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "PDF page", "popup_tab": false, "popup_hidden": false}, {"key": "introduction", "header": "Introduction", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Text", "popup_tab": true, "popup_hidden": false}, {"key": "footnotes", "header": "Footnotes", "popup_tab": true, "popup_hidden": false}, {"key": "original_script", "header": "Script lines (OCR)", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "AI rendering", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": null, "type": "type", "location": "heading", "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}, "vijayanagara": {"label": "Vijayanagara Ins.", "fullName": "Vijayanagara Inscriptions", "dataUrl": "../data/vijayanagara/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "nellore": {"label": "Nellore Ins.", "fullName": "Nellore Inscriptions", "dataUrl": "../data/nellore/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "gujarat": {"label": "Gujarat Ins.", "fullName": "Gujarat Inscriptions", "dataUrl": "../data/gujarat/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "misc": {"label": "Misc.", "fullName": "Miscellaneous Inscription Publications", "dataUrl": "../data/misc/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}};
+const CORPUS_CONFIG = {"sii": {"label": "SII", "fullName": "South Indian Inscriptions", "dataUrl": "../data/sii/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "sl_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Kind", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "survey_ref", "header": "Survey Ref", "popup_tab": false, "popup_hidden": false}, {"key": "also", "header": "Also published as", "popup_tab": false, "popup_hidden": false}, {"key": "place", "header": "Place/Source", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty/King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "commentary", "header": "Commentary", "popup_tab": true, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "image", "header": "Image", "popup_tab": false, "popup_hidden": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "are": {"label": "ARE", "fullName": "Annual Report on Epigraphy", "dataUrl": "../data/are/index.json", "numbering": "year", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "sl_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Year", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Kind", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "place", "header": "Place/Source", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "also", "header": "Also published as", "popup_tab": false, "popup_hidden": false}], "unionMap": {"sl_no": "sl_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epca": {"label": "EC", "fullName": "Epigraphia Carnatica", "dataUrl": "../data/epca/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "inscription_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "text_roman", "header": "English Transliteration", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Kannada Original", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "inscription_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "taka": {"label": "TN Inscriptions", "fullName": "Tamil Nadu Inscriptions", "dataUrl": "../data/taka/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "serial_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "kind", "header": "Source", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": true}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "summary_printed_english", "header": "English Remarks", "popup_tab": true, "popup_hidden": false}, {"key": "summary_tamil", "header": "Tamil Remarks", "popup_tab": true, "popup_hidden": false}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true, "popup_hidden": false}, {"key": "english_translation", "header": "English Translation", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": "kind", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "epte": {"label": "ET", "fullName": "Epigraphia Telanganica", "dataUrl": "../data/epte/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "serial_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "reign_of", "header": "Reign Of", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "references", "header": "All References", "popup_tab": true, "popup_hidden": false}, {"key": "inscription_text", "header": "Inscription Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "serial_no", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": null, "king": "reign_of", "date": "date", "remarks": "remarks", "page": "page"}}, "epan": {"label": "EA", "fullName": "Epigraphia Andhrica", "dataUrl": "../data/epan/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "article_no", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "title", "header": "Title", "popup_tab": false, "popup_hidden": false}, {"key": "author", "header": "Author", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Excerpt", "popup_tab": false, "popup_hidden": false}, {"key": "full_text", "header": "Full Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "article_no", "source": "source", "kind": null, "type": "type", "location": null, "dynasty": null, "king": null, "date": null, "remarks": "remarks", "page": "page"}}, "kri": {"label": "KI", "fullName": "Karnatak Inscriptions", "dataUrl": "../data/kri/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "citation", "header": "Citation", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "citation", "source": "source", "kind": null, "type": "type", "location": "location", "dynasty": "dynasty", "king": null, "date": "date", "remarks": "remarks", "page": "page"}}, "tras": {"label": "TAS", "fullName": "Travancore Archaeological Series", "dataUrl": "../data/tras/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "heading", "header": "Heading", "popup_tab": false, "popup_hidden": false}, {"key": "group", "header": "Group", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "register", "header": "Register", "popup_tab": false, "popup_hidden": false}, {"key": "are_ref", "header": "ARE", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "script", "header": "Script", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "PDF page", "popup_tab": false, "popup_hidden": false}, {"key": "introduction", "header": "Introduction", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Text", "popup_tab": true, "popup_hidden": false}, {"key": "footnotes", "header": "Footnotes", "popup_tab": true, "popup_hidden": false}, {"key": "original_script", "header": "Script lines (OCR)", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "AI rendering", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": null, "type": "type", "location": "heading", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "vijayanagara": {"label": "Vijayanagara Ins.", "fullName": "Vijayanagara Inscriptions", "dataUrl": "../data/vijayanagara/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "nellore": {"label": "Nellore Ins.", "fullName": "Nellore Inscriptions", "dataUrl": "../data/nellore/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "gujarat": {"label": "Gujarat Ins.", "fullName": "Gujarat Inscriptions", "dataUrl": "../data/gujarat/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}, "misc": {"label": "Misc.", "fullName": "Miscellaneous Inscription Publications", "dataUrl": "../data/misc/index.json", "numbering": "roman", "columns": [{"key": "id", "header": "ID", "popup_tab": false, "popup_hidden": false}, {"key": "number", "header": "No.", "popup_tab": false, "popup_hidden": false}, {"key": "series", "header": "Series", "popup_tab": false, "popup_hidden": false}, {"key": "source", "header": "Volume", "popup_tab": false, "popup_hidden": false}, {"key": "type", "header": "Type", "popup_tab": false, "popup_hidden": false}, {"key": "location", "header": "Location", "popup_tab": false, "popup_hidden": false}, {"key": "language", "header": "Language", "popup_tab": false, "popup_hidden": false}, {"key": "dynasty", "header": "Dynasty", "popup_tab": false, "popup_hidden": false}, {"key": "king", "header": "King", "popup_tab": false, "popup_hidden": false}, {"key": "date", "header": "Date", "popup_tab": false, "popup_hidden": false}, {"key": "reference", "header": "Reference", "popup_tab": false, "popup_hidden": false}, {"key": "object", "header": "Object", "popup_tab": false, "popup_hidden": false}, {"key": "remarks", "header": "Remarks", "popup_tab": false, "popup_hidden": false}, {"key": "page", "header": "Page", "popup_tab": false, "popup_hidden": false}, {"key": "translation", "header": "Translation", "popup_tab": true, "popup_hidden": false}, {"key": "ai_translation", "header": "English Summary (AI translation)", "popup_tab": true, "popup_hidden": false}, {"key": "text_original", "header": "Original Text", "popup_tab": true, "popup_hidden": false}, {"key": "notes", "header": "Notes", "popup_tab": true, "popup_hidden": false}], "unionMap": {"sl_no": "number", "source": "source", "kind": "series", "type": "type", "location": "location", "dynasty": "dynasty", "king": "king", "date": "date", "remarks": "remarks", "page": "page"}}};
 // Shared facet files, one set per corpus (only the searched corpora are
 // fetched); the Sanjay page adds a "type"-only overlay of its own.
 const FACETS_BASE = "../data/facets/";
@@ -675,7 +725,12 @@ async function wantedChunksForCorpus(corpusKey, range) {
     const n = volumeNumberForKey(entry.key, cfg.numbering);
     return n !== null && n >= range.min && n <= range.max;
   });
-  return { corpus: corpusKey, cfg, dataDir, wanted };
+  return { corpus: corpusKey, cfg, dataDir, wanted, stamp: indexStamp(index) };
+}
+// The newest chunk build in a corpus's index: a saved search notes it, and
+// says so when the corpus has been rebuilt since
+function indexStamp(index) {
+  return index.reduce((m, e) => Math.max(m, e.modified || 0), 0);
 }
 
 // -- Diacritic-folded search, ported from inscriptions_table_html.py's
@@ -1192,19 +1247,48 @@ function rowMatchesFields(row, ft) {
                        .concat([row.union.location]), ft.place)) return false;
   return true;
 }
-function applyUrl() {
-  const p = new URLSearchParams(location.search);
+// The search as the page's address carries it (specQuery writes it,
+// applyUrl reads it): corpus=sii,are (left out when all are on), vol, q,
+// mode (left out when Partial), king, place, and one parameter per
+// category list -- dynasty=Hoysala as At a Glance links send it,
+// dynasty=a|b for several values, dynasty=not:a|b to exclude them.
+function specQuery() {
+  const p = new URLSearchParams();
+  const on = checkedCorpora();
+  if (on.length !== Object.keys(CORPUS_CONFIG).length) p.set('corpus', on.join(','));
+  const val = (id) => document.getElementById(id).value.trim();
+  if (val('volumeInput')) p.set('vol', val('volumeInput'));
+  if (val('keywordInput')) p.set('q', val('keywordInput'));
+  if (val('matchModeInput') !== 'partial') p.set('mode', val('matchModeInput'));
+  if (val('kingInput')) p.set('king', val('kingInput'));
+  if (val('placeInput')) p.set('place', val('placeInput'));
+  Object.entries(activeFacets()).forEach(([d, st]) => {
+    p.set(d, (st.mode === 'exclude' ? 'not:' : '') + st.values.join('|'));
+  });
+  return p.toString();
+}
+function applyUrl(params) {
+  const p = params || new URLSearchParams(location.search);
   if (![...p.keys()].length) return false;
   if (p.get('corpus')) {  // data keys (sii,epca,taka ...), stable whatever the display names
     const keys = p.get('corpus').split(',').filter(Boolean);
     setCorpora(keys);
   }
-  FACET_DIMS.forEach((d) => { if (p.get(d) !== null) urlFacets[d] = p.get(d); });
-  SELECT_DIMS.forEach((d) => {
-    const v = urlFacets[d];
-    if (!facetSelect(d) || !v || !FACET_VALUES[d].includes(v)) return; // else a chip ("Not recorded")
-    setFacetState(d, {mode: 'include', values: [v]});
+  new Set(FACET_DIMS.concat(SELECT_DIMS)).forEach((d) => {
+    const raw = p.get(d);
+    if (raw === null) return;
+    const not = raw.startsWith('not:');
+    const vals = (not ? raw.slice(4) : raw).split('|').filter(Boolean);
+    const offered = vals.filter((v) => (FACET_VALUES[d] || []).includes(v));
+    if (!not && vals.length === 1) {
+      if (facetSelect(d) && offered.length) setFacetState(d, {mode: 'include', values: vals});
+      else if (FACET_DIMS.includes(d)) urlFacets[d] = vals[0]; // a chip ("Not recorded")
+    } else if (facetSelect(d) && offered.length) {
+      setFacetState(d, {mode: not ? 'exclude' : 'include', values: offered});
+    }
   });
+  if (p.get('vol')) document.getElementById('volumeInput').value = p.get('vol');
+  if (['embedded', 'partial', 'full'].includes(p.get('mode'))) document.getElementById('matchModeInput').value = p.get('mode');
   if (p.get('king')) document.getElementById('kingInput').value = p.get('king');
   if (p.get('place')) document.getElementById('placeInput').value = p.get('place');
   if (p.get('q')) document.getElementById('keywordInput').value = p.get('q');
@@ -1309,14 +1393,12 @@ async function runSearchInner(myGen) {
   const facets = activeFacets();
   const useFacets = Object.keys(facets).length > 0;
   const ft = fieldTerms();
-  currentFieldTerms = [ft.king, ft.place].filter(Boolean).concat(facetTerms(facets));
-  currentFieldTermsByDim = fieldTermsByDim(ft, facets);
-  currentFacets = facets;
-  currentSearchTerm = keyword;
-  currentSearchMode = mode;
+  setMatchState(keyword, mode, facets, ft);
   trackSearch(corpora, range, keyword, mode, facets, ft);
-  currentTerm = keyword;
-  currentMode = mode;
+  const query = specQuery();
+  history.replaceState(null, '', location.pathname + (query ? '?' + query : ''));
+  lastSearch = {query, stamps: {}, complete: false};
+  const thisSearch = lastSearch;
   summary.textContent = 'Loading\u2026';
 
   try {
@@ -1325,9 +1407,11 @@ async function runSearchInner(myGen) {
     // known before any chunk itself is fetched, rather than guessed at.
     const perCorpus = await Promise.all(corpora.map((c) => wantedChunksForCorpus(c, range)));
     if (myGen !== searchGeneration) return; // superseded by a newer search
+    perCorpus.forEach((p) => { thisSearch.stamps[p.corpus] = p.stamp; });
 
     const totalChunks = perCorpus.reduce((sum, p) => sum + p.wanted.length, 0);
     if (totalChunks === 0) {
+      thisSearch.complete = true;
       summary.textContent = '0 result(s) across ' + corpora.length + ' corpus/corpora.';
       return;
     }
@@ -1373,6 +1457,7 @@ async function runSearchInner(myGen) {
       });
     });
     await Promise.all(chunkJobs);
+    if (myGen === searchGeneration) thisSearch.complete = true;
   } catch (err) {
     if (myGen === searchGeneration) summary.textContent = 'Error loading results: ' + err.message;
   }
@@ -1438,9 +1523,8 @@ function renderResults(rows, term, mode) {
 }
 
 document.getElementById('searchBtn').addEventListener('click', runSearch);
-document.getElementById('clearBtn').addEventListener('click', () => {
-  searchGeneration++; // cancel any in-flight incremental search
-  setSearchBusy(false);
+// Every control back to its default (Clear; a saved search opening)
+function resetForm() {
   document.getElementById('volumeInput').value = '';
   document.getElementById('keywordInput').value = '';
   document.getElementById('matchModeInput').value = 'partial';
@@ -1452,8 +1536,14 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   currentFacets = {};
   urlFacets = {};
   paintFacetChips();
-  history.replaceState(null, '', location.pathname);
   setCorpora(null);
+}
+document.getElementById('clearBtn').addEventListener('click', () => {
+  searchGeneration++; // cancel any in-flight incremental search
+  setSearchBusy(false);
+  resetForm();
+  history.replaceState(null, '', location.pathname);
+  lastSearch = null;
   paintCriteria();
   document.getElementById('resultsBody').innerHTML = '';
   document.getElementById('resultSummary').textContent = '';
@@ -1465,6 +1555,222 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   currentResults = [];
   currentPage = 1;
 });
+// What the table and popup mark, for a search just run or a saved one opened
+function setMatchState(keyword, mode, facets, ft) {
+  currentFieldTerms = [ft.king, ft.place].filter(Boolean).concat(facetTerms(facets));
+  currentFieldTermsByDim = fieldTermsByDim(ft, facets);
+  currentFacets = facets;
+  currentSearchTerm = keyword;
+  currentSearchMode = mode;
+  currentTerm = keyword;
+  currentMode = mode;
+}
+
+// -- Shareable links and saved searches (user, 2026-11-26). Each search
+// writes itself into the page's address (specQuery), so a bookmark or a
+// copied link opens the same search. Save search keeps that address and a
+// snapshot of the results (up to SNAPSHOT_MAX_ROWS) in this browser's
+// IndexedDB, one store per page (the public and Sanjay pages search
+// different corpora), so a saved search opens without searching again.
+// Each corpus's index stamp is kept with it: a corpus rebuilt since is
+// named when the search opens. --
+const SNAPSHOT_MAX_ROWS = 5000;
+let lastSearch = null; // {query, stamps: {corpus: newest chunk}, complete}
+const savedNote = document.getElementById('savedNote');
+let savedNoteTimer = null;
+function noteSaved(msg) {
+  savedNote.textContent = msg;
+  clearTimeout(savedNoteTimer);
+  savedNoteTimer = setTimeout(() => { savedNote.textContent = ''; }, 6000);
+}
+const savedDb = (() => {
+  let dbp = null;
+  function open() {
+    if (!dbp) dbp = new Promise((res, rej) => {
+      const r = indexedDB.open('advsearch-saved:' + location.pathname, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('searches', {keyPath: 'id', autoIncrement: true});
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => { dbp = null; rej(r.error); };
+    });
+    return dbp;
+  }
+  async function tx(mode, fn) {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction('searches', mode);
+      const req = fn(t.objectStore('searches'));
+      t.oncomplete = () => res(req && req.result);
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error);
+    });
+  }
+  return {
+    all: () => tx('readonly', (s) => s.getAll()),
+    get: (id) => tx('readonly', (s) => s.get(id)),
+    put: (rec) => tx('readwrite', (s) => s.put(rec)),
+    del: (id) => tx('readwrite', (s) => s.delete(id)),
+  };
+})();
+if (!window.indexedDB) {
+  // a private window or blocked site data: links still work, saving does not
+  ['saveSearchBtn', 'savedListBtn'].forEach((id) => { document.getElementById(id).hidden = true; });
+}
+function savedDate(iso) {
+  return new Date(iso).toLocaleDateString(undefined, {day: 'numeric', month: 'short', year: 'numeric'});
+}
+
+document.getElementById('saveSearchBtn').addEventListener('click', async () => {
+  if (!lastSearch) { noteSaved('Run a search first.'); return; }
+  if (searchBtnEl.disabled) { noteSaved('Wait for the search to finish, or Stop it.'); return; }
+  const criteria = document.getElementById('criteriaSummary').textContent.replace(/^Filtering on\s*—\s*/, '');
+  const name = prompt('Name this search:', criteria.slice(0, 120) || 'All records');
+  if (name === null) return;
+  const rec = {name: name.trim() || 'Untitled search', savedAt: new Date().toISOString(),
+    query: lastSearch.query, count: currentResults.length, partial: !lastSearch.complete,
+    stamps: lastSearch.stamps,
+    rows: currentResults.length <= SNAPSHOT_MAX_ROWS ? currentResults : null};
+  try {
+    await savedDb.put(rec);
+    noteSaved(rec.rows ? 'Saved “' + rec.name + '” with its ' + rec.count + ' result(s).'
+      : 'Saved “' + rec.name + '”. Over ' + SNAPSHOT_MAX_ROWS + ' results: it searches again when opened.');
+  } catch (err) {
+    if (!rec.rows) { noteSaved('Could not save: ' + err.message); return; }
+    rec.rows = null; // the browser's storage is full: keep the search alone
+    try {
+      await savedDb.put(rec);
+      noteSaved('Saved “' + rec.name + '” without its results (no room left): it searches again when opened.');
+    } catch (err2) { noteSaved('Could not save: ' + err2.message); }
+  }
+});
+
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  const ok = document.execCommand('copy');
+  document.body.removeChild(ta);
+  return ok ? Promise.resolve() : Promise.reject(new Error('copy failed'));
+}
+document.getElementById('copyLinkBtn').addEventListener('click', () => {
+  const query = specQuery(); // the controls as they stand, searched or not
+  const url = location.origin + location.pathname + (query ? '?' + query : '');
+  copyText(url).then(() => noteSaved('Link copied.'), () => { prompt('Copy this link:', url); });
+});
+
+const savedModal = document.getElementById('savedModal');
+const savedList = document.getElementById('savedList');
+async function paintSavedList() {
+  let recs = [];
+  try { recs = await savedDb.all(); } catch (err) {
+    savedList.textContent = 'Saved searches are not available in this browser: ' + err.message;
+    return;
+  }
+  if (!recs.length) {
+    savedList.innerHTML = '<div class="hint">Nothing saved yet. Run a search, then <b>Save search</b>.</div>';
+    return;
+  }
+  recs.sort((a, b) => b.savedAt.localeCompare(a.savedAt));
+  savedList.innerHTML = recs.map((r) =>
+    '<div class="saved-item" data-id="' + r.id + '"><div><div class="saved-name">' + escapeHtml(r.name) + '</div>' +
+    '<div class="saved-meta">' + savedDate(r.savedAt) + ' · ' + r.count + ' result(s)' +
+    (r.partial ? ' (stopped early)' : '') + (r.rows ? '' : ' · searches again when opened') + '</div></div>' +
+    '<div class="saved-acts"><button type="button" class="saved-open">Open</button>' +
+    '<button type="button" class="saved-rename">Rename</button>' +
+    '<button type="button" class="saved-del">Delete</button></div></div>').join('');
+}
+document.getElementById('savedListBtn').addEventListener('click', () => {
+  savedModal.hidden = false;
+  paintSavedList();
+});
+document.getElementById('savedClose').addEventListener('click', () => { savedModal.hidden = true; });
+savedModal.addEventListener('click', (e) => { if (e.target === savedModal) savedModal.hidden = true; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') savedModal.hidden = true; });
+savedList.addEventListener('click', async (e) => {
+  const item = e.target.closest('.saved-item'); if (!item) return;
+  const id = +item.dataset.id;
+  if (e.target.closest('.saved-open')) { openSaved(id); return; }
+  if (e.target.closest('.saved-rename')) {
+    const rec = await savedDb.get(id); if (!rec) return;
+    const name = prompt('Rename this search:', rec.name);
+    if (name === null || !name.trim()) return;
+    rec.name = name.trim();
+    await savedDb.put(rec);
+    paintSavedList();
+  } else if (e.target.closest('.saved-del')) {
+    if (!confirm('Delete this saved search?')) return;
+    await savedDb.del(id);
+    paintSavedList();
+  }
+});
+
+async function openSaved(id) {
+  const rec = await savedDb.get(id);
+  if (!rec) return;
+  savedModal.hidden = true;
+  searchGeneration++; // a search still running gives way
+  setSearchBusy(false);
+  resetForm();
+  applyUrl(new URLSearchParams(rec.query));
+  paintCriteria();
+  history.replaceState(null, '', location.pathname + (rec.query ? '?' + rec.query : ''));
+  if (!rec.rows) { runSearch(); return; }
+  setMatchState(document.getElementById('keywordInput').value.trim(),
+    document.getElementById('matchModeInput').value, activeFacets(), fieldTerms());
+  lastSearch = {query: rec.query, stamps: rec.stamps || {}, complete: !rec.partial};
+  currentResults = rec.rows;
+  currentPage = 1;
+  paintPage();
+  const summary = document.getElementById('resultSummary');
+  summary.innerHTML = 'Saved search “' + escapeHtml(rec.name) + '”, ' + savedDate(rec.savedAt) + ': ' +
+    rec.count + ' result(s)' + (rec.partial ? ' <span class="partial-note">(the search was stopped early)</span>' : '') + '.';
+  const myGen = searchGeneration;
+  const newer = [];
+  await Promise.all(Object.entries(rec.stamps || {}).map(async ([c, t]) => {
+    if (!CORPUS_CONFIG[c]) return;
+    try { if (indexStamp(await fetchJson(CORPUS_CONFIG[c].dataUrl)) > t) newer.push(CORPUS_CONFIG[c].fullName); }
+    catch (err) { /* offline: the snapshot stands */ }
+  }));
+  if (newer.length && myGen === searchGeneration) {
+    summary.innerHTML += ' <span class="partial-note">Updated since it was saved: ' + escapeHtml(newer.join(', ')) +
+      '. Search again for the current results.</span>';
+  }
+}
+
+document.getElementById('savedExport').addEventListener('click', async () => {
+  const recs = await savedDb.all();
+  const blob = new Blob([JSON.stringify({format: 'advanced-search-saved', page: location.pathname, searches: recs})],
+                        {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'saved-searches.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+const importFile = document.getElementById('savedImportFile');
+document.getElementById('savedImport').addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', async () => {
+  const f = importFile.files[0];
+  importFile.value = '';
+  if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (data.format !== 'advanced-search-saved' || !Array.isArray(data.searches)) throw new Error('not a saved-searches file');
+    for (const r of data.searches) {
+      if (typeof r.query !== 'string' || !r.name) continue;
+      delete r.id; // a new place in this browser's list
+      await savedDb.put(r);
+    }
+    paintSavedList();
+  } catch (err) {
+    alert('Could not import: ' + err.message);
+  }
+});
+
 document.getElementById('volumeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 document.getElementById('keywordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 ['kingInput', 'placeInput'].forEach((id) => document.getElementById(id)
