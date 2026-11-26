@@ -113,14 +113,6 @@
   .modal-actions button:hover { border-color: var(--accent); }
   .modal-actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .modal-actions .primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
-  /* Same subscribe button as the SII/ARE table pages' own titlebar --
-     per the user, 2026-10-02, public page only (never --sanjay). */
-  .subscribe-btn {
-    display: inline-block; font-size: 0.85rem; font-weight: 600;
-    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
-    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
-  }
-  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
   /* Sanjay page: one tab per source list (2026-11-16) */
   .tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; margin: 1.5rem 0 0.5rem;
            padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
@@ -172,6 +164,15 @@
   .hint-icon { display: inline-block; vertical-align: -0.2em; padding: 0.1rem 0.25rem; line-height: 0;
                 border: 1px solid var(--border); border-radius: 5px; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* Same subscribe button as the SII/ARE table pages' own titlebar --
+     per the user, 2026-10-02, public page only (never --sanjay). */
+  .subscribe-btn {
+    display: inline-block; font-size: 0.85rem; font-weight: 600;
+    padding: 0.4rem 1rem; border-radius: 999px; text-decoration: none;
+    background: var(--accent-copper); color: #fff; margin-left: 0.6rem;
+  }
+  .subscribe-btn:hover { background: var(--accent-copper-strong); color: #fff; }
 </style>
 </head>
 <body>
@@ -452,6 +453,7 @@ whichever copy a search turns up, or the page number won't line up.</p>
 </div>
 <script>
 (function() {
+(function() {
   // Every source link already has target="_blank" rel="noopener" for
   // a no-JS/middle-click fallback -- this intercepts a plain left
   // click only, so ctrl/cmd-click and middle-click still work exactly
@@ -549,6 +551,10 @@ whichever copy a search turns up, or the page number won't line up.</p>
       document.querySelectorAll('tr[data-alt-of="' + b.dataset.alts + '"]').forEach(function(tr) { tr.hidden = !open; });
     });
   });
+})();
+</script>
+<script>
+(function() {
   // Public page only -- the --sanjay build never renders this element.
   const subscribeLink = document.getElementById('subscribeLink');
   if (subscribeLink) {
