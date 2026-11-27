@@ -591,7 +591,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><span class="current">Topographical Lists</span></nav>
 
 
-<div class="generated">Generated 2026-11-19 19:35</div>
+<div class="generated">Generated 2026-11-27 15:53</div>
 
 <div class="stats">30,340 entries; 13,856 matched to SII or ARE, 9,726 citing an ARE number not matched.</div>
 <div class="legend"><strong>What these lists are</strong>: finding lists, one short entry per inscription, by district, taluk and village. Most entries are records another book holds, so this page is kept out of Advanced Search.<br><strong>Entry</strong>: the district and the list's own number (numbered afresh in each district).<br><strong>ARE No.</strong>: the Annual Report number the entry cites, as printed.<br><strong>Match</strong>: the same stone in SII or ARE, where the ARE number is shared and the place agrees; a click opens that record. The Match filter's <em>ARE number, not matched</em> lists entries citing an ARE number we could not match: mostly ARE years we do not hold (Rangacharya cites 1887-1915).<br><strong>Dynasty / King / Date</strong>: read from the entry's summary by rule ("of the Pāṇḍya king ...", "in the eleventh year", "Ś. 1472"); one spelling per house. Empty where the summary does not say; a house is never guessed from a king's title.</div>
@@ -1636,6 +1636,27 @@ function putCachedChunk(url, modified, data) {
   });
 }
 
+
+const MORE_BTN_RE = /<button type="button" class="remarks-more-btn"[^>]*>[\s\S]*?<\/button>/g;
+const UNESCAPE_BOX = document.createElement('textarea');
+// strip_tags() in Python: the Read-more button out, every tag out, entities decoded
+function cellPlainText(cellHtml) {
+  if (!cellHtml) return '';
+  const s = String(cellHtml).replace(MORE_BTN_RE, '').replace(/<[^>]+>/g, '');
+  if (s.indexOf('&') < 0) return s;
+  UNESCAPE_BOX.innerHTML = s;   // a textarea decodes entities and runs nothing
+  return UNESCAPE_BOX.value;
+}
+function addRowText(rows) {
+  rows.forEach((r) => {
+    if (r.text) return;
+    const t = {};
+    for (const k in (r.cells || {})) t[k] = cellPlainText(r.cells[k]);
+    r.text = t;
+  });
+  return rows;
+}
+
 // Visible purely for manual verification while this is being tested on
 // just SII's own Sanjay page (per the user, 2026-10-03) -- logged once
 // at the end of loadData() below, not used by any real logic.
@@ -1718,7 +1739,7 @@ async function loadData() {
     // index 0 now means "first row of THIS chunk", a different row in
     // every chunk, not a single corpus-wide position).
     const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
-      const chunkRows = await fetchChunkJson(dataDir + entry.file, entry.modified);
+      const chunkRows = addRowText(await fetchChunkJson(dataDir + entry.file, entry.modified));
       noteProgress(entry.key);
       const supp = suppByKey && suppByKey.get(entry.key);
       if (supp) {

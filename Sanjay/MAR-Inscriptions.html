@@ -597,7 +597,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#mar">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-19 19:35</div>
+<div class="generated">Generated 2026-11-27 15:53</div>
 
 <div class="stats">2875 records (1939 inscriptions, 936 report paragraphs) from 30 volume PDF(s) of the Annual Report of the Mysore Archaeological Department, 1901-1956. Other scans of the same years are listed in Sources and not parsed. First parse (2026-11-16), not yet checked against the scans.</div>
 <div class="legend"><strong>Inscription</strong> (reports 1923-1956): a numbered entry of the report's Inscriptions part, under its District and Taluk; click it for the text, transliteration and note. <strong>Report paragraph</strong> (reports 1901-1922): a numbered paragraph of Part II, "Progress of Archaeological Research", where those reports discuss the year's new inscriptions by dynasty and king.<br><strong>Remarks</strong>: the book's translation, or its note where it prints none; for a paragraph, the paragraph. Read by OCR (Surya); Kannada script lines are about 90% accurate, English near-exact.</div>
@@ -1642,6 +1642,27 @@ function putCachedChunk(url, modified, data) {
   });
 }
 
+
+const MORE_BTN_RE = /<button type="button" class="remarks-more-btn"[^>]*>[\s\S]*?<\/button>/g;
+const UNESCAPE_BOX = document.createElement('textarea');
+// strip_tags() in Python: the Read-more button out, every tag out, entities decoded
+function cellPlainText(cellHtml) {
+  if (!cellHtml) return '';
+  const s = String(cellHtml).replace(MORE_BTN_RE, '').replace(/<[^>]+>/g, '');
+  if (s.indexOf('&') < 0) return s;
+  UNESCAPE_BOX.innerHTML = s;   // a textarea decodes entities and runs nothing
+  return UNESCAPE_BOX.value;
+}
+function addRowText(rows) {
+  rows.forEach((r) => {
+    if (r.text) return;
+    const t = {};
+    for (const k in (r.cells || {})) t[k] = cellPlainText(r.cells[k]);
+    r.text = t;
+  });
+  return rows;
+}
+
 // Visible purely for manual verification while this is being tested on
 // just SII's own Sanjay page (per the user, 2026-10-03) -- logged once
 // at the end of loadData() below, not used by any real logic.
@@ -1724,7 +1745,7 @@ async function loadData() {
     // index 0 now means "first row of THIS chunk", a different row in
     // every chunk, not a single corpus-wide position).
     const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
-      const chunkRows = await fetchChunkJson(dataDir + entry.file, entry.modified);
+      const chunkRows = addRowText(await fetchChunkJson(dataDir + entry.file, entry.modified));
       noteProgress(entry.key);
       const supp = suppByKey && suppByKey.get(entry.key);
       if (supp) {

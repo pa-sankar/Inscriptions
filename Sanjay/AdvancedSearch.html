@@ -368,7 +368,7 @@
     </table>
   </div>
 
-  <footer>Sanjay review area. Generated 2026-11-26 19:43 via <code>scripts/build_advanced_search.py</code>.</footer>
+  <footer>Sanjay review area. Generated 2026-11-27 15:53 via <code>scripts/build_advanced_search.py</code>.</footer>
 </div>
 
 <div class="row-detail-overlay" id="searchModal" hidden>
@@ -656,6 +656,27 @@ function parseVolumeRange(text) {
     return {min: Math.min(a, b), max: Math.max(a, b)};
   }
   return null;
+}
+
+
+const MORE_BTN_RE = /<button type="button" class="remarks-more-btn"[^>]*>[\s\S]*?<\/button>/g;
+const UNESCAPE_BOX = document.createElement('textarea');
+// strip_tags() in Python: the Read-more button out, every tag out, entities decoded
+function cellPlainText(cellHtml) {
+  if (!cellHtml) return '';
+  const s = String(cellHtml).replace(MORE_BTN_RE, '').replace(/<[^>]+>/g, '');
+  if (s.indexOf('&') < 0) return s;
+  UNESCAPE_BOX.innerHTML = s;   // a textarea decodes entities and runs nothing
+  return UNESCAPE_BOX.value;
+}
+function addRowText(rows) {
+  rows.forEach((r) => {
+    if (r.text) return;
+    const t = {};
+    for (const k in (r.cells || {})) t[k] = cellPlainText(r.cells[k]);
+    r.text = t;
+  });
+  return rows;
 }
 
 function dirOf(url) { return url.slice(0, url.lastIndexOf('/') + 1); }
@@ -1441,6 +1462,7 @@ async function runSearchInner(myGen) {
           Promise.all([fetchJson(dataDir + entry.file), facetJob, suppJob])
             .then(([chunkRows, facetFile, supp]) => {
               if (myGen !== searchGeneration) return;
+              addRowText(chunkRows);
               if (supp) chunkRows.forEach((r, i) => { const x = supp[String(i)]; if (x && x.spans) r.spans = x.spans; });
               const kept = useFacets ? filterByFacets(chunkRows, facetFile, facets) : chunkRows;
               const rows = kept.map((row) => buildUnionRow(corpus, cfg, row, entry.key));

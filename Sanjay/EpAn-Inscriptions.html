@@ -585,7 +585,7 @@
 <nav class="site-nav"><a href="index.html">Index</a><a href="Sources.html#epan">Sources</a><a href="AdvancedSearch.html">Advanced Search</a><a href="AtAGlance.html">At a Glance</a><a href="Topographical-Lists.html">Topographical Lists</a></nav>
 
 
-<div class="generated">Generated 2026-11-19 19:34</div>
+<div class="generated">Generated 2026-11-27 15:52</div>
 
 <div class="stats">30 articles from 2 volume(s). Each row is one independently-authored article, which may discuss more than one inscription; a row's detail popup carries its complete text.</div>
 <div class="legend"><strong>Excerpt</strong> is the article's own opening ~500 characters -- click any row for its full detail popup, whose "Full Text" field carries the complete article.<br><strong>Type</strong>: hero-stone/sati-stone direct mentions vs. an incidental mention vs. unclassified, matched anywhere in the full article text.</div>
@@ -1630,6 +1630,27 @@ function putCachedChunk(url, modified, data) {
   });
 }
 
+
+const MORE_BTN_RE = /<button type="button" class="remarks-more-btn"[^>]*>[\s\S]*?<\/button>/g;
+const UNESCAPE_BOX = document.createElement('textarea');
+// strip_tags() in Python: the Read-more button out, every tag out, entities decoded
+function cellPlainText(cellHtml) {
+  if (!cellHtml) return '';
+  const s = String(cellHtml).replace(MORE_BTN_RE, '').replace(/<[^>]+>/g, '');
+  if (s.indexOf('&') < 0) return s;
+  UNESCAPE_BOX.innerHTML = s;   // a textarea decodes entities and runs nothing
+  return UNESCAPE_BOX.value;
+}
+function addRowText(rows) {
+  rows.forEach((r) => {
+    if (r.text) return;
+    const t = {};
+    for (const k in (r.cells || {})) t[k] = cellPlainText(r.cells[k]);
+    r.text = t;
+  });
+  return rows;
+}
+
 // Visible purely for manual verification while this is being tested on
 // just SII's own Sanjay page (per the user, 2026-10-03) -- logged once
 // at the end of loadData() below, not used by any real logic.
@@ -1712,7 +1733,7 @@ async function loadData() {
     // index 0 now means "first row of THIS chunk", a different row in
     // every chunk, not a single corpus-wide position).
     const chunkArrays = await Promise.all(dataIndex.map(async (entry) => {
-      const chunkRows = await fetchChunkJson(dataDir + entry.file, entry.modified);
+      const chunkRows = addRowText(await fetchChunkJson(dataDir + entry.file, entry.modified));
       noteProgress(entry.key);
       const supp = suppByKey && suppByKey.get(entry.key);
       if (supp) {
